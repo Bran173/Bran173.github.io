@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Paneles Solares</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        
+        nav {
+            background-color: #34495e;
+            padding: 0.5rem;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        
+        nav ul li {
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            background-color: #16a085;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .hero {
+            background-color: #1abc9c;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+        
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 20px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 400px;
+            margin: 20px 0;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #16a085;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #1abc9c;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Paneles Solares</h1>
+        <p>Determina cuántos paneles solares necesita tu hogar</p>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="#datos">Datos de Radiación</a></li>
+            <li><a href="#consumo">Modelo de Consumo</a></li>
+            <li><a href="#calculos">Cálculos</a></li>
+            <li><a href="#resultados">Resultados</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <section id="inicio" class="hero">
+            <h2>Optimiza tu consumo eléctrico con energía solar</h2>
+            <p>Esta herramienta te ayuda a determinar cuántos paneles solares necesitas para cubrir el consumo eléctrico de tu hogar en un mes específico.</p>
+            <a href="#calculos" class="btn">Comenzar Cálculo</a>
+        </section>
+        
+        <section id="datos">
+            <h2>Datos de Radiación Solar</h2>
+            <p>Aquí se mostrarán los datos de radiación solar para la ciudad y mes seleccionados.</p>
+            <div class="chart-container">
+                <p>Gráfico de radiación solar aparecerá aquí</p>
+            </div>
+            <div class="controls">
+                <label for="ciudad">Ciudad:</label>
+                <select id="ciudad">
+                    <option value="morelia">Morelia</option>
+                    <option value="cdmx">Ciudad de México</option>
+                    <option value="monterrey">Monterrey</option>
+                </select>
+                
+                <label for="mes">Mes:</label>
+                <select id="mes">
+                    <option value="enero">Enero</option>
+                    <option value="julio">Julio</option>
+                </select>
+                
+                <button class="btn" onclick="cargarDatos()">Cargar Datos</button>
+            </div>
+        </section>
+        
+        <section id="consumo">
+            <h2>Modelo de Consumo Eléctrico</h2>
+            <p>Configura el consumo eléctrico promedio de tu hogar.</p>
+            <div class="chart-container">
+                <p>Gráfico de consumo eléctrico aparecerá aquí</p>
+            </div>
+            <div class="controls">
+                <label for="consumo-promedio">Consumo diario promedio (kWh):</label>
+                <input type="number" id="consumo-promedio" value="5" min="1" step="0.1">
+                
+                <label for="variabilidad">Variabilidad (%):</label>
+                <input type="number" id="variabilidad" value="20" min="0" max="100">
+                
+                <button class="btn" onclick="simularConsumo()">Simular Consumo</button>
+            </div>
+        </section>
+        
+        <section id="calculos">
+            <h2>Cálculos de Generación Solar</h2>
+            <p>Configura los parámetros de tus paneles solares.</p>
+            <div class="controls">
+                <label for="panel-eficiencia">Eficiencia del panel (%):</label>
+                <input type="number" id="panel-eficiencia" value="18" min="1" max="100">
+                
+                <label for="panel-area">Área efectiva por panel (m²):</label>
+                <input type="number" id="panel-area" value="1.6" min="0.1" step="0.1">
+                
+                <label for="num-paneles">Número de paneles:</label>
+                <input type="number" id="num-paneles" value="5" min="1">
+                
+                <button class="btn" onclick="calcularGeneracion()">Calcular Generación</button>
+            </div>
+        </section>
+        
+        <section id="resultados">
+            <h2>Resultados y Recomendaciones</h2>
+            <div class="chart-container">
+                <p>Comparación entre consumo y generación aparecerá aquí</p>
+            </div>
+            <div id="resultados-texto">
+                <p>Después de realizar los cálculos, aquí aparecerá el análisis de cuántos paneles necesitas para cubrir tu consumo con un 95% de confianza.</p>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        // Funciones placeholder que podrás implementar más adelante
+        function cargarDatos() {
+            alert('Esta función cargará los datos de radiación solar para la ciudad y mes seleccionados.');
+            // Aquí implementarás la carga de datos reales o simulados
+        }
+        
+        function simularConsumo() {
+            alert('Esta función simulará el consumo eléctrico según los parámetros proporcionados.');
+            // Aquí implementarás la simulación del consumo
+        }
+        
+        function calcularGeneracion() {
+            alert('Esta función calculará la energía generada por los paneles solares.');
+            // Aquí implementarás los cálculos de generación
+        }
+    </script>
+</body>
+</html>
