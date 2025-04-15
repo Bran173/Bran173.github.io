@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Ubicación - Calculadora Solar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        /* ESTILOS GENERALES */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* HEADER Y NAVEGACIÓN FIJA */
+        header {
+            background-color: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            background-color: rgba(52, 73, 94, 0.95);
+            padding: 0.8rem;
+            position: fixed;
+            top: 60px; /* Ajustar según altura del header */
+            width: 100%;
+            z-index: 1000;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav ul li {
+            margin: 0 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            background-color: #16a085;
+            transform: translateY(-2px);
+        }
+
+        /* CONTENIDO PRINCIPAL (CON ESPACIO PARA HEADER Y NAV) */
+        #main-content {
+            padding-top: 140px; /* Espacio para header + nav */
+            margin-top: -20px; /* Compensación ligera */
+        }
+
+        /* ESTILOS PARA EL MAPA */
+        #map-container {
+            width: 100%;
+            padding: 2rem 0;
+            background-color: #f5f7fa;
+        }
+        
+        #map {
+            height: 500px;
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto 0; /* Margen superior aumentado */
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 2px solid #2c3e50;
+        }
+        
+        .data-panel {
+            background-color: white;
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 40px; /* Espacio adicional */
+            padding: 0 20px;
+        }
+        
+        .section-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+            padding: 0 20px;
+        }
+        
+        .radiation-data {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 1.5rem;
+        }
+        
+        .radiation-item {
+            background-color: #e8f4f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .radiation-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .radiation-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        
+        .radiation-label {
+            font-weight: bold;
+            color: #16a085;
+        }
+        
+        #btn-calcular {
+            display: block;
+            width: 250px;
+            margin: 2rem auto 0;
+            padding: 12px 0;
+            font-size: 1.1rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            font-style: italic;
+            color: #666;
+        }
+        
+        .last-update {
+            text-align: right;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        /* FOOTER */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            header {
+                padding: 0.8rem 0;
+            }
+            
+            nav {
+                top: 50px;
+                padding: 0.6rem;
+            }
+            
+            #main-content {
+                padding-top: 120px;
+            }
+            
+            .section-title {
+                margin-top: 30px;
+                font-size: 1.5rem;
+            }
+            
+            #map {
+                height: 400px;
+                margin-top: 20px;
+            }
+            
+            .radiation-data {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Paneles Solares</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="mapa.html" class="active">Seleccionar Ubicación</a></li>
+            <li><a href="calculos.html">Cálculos</a></li>
+        </ul>
+    </nav>
+    
+    <div id="main-content">
+        <div id="map-container">
+            <h2 class="section-title">Selecciona tu ubicación en el mapa</h2>
+            <p class="section-subtitle">Haz clic en el mapa para obtener datos de radiación solar en tiempo real</p>
+            
+            <div id="map"></div>
+            
+            <div class="data-panel">
+                <h3>Datos de Radiación Solar</h3>
+                <p class="loading" id="update-status">Cargando datos iniciales...</p>
+                
+                <div class="radiation-data">
+                    <div class="radiation-item">
+                        <div class="radiation-label">Radiación Global (GHI)</div>
+                        <div class="radiation-value" id="ghi">-- W/m²</div>
+                        <p>Radiación solar total recibida</p>
+                    </div>
+                    
+                    <div class="radiation-item">
+                        <div class="radiation-label">Radiación Directa (DNI)</div>
+                        <div class="radiation-value" id="dni">-- W/m²</div>
+                        <p>Radiación que llega directamente del sol</p>
+                    </div>
+                    
+                    <div class="radiation-item">
+                        <div class="radiation-label">Radiación Difusa (DHI)</div>
+                        <div class="radiation-value" id="dhi">-- W/m²</div>
+                        <p>Radiación dispersada por la atmósfera</p>
+                    </div>
+                </div>
+                
+                <p class="last-update" id="update-time"></p>
+                
+                <button id="btn-calcular" class="btn" onclick="usarDatos()">Usar estos datos para cálculo</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Variables globales
+        let map;
+        let marker;
+        let currentRadiationData = {};
+        
+        // Inicializar el mapa
+        function initMap() {
+            map = L.map('map').setView([19.7008, -101.1844], 5);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Manejador de clics en el mapa
+            map.on('click', async function(e) {
+                if (marker) {
+                    marker.setLatLng(e.latlng);
+                } else {
+                    marker = L.marker(e.latlng).addTo(map);
+                }
+                
+                await fetchSolarRadiation(e.latlng.lat, e.latlng.lng);
+            });
+            
+            // Cargar datos iniciales (ubicación por defecto)
+            fetchSolarRadiation(19.7008, -101.1844);
+        }
+        
+        // Obtener datos de radiación solar de la API
+        async function fetchSolarRadiation(lat, lon) {
+            document.getElementById('update-status').textContent = "Cargando datos...";
+            document.getElementById('btn-calcular').disabled = true;
+            
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation,direct_radiation,diffuse_radiation&daily=shortwave_radiation_sum&timezone=auto`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data && data.hourly) {
+                    // Calcular promedios horarios
+                    const ghi = data.hourly.shortwave_radiation.reduce((a, b) => a + b, 0) / data.hourly.shortwave_radiation.length;
+                    const dni = data.hourly.direct_radiation.reduce((a, b) => a + b, 0) / data.hourly.direct_radiation.length;
+                    const dhi = data.hourly.diffuse_radiation.reduce((a, b) => a + b, 0) / data.hourly.diffuse_radiation.length;
+                    
+                    currentRadiationData = {
+                        ghi: ghi.toFixed(2),
+                        dni: dni.toFixed(2),
+                        dhi: dhi.toFixed(2),
+                        daily_sum: data.daily.shortwave_radiation_sum[0],
+                        coordinates: { lat, lon },
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    updateRadiationData(currentRadiationData);
+                    document.getElementById('update-status').textContent = "Datos actualizados correctamente";
+                }
+            } catch (error) {
+                console.error('Error al obtener datos de radiación:', error);
+                document.getElementById('update-status').textContent = "Error al cargar datos. Intenta nuevamente.";
+            }
+        }
+        
+        // Actualizar la interfaz con los datos de radiación
+        function updateRadiationData(data) {
+            document.getElementById('ghi').textContent = `${data.ghi} W/m²`;
+            document.getElementById('dni').textContent = `${data.dni} W/m²`;
+            document.getElementById('dhi').textContent = `${data.dhi} W/m²`;
+            document.getElementById('update-time').textContent = `Última actualización: ${new Date().toLocaleString()}`;
+            
+            // Habilitar botón de cálculo
+            document.getElementById('btn-calcular').disabled = false;
+        }
+        
+        // Usar los datos seleccionados para los cálculos
+        function usarDatos() {
+            if (!currentRadiationData.ghi) {
+                alert('Por favor selecciona una ubicación en el mapa primero.');
+                return;
+            }
+            
+            // Guardar datos en localStorage para usarlos en otras páginas
+            localStorage.setItem('solarRadiationData', JSON.stringify(currentRadiationData));
+            
+            // Redirigir a la página de cálculos
+            window.location.href = 'calculos.html';
+        }
+        
+        // Inicializar el mapa cuando se cargue la página
+        window.onload = initMap;
+    </script>
+</body>
+</html>
