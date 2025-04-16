@@ -13,9 +13,9 @@
     
     <nav>
         <ul>
-            <li><a href="#inicio">Inicio</a></li>
+            <li><a href="index.html">Inicio</a></li>
             <li><a href="mapa.html">Seleccionar Ubicación</a></li>
-            <li><a href="#calculos">Cálculos</a></li>
+            <li><a href="informacion.html">Más Información</a></li> <!-- Nuevo enlace en el menú -->
         </ul>
     </nav>
     
@@ -28,7 +28,7 @@
             
             <div class="btn-group">
                 <a href="mapa.html" class="btn">Comenzar Cálculo</a>
-                <a href="#info" class="btn btn-secondary">Más información</a>
+                <a href="informacion.html" class="btn btn-secondary">Más información</a> <!-- Actualizado -->
             </div>
         </div>
     </section>
@@ -54,6 +54,7 @@
     
     <footer>
         <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>Página desarrollada por Brandon Alexis Magaña Sanchez</p>
         <p>&copy; 2023 - Todos los derechos reservados</p>
     </footer>
     
@@ -62,16 +63,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             const radiationData = JSON.parse(localStorage.getItem('solarRadiationData'));
             
-            // Si hay datos de ubicación, puedes mostrarlos donde prefieras
             if (radiationData) {
                 console.log('Datos de radiación cargados:', radiationData);
-                // Puedes agregar lógica para mostrar estos datos cuando sea necesario
+                // Lógica adicional para mostrar datos si es necesario
             }
             
-            // Redirigir directamente a mapa.html al hacer clic en "Comenzar Cálculo"
+            // Redirigir a mapa.html al hacer clic en "Comenzar Cálculo"
             document.querySelector('.btn[href="mapa.html"]').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'mapa.html';
+            });
+
+            // Redirigir a informacion.html al hacer clic en "Más información" (opcional, ya funciona con el href)
+            document.querySelector('.btn[href="informacion.html"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'informacion.html';
             });
         });
     </script>

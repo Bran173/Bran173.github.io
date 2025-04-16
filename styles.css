@@ -64,6 +64,41 @@ nav ul li a:hover {
     transform: translateY(-2px);
 }
 
+/* ===== SECCIÓN INFORMACIÓN ===== */
+#informacion-page {
+    min-height: 100vh;
+    padding-top: 140px;
+    position: relative;
+    background-image: url('../imagenes/fondo-informacion.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#informacion-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+.info-container {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.95);
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
 /* ===== SECCIÓN INICIO ===== */
 #inicio {
     height: 100vh;
@@ -386,7 +421,7 @@ footer {
         margin-top: -120px;
     }
     
-    #mapa-page, #mes-page {
+    #mapa-page, #mes-page, #informacion-page {
         padding-top: 20px;
     }
     
@@ -412,7 +447,7 @@ footer {
         max-width: 250px;
     }
     
-    #map-container, #mes-container {
+    #map-container, #mes-container, .info-container {
         width: 95%;
         padding: 1rem;
     }
