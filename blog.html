@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog del Proyecto Calculadora de Paneles Solares</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body id="blog-page">
+    <header>
+        <h1 class="page-title">Blog del proyecto "Calculadora de Paneles Solares"</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Volver a la Calculadora</a></li>
+            <li><a href="#introduccion">Introducción</a></li>
+            <li><a href="#flujo">Flujo</a></li>
+            <li><a href="#conclusion">Conclusión</a></li>
+        </ul>
+    </nav>
+    
+    <div class="blog-container">
+        <!-- Introducción -->
+        <article id="introduccion">
+            <h2>Introducción</h2>
+            <p>La Calculadora de Paneles Solares es una aplicación web diseñada para estimar el número de paneles solares necesarios para un hogar.</p>
+            
+            <div class="flow-diagram">
+                <h3>Flujo Básico de la Aplicación</h3>
+                <p><strong>Inicio</strong> → <strong>Ubicación</strong> → <strong>Mes</strong> → <strong>Consumo</strong> → <strong>Resultados</strong></p>
+            </div>
+        </article>
+        
+        <!-- Flujo de la aplicación -->
+        <article id="flujo">
+            <h2>Flujo de la Aplicación</h2>
+            <p>La aplicación sigue un proceso secuencial para recolectar los datos necesarios:</p>
+            
+            <h3>1. Página de Inicio (index.html)</h3>
+            <div class="section-content">
+                <p>El archivo <strong>index.html</strong> es la página principal de la aplicación y cumple varias funciones clave:</p>
+            
+                <h4>Estructura Principal</h4>
+                <ul>
+                    <li><strong>Encabezado fijo:</strong> Contiene el título principal de la aplicación y se mantiene visible en todo momento.</li>
+                    <li><strong>Barra de navegación:</strong> Permite acceder a las diferentes secciones (Inicio, Ubicación, Información).</li>
+                    <li><strong>Sección hero:</strong> Área principal con llamados a acción y breve descripción de la aplicación.</li>
+                    <li><strong>Botón del blog:</strong> Enlace directo al blog técnico en la esquina superior izquierda.</li>
+                </ul>
+            
+                <h4>Funcionalidades Clave</h4>
+                <div class="feature-box">
+                    <p><strong>1. Diseño Atractivo:</strong></p>
+                    <ul>
+                        <li>Fondo con imagen temática y overlay oscuro para mejor legibilidad</li>
+                        <li>Texto con sombras para mejor contraste</li>
+                        <li>Botones con efectos hover interactivos</li>
+                    </ul>
+            
+                    <p><strong>2. Navegación Intuitiva:</strong></p>
+                    <ul>
+                        <li>Botón "Comenzar Cálculo" inicia el flujo principal</li>
+                        <li>Botón "Más información" lleva a detalles adicionales</li>
+                        <li>Menú superior permite moverse entre secciones</li>
+                    </ul>
+            
+                    <p><strong>3. Tecnologías Implementadas:</strong></p>
+                    <ul>
+                        <li>Diseño responsive que se adapta a móviles y tablets</li>
+                        <li>Uso de localStorage para mantener datos entre páginas</li>
+                        <li>Efectos CSS modernos para mejor experiencia de usuario</li>
+                    </ul>
+                </div>
+            
+                <h4>Flujo de Trabajo</h4>
+                <ol>
+                    <li>El usuario llega a la página de inicio</li>
+                    <li>Puede elegir entre:
+                        <ul>
+                            <li>Comenzar el cálculo (lo lleva a mapa.html)</li>
+                            <li>Consultar información adicional (informacion.html)</li>
+                            <li>Acceder al blog técnico</li>
+                        </ul>
+                    </li>
+                    <li>El sistema verifica si hay datos previos almacenados</li>
+                    <li>Muestra la interfaz principal con los llamados a acción</li>
+                </ol>
+            
+                <h4>Código Destacado</h4>
+                <div class="code-notes">
+                    <p>El JavaScript incluido realiza estas funciones:</p>
+                    <ul>
+                        <li>Verifica si hay datos de radiación solar almacenados</li>
+                        <li>Configura los event listeners para los botones principales</li>
+                        <li>Previene el comportamiento por defecto de los enlaces para un control más preciso</li>
+                    </ul>
+                </div>
+            
+                <div class="design-notes">
+                    <p><strong>Notas de Diseño:</strong> La página utiliza una estructura semántica HTML5 con secciones claramente definidas, manteniendo un equilibrio entre estética y funcionalidad. Los colores siguen la paleta principal de la aplicación (#2c3e50, #16a085, #ffffff) para consistencia visual.</p>
+                </div>
+            </div>
+            
+            <h3>2. Selección de Ubicación (mapa.html)</h3>
+            <div class="section-content">
+                <p>La página <strong>mapa.html</strong> es el primer paso en el flujo de cálculo, donde los usuarios seleccionan su ubicación para obtener datos precisos de radiación solar.</p>
+            
+                <h4>Componentes principales</h4>
+                <div class="feature-box">
+                    <p><strong>1. Mapa Interactivo:</strong></p>
+                    <ul>
+                        <li>Implementado con <strong>Leaflet.js</strong>, una biblioteca JavaScript para mapas interactivos</li>
+                        <li>Centrado inicialmente en México con zoom nivel 5</li>
+                        <li>Capas de mosaicos de OpenStreetMap para la visualización</li>
+                        <li>Marcador arrastrable para ajustar la ubicación exacta</li>
+                    </ul>
+            
+                    <p><strong>2. Selector de Ciudades:</strong></p>
+                    <ul>
+                        <li>Lista desplegable con más de 30 ciudades importantes de México</li>
+                        <li>Cada opción incluye coordenadas geográficas (latitud/longitud)</li>
+                        <li>Selección automática de la ciudad más cercana al hacer clic en el mapa</li>
+                    </ul>
+            
+                    <p><strong>3. Datos de Radiación:</strong></p>
+                    <ul>
+                        <li>Muestra tres tipos de radiación solar: Global (GHI), Directa (DNI) y Difusa (DHI)</li>
+                        <li>Actualización en tiempo real al seleccionar nueva ubicación</li>
+                        <li>Indicador de fecha/hora de la última actualización</li>
+                    </ul>
+                </div>
+            
+                <h4>Funcionamiento técnico</h4>
+                <ol>
+                    <li><strong>Inicialización:</strong>
+                        <ul>
+                            <li>Carga el mapa con vista inicial de México</li>
+                            <li>Configura los controladores de eventos para clics y selección de ciudad</li>
+                        </ul>
+                    </li>
+                    <li><strong>Interacción del usuario:</strong>
+                        <ul>
+                            <li>Al hacer clic en el mapa: coloca marcador y busca ciudad más cercana</li>
+                            <li>Al seleccionar ciudad: centra el mapa y coloca marcador</li>
+                        </ul>
+                    </li>
+                    <li><strong>Obtención de datos:</strong>
+                        <ul>
+                            <li>Consulta la API de Open-Meteo para datos actuales de radiación</li>
+                            <li>Parámetros solicitados: shortwave_radiation, direct_radiation, diffuse_radiation</li>
+                            <li>Manejo de errores para fallos en la conexión</li>
+                        </ul>
+                    </li>
+                    <li><strong>Almacenamiento:</strong>
+                        <ul>
+                            <li>Guarda ubicación y datos en localStorage para uso en pasos siguientes</li>
+                            <li>Datos almacenados: coordenadas, valores de radiación, ciudad seleccionada</li>
+                        </ul>
+                    </li>
+                </ol>
+            
+                <h4>Tecnologías clave</h4>
+                <div class="tech-specs">
+                    <div class="tech-item">
+                        <h5>Leaflet.js</h5>
+                        <p>Biblioteca ligera para mapas interactivos, utiliza OpenStreetMap como proveedor de mosaicos base.</p>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <h5>API Open-Meteo</h5>
+                        <p>Servicio meteorológico gratuito que proporciona datos actuales e históricos de radiación solar.</p>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <h5>LocalStorage</h5>
+                        <p>Almacenamiento en el navegador para persistir datos entre páginas sin necesidad de servidor.</p>
+                    </div>
+                </div>
+            
+                <h4>Flujo de datos</h4>
+                <div class="data-flow">
+                    <p>1. Usuario selecciona ubicación → 2. Sistema obtiene coordenadas → 3. Consulta API → 4. Procesa respuesta → 5. Actualiza interfaz → 6. Almacena datos → 7. Habilita siguiente paso</p>
+                </div>
+            
+                <h4>Consideraciones de diseño</h4>
+                <div class="design-notes">
+                    <ul>
+                        <li>Interfaz dividida en dos columnas (mapa y controles) para mejor usabilidad</li>
+                        <li>Estados visuales claros para: carga, éxito y error en obtención de datos</li>
+                        <li>Diseño responsive que se adapta a móviles (mapa encima, controles debajo)</li>
+                        <li>Feedback inmediato al usuario con animaciones sutiles</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>3. Selección de Mes (mes.html)</h3>
+            <div class="section-content">
+                <p>La página <strong>mes.html</strong> permite seleccionar el periodo del año para el cálculo, lo que afecta directamente los resultados de radiación solar.</p>
+            
+                <h4>Componentes principales</h4>
+                <div class="feature-box">
+                    <p><strong>1. Selector de Mes:</strong></p>
+                    <ul>
+                        <li>Lista desplegable con los 12 meses del año</li>
+                        <li>Selección predeterminada en julio (mes con mayor radiación en México)</li>
+                        <li>Actualización automática al cambiar la selección</li>
+                    </ul>
+            
+                    <p><strong>2. Panel de Datos Climáticos:</strong></p>
+                    <ul>
+                        <li>Muestra radiación solar promedio diaria (kWh/m²)</li>
+                        <li>Porcentaje estimado de días nublados</li>
+                        <li>Radiación máxima registrada</li>
+                        <li>Descripción contextual según los valores</li>
+                    </ul>
+            
+                    <p><strong>3. Integración con NASA POWER API:</strong></p>
+                    <ul>
+                        <li>Consulta datos históricos de radiación solar</li>
+                        <li>Manejo de errores con datos de ejemplo cuando la API falla</li>
+                        <li>Fuente de datos claramente indicada</li>
+                    </ul>
+                </div>
+            
+                <h4>Funcionamiento técnico</h4>
+                <ol>
+                    <li><strong>Carga inicial:</strong>
+                        <ul>
+                            <li>Obtiene ubicación guardada del localStorage</li>
+                            <li>Carga datos del mes predeterminado (julio)</li>
+                            <li>Muestra spinner durante la carga</li>
+                        </ul>
+                    </li>
+                    <li><strong>Cambio de mes:</strong>
+                        <ul>
+                            <li>Detecta cambio en el selector</li>
+                            <li>Vuelve a consultar la API con nuevos parámetros</li>
+                            <li>Actualiza la interfaz con los nuevos datos</li>
+                        </ul>
+                    </li>
+                    <li><strong>Obtención de datos:</strong>
+                        <ul>
+                            <li>Intenta conectar con NASA POWER API</li>
+                            <li>Usa proxy CORS como respaldo</li>
+                            <li>Si falla, genera datos estimados basados en latitud y mes</li>
+                        </ul>
+                    </li>
+                    <li><strong>Preparación para siguiente paso:</strong>
+                        <ul>
+                            <li>Guarda todos los datos en localStorage</li>
+                            <li>Habilita el botón "Siguiente"</li>
+                        </ul>
+                    </li>
+                </ol>
+            
+                <h4>Tecnologías clave</h4>
+                <div class="tech-specs">
+                    <div class="tech-item">
+                        <h5>NASA POWER API</h5>
+                        <p>Fuente de datos meteorológicos históricos de la NASA, proporciona información precisa de radiación solar.</p>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <h5>Algoritmo de estimación</h5>
+                        <p>Cuando la API falla, genera datos basados en latitud y mes con patrones climáticos típicos.</p>
+                    </div>
+                    
+                    <div class="tech-item">
+                        <h5>LocalStorage</h5>
+                        <p>Almacena los datos climáticos para usarlos en los cálculos posteriores.</p>
+                    </div>
+                </div>
+            
+                <h4>Flujo de datos</h4>
+                <div class="code-notes">
+                    <pre>
+            1. Usuario selecciona mes → 
+            2. Sistema construye consulta API → 
+            3. Intenta conexión directa → 
+            4. Si falla, usa proxy CORS → 
+            5. Si falla, genera datos estimados → 
+            6. Procesa y muestra resultados → 
+            7. Almacena datos para siguiente paso
+                    </pre>
+                </div>
+            
+                <h4>Consideraciones importantes</h4>
+                <div class="design-notes">
+                    <ul>
+                        <li><strong>Resiliencia:</strong> Funciona incluso sin conexión a la API gracias a los datos estimados</li>
+                        <li><strong>Transparencia:</strong> Indica claramente cuando los datos son estimados</li>
+                        <li><strong>Experiencia de usuario:</strong> Feedback visual durante carga (spinner)</li>
+                        <li><strong>Precisión:</strong> Los datos reales de NASA POWER tienen resolución diaria</li>
+                    </ul>
+                </div>
+            
+                <h4>Ejemplo de consulta API</h4>
+                <div class="code-block">
+                    <span class="code-comment">// Consulta a NASA POWER API para julio en Morelia</span><br>
+                    https://power.larc.nasa.gov/api/temporal/daily/point?<br>
+                    parameters=ALLSKY_SFC_SW_DWN,CLOUD_AMT&<br>
+                    community=RE&<br>
+                    longitude=-101.1844&<br>
+                    latitude=19.7008&<br>
+                    start=20230701&<br>
+                    end=20230731&<br>
+                    format=JSON
+                </div>
+            </div>
+            
+            <h3>4. Consumo Eléctrico (consumo.html)</h3>
+            <div class="section-content">
+                <p>Esta página permite al usuario ingresar su patrón de consumo eléctrico, que es fundamental para calcular el sistema solar necesario.</p>
+            
+                <h4>Características principales</h4>
+                <div class="feature-box">
+                    <p><strong>1. Métodos de ingreso flexibles:</strong></p>
+                    <ul>
+                        <li><strong>Consumo promedio:</strong> Slider interactivo para seleccionar kWh/día</li>
+                        <li><strong>Personalizado:</strong> Opción avanzada para mayor precisión</li>
+                        <li><strong>Consumo horario:</strong> Tabla detallada por horas del día</li>
+                    </ul>
+            
+                    <p><strong>2. Interfaz intuitiva:</strong></p>
+                    <ul>
+                        <li>Diseño responsive que se adapta a todos los dispositivos</li>
+                        <li>Transiciones suaves entre diferentes métodos de ingreso</li>
+                        <li>Validación automática de los valores ingresados</li>
+                    </ul>
+            
+                    <p><strong>3. Integración con el sistema:</strong></p>
+                    <ul>
+                        <li>Almacena los datos en localStorage para el cálculo final</li>
+                        <li>Calcula automáticamente el consumo diario total</li>
+                        <li>Prepara los datos para la página de resultados</li>
+                    </ul>
+                </div>
+            
+                <h4>Funcionamiento técnico</h4>
+                <ol>
+                    <li><strong>Carga inicial:</strong>
+                        <ul>
+                            <li>Muestra el método de ingreso predeterminado (consumo promedio)</li>
+                            <li>Inicializa el slider con valor medio (5 kWh/día)</li>
+                            <li>Prepara la tabla de consumo horario (24 filas)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Interacción del usuario:</strong>
+                        <ul>
+                            <li>Al cambiar el método de ingreso, muestra/oculta las secciones correspondientes</li>
+                            <li>Actualiza en tiempo real los valores mostrados</li>
+                            <li>Valida que los valores ingresados sean números positivos</li>
+                        </ul>
+                    </li>
+                    <li><strong>Procesamiento de datos:</strong>
+                        <ul>
+                            <li>Para consumo promedio: toma directamente el valor del slider</li>
+                            <li>Para consumo personalizado: suma los valores horarios o toma el valor diario</li>
+                            <li>Guarda los datos en formato estructurado</li>
+                        </ul>
+                    </li>
+                    <li><strong>Preparación para resultados:</strong>
+                        <ul>
+                            <li>Combina los datos de consumo con ubicación y mes seleccionados</li>
+                            <li>Almacena todo en localStorage bajo 'solarSimulationData'</li>
+                        </ul>
+                    </li>
+                </ol>
+            
+                <h4>Estructura de datos almacenados</h4>
+                <div class="code-block">
+                    <span class="code-comment">// Ejemplo de datos guardados en localStorage</span><br>
+                    {<br>
+                    &nbsp;&nbsp;"method": "personalizado",<br>
+                    &nbsp;&nbsp;"dailyKwh": 8.5,<br>
+                    &nbsp;&nbsp;"hourly": [0.1, 0.1, 0.1, ..., 0.8, 1.2, ...]<br>
+                    }
+                </div>
+            
+                <h4>Validaciones importantes</h4>
+                <div class="design-notes">
+                    <ul>
+                        <li>Asegura que todos los valores sean números válidos</li>
+                        <li>Impide valores negativos en el consumo</li>
+                        <li>Proporciona valores por defecto razonables</li>
+                        <li>Calcula automáticamente totales para verificar consistencia</li>
+                    </ul>
+                </div>
+            
+                <h4>Consideraciones de diseño</h4>
+                <div class="design-notes">
+                    <ul>
+                        <li><strong>Jerarquía visual:</strong> Paso 3 claramente identificado</li>
+                        <li><strong>Progreso:</strong> Botones de navegación Anterior/Siguiente</li>
+                        <li><strong>Accesibilidad:</strong> Labels asociados a todos los controles</li>
+                        <li><strong>Feedback:</strong> Valores que se actualizan en tiempo real</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>5. Página de Resultados (resultados.html)</h3>
+<div class="section-content">
+    <p>La página <strong>resultados.html</strong> es donde se consolidan todos los datos recolectados y se presentan los cálculos finales del sistema solar recomendado.</p>
+
+    <h4>Estructura Principal</h4>
+    <ul>
+        <li><strong>Resumen inicial:</strong> Muestra ubicación, consumo y número de paneles recomendados</li>
+        <li><strong>Resultados principales:</strong> Explicación detallada de la cobertura estimada</li>
+        <li><strong>Gráficos interactivos:</strong> Visualización de radiación vs consumo y distribución de energía</li>
+        <li><strong>Escenarios comparativos:</strong> Diferentes configuraciones de paneles con sus pros y contras</li>
+    </ul>
+
+    <h4>Procesos de Cálculo</h4>
+    <div class="feature-box">
+        <p><strong>1. Cálculo de paneles necesarios:</strong></p>
+        <ul>
+            <li>Considera radiación solar promedio del lugar</li>
+            <li>Eficiencia típica de paneles (18%)</li>
+            <li>Área estándar por panel (1.6 m²)</li>
+            <li>Factor de pérdidas por temperatura/suciedad (75%)</li>
+            <li>Aplica 10% adicional como margen de seguridad</li>
+        </ul>
+
+        <p><strong>2. Modelado de variabilidad:</strong></p>
+        <ul>
+            <li>Simula 30 días de radiación considerando días nublados</li>
+            <li>Genera patrones de consumo con distribución normal</li>
+            <li>Clasifica días en excedentes, suficientes y con déficit</li>
+        </ul>
+
+        <p><strong>3. Escenarios comparativos:</strong></p>
+        <ul>
+            <li>Configuración mínima (menos paneles, menor inversión)</li>
+            <li>Configuración recomendada (balance óptimo)</li>
+            <li>Configuración ampliada (más paneles, excedentes)</li>
+        </ul>
+    </div>
+
+    <h4>Fórmulas Clave</h4>
+    <div class="code-notes">
+        <p><strong>Cálculo básico de paneles:</strong></p>
+        <pre>Paneles = (Consumo diario) / (Radiación × 0.18 × 1.6 × 0.75) × 1.1</pre>
+        
+        <p><strong>Producción diaria estimada:</strong></p>
+        <pre>Producción = N° paneles × Radiación × 0.18 × 1.6 × 0.75</pre>
+        
+        <p><strong>Porcentaje de cobertura:</strong></p>
+        <pre>Cobertura = (Producción diaria / Consumo diario) × 100</pre>
+    </div>
+
+    <h4>Flujo de Trabajo</h4>
+    <ol>
+        <li>Recupera todos los datos almacenados (ubicación, mes, consumo)</li>
+        <li>Calcula número base de paneles necesarios</li>
+        <li>Genera simulaciones de 30 días considerando variabilidad</li>
+        <li>Clasifica días según cobertura energética</li>
+        <li>Prepara escenarios con diferentes cantidades de paneles</li>
+        <li>Renderiza gráficos y resúmenes visuales</li>
+    </ol>
+
+    <h4>Tecnologías Clave</h4>
+    <ul>
+        <li><strong>Chart.js:</strong> Para gráficos interactivos de radiación y consumo</li>
+        <li><strong>LocalStorage:</strong> Para recuperar todos los datos ingresados</li>
+        <li><strong>Modelado estadístico:</strong> Simulación de días nublados y patrones de consumo</li>
+    </ul>
+
+    <div class="design-notes">
+        <p><strong>Notas de Diseño:</strong> La página utiliza un diseño limpio con tarjetas informativas para presentar los resultados. Los gráficos proporcionan visión inmediata de los patrones, mientras que los escenarios permiten comparación fácil. La paleta de colores mantiene consistencia con el resto de la aplicación, usando verde para indicar excedentes y rojo para déficits.</p>
+    </div>
+</div>
+        
+          <!-- Conclusión -->
+<article id="conclusion">
+    <h2>Conclusión</h2>
+    <div class="section-content">
+        <p>El proyecto de la <strong>Calculadora de Paneles Solares</strong> representa una solución tecnológica accesible para estimar las necesidades de energía solar en hogares, combinando conocimientos técnicos con desarrollo web moderno.</p>
+
+        <h4>Logros Principales</h4>
+        <div class="feature-box">
+            <ul>
+                <li><strong>Interfaz intuitiva:</strong> Flujo guiado en 4 pasos simples (Ubicación, Mes, Consumo, Resultados)</li>
+                <li><strong>Precisión técnica:</strong> Cálculos basados en datos reales de radiación solar y modelos energéticos</li>
+                <li><strong>Flexibilidad:</strong> Adaptable a diferentes patrones de consumo y ubicaciones geográficas</li>
+                <li><strong>Tecnología accesible:</strong> Implementado completamente con estándares web (HTML5, CSS3, JavaScript)</li>
+            </ul>
+        </div>
+
+        <h4>Impacto Potencial</h4>
+        <ul>
+            <li>Facilita la transición a energías renovables al hacer más comprensible la tecnología solar</li>
+            <li>Reduce la barrera de entrada para usuarios sin conocimientos técnicos</li>
+            <li>Proporciona estimaciones personalizadas sin necesidad de consultores especializados</li>
+        </ul>
+
+        <div class="design-notes">
+            <p><strong>Reflexión final:</strong> Este proyecto demuestra cómo herramientas tecnológicas sencillas pueden tener un impacto significativo en la promoción de energías limpias. La calculadora sigue evolucionando, con planes para incorporar más funcionalidades que ayuden a los usuarios a tomar decisiones informadas sobre su transición energética.</p>
+        </div>
+
+        <a href="index.html" class="btn">Volver a la Calculadora</a>
+    </div>
+</article>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>Documentación técnica por Brandon Alexis Magaña Sanchez</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+</body>
+</html>

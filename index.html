@@ -5,8 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Paneles Solares</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Estilo para el botón del blog */
+        .blog-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #16a085;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1001;
+            transition: background-color 0.3s;
+        }
+        
+        .blog-btn:hover {
+            background-color: #1abc9c;
+        }
+    </style>
 </head>
 <body>
+    <!-- Botón del blog -->
+    <a href="blog.html" class="blog-btn">Blog de la Página</a>
+    
     <header>
         <h1>Calculadora de Paneles Solares</h1>
     </header>
@@ -15,7 +38,7 @@
         <ul>
             <li><a href="index.html">Inicio</a></li>
             <li><a href="mapa.html">Seleccionar Ubicación</a></li>
-            <li><a href="informacion.html">Más Información</a></li> <!-- Nuevo enlace en el menú -->
+            <li><a href="informacion.html">Más Información</a></li>
         </ul>
     </nav>
     
@@ -28,7 +51,7 @@
             
             <div class="btn-group">
                 <a href="mapa.html" class="btn">Comenzar Cálculo</a>
-                <a href="informacion.html" class="btn btn-secondary">Más información</a> <!-- Actualizado -->
+                <a href="informacion.html" class="btn btn-secondary">Más información</a>
             </div>
         </div>
     </section>
@@ -59,22 +82,18 @@
     </footer>
     
     <script>
-        // Cargar datos de ubicación si existen
         document.addEventListener('DOMContentLoaded', function() {
             const radiationData = JSON.parse(localStorage.getItem('solarRadiationData'));
             
             if (radiationData) {
                 console.log('Datos de radiación cargados:', radiationData);
-                // Lógica adicional para mostrar datos si es necesario
             }
             
-            // Redirigir a mapa.html al hacer clic en "Comenzar Cálculo"
             document.querySelector('.btn[href="mapa.html"]').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'mapa.html';
             });
 
-            // Redirigir a informacion.html al hacer clic en "Más información" (opcional, ya funciona con el href)
             document.querySelector('.btn[href="informacion.html"]').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'informacion.html';

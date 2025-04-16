@@ -64,6 +64,75 @@ nav ul li a:hover {
     transform: translateY(-2px);
 }
 
+/* ===== SECCIÓN BLOG ===== */
+#blog-page {
+    min-height: 100vh;
+    padding-top: 140px;
+    position: relative;
+    background-image: url('../imagenes/fondo-blog.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#blog-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+.blog-container {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.95);
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto 2rem;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.blog-title {
+    font-size: 2.5rem;
+    color: white;
+    text-align: center;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.blog-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.blog-section:last-child {
+    border-bottom: none;
+}
+
+.blog-section h2 {
+    color: #2c3e50;
+    margin-top: 2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #16a085;
+}
+
+.blog-placeholder {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 5px;
+    border-left: 4px solid #16a085;
+    font-style: italic;
+    color: #555;
+}
+
 /* ===== SECCIÓN INFORMACIÓN ===== */
 #informacion-page {
     min-height: 100vh;
@@ -421,7 +490,7 @@ footer {
         margin-top: -120px;
     }
     
-    #mapa-page, #mes-page, #informacion-page {
+    #mapa-page, #mes-page, #informacion-page, #blog-page {
         padding-top: 20px;
     }
     
@@ -447,12 +516,16 @@ footer {
         max-width: 250px;
     }
     
-    #map-container, #mes-container, .info-container {
+    #map-container, #mes-container, .info-container, .blog-container {
         width: 95%;
         padding: 1rem;
     }
     
     .climate-data {
         grid-template-columns: 1fr;
+    }
+    
+    .blog-title {
+        font-size: 2rem;
     }
 }
