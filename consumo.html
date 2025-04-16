@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumo Eléctrico | Calculadora Solar</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .consumo-container {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .page-title {
+            margin-top: 70px;  /* Espacio aumentado para separar del nav */
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 0 15px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .slider-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            flex-grow: 1;
+        }
+        .advanced-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .hourly-consumption {
+            display: none;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .btn {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .step-number {
+            background-color: #4CAF50;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Paneles Solares</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="mapa.html">Ubicación</a></li>
+            <li><a href="mes.html">Selección de Mes</a></li>
+            <li><a href="consumo.html" class="active">Consumo Eléctrico</a></li>
+            <li><a href="resultados.html">Resultados</a></li>
+        </ul>
+    </nav>
+    
+    <div class="page-title">
+        <h2>Configuración de Consumo Eléctrico</h2>
+    </div>
+    
+    <div class="consumo-container">
+        <div class="step-header">
+            <div class="step-number">3</div>
+            <h3>Seleccione su consumo eléctrico</h3>
+        </div>
+        
+        <div class="form-group">
+            <label for="consumption-option">Seleccione el método de ingreso de consumo:</label>
+            <select id="consumption-option" class="form-control">
+                <option value="promedio">Consumo promedio predeterminado</option>
+                <option value="personalizado">Personalizar consumo</option>
+            </select>
+        </div>
+        
+        <div id="average-consumption-section">
+            <div class="form-group">
+                <label for="consumption-slider">Consumo promedio diario:</label>
+                <div class="slider-container">
+                    <input type="range" id="consumption-slider" min="1" max="20" step="0.5" value="5">
+                    <span id="slider-value" class="slider-value">5 kWh/día</span>
+                </div>
+            </div>
+        </div>
+        
+        <div id="custom-consumption-section" class="advanced-section" style="display: none;">
+            <h4>Personalizar Consumo</h4>
+            
+            <div class="form-group">
+                <label for="consumption-method">Método de ingreso:</label>
+                <select id="consumption-method" class="form-control">
+                    <option value="diario">Consumo diario total</option>
+                    <option value="horario">Consumo por horas</option>
+                </select>
+            </div>
+            
+            <div id="daily-consumption">
+                <div class="form-group">
+                    <label for="daily-kwh">Consumo eléctrico diario (kWh):</label>
+                    <input type="number" id="daily-kwh" min="0" step="0.1" class="form-control" value="5">
+                </div>
+            </div>
+            
+            <div id="hourly-consumption" class="hourly-consumption">
+                <p>Ingrese el consumo por horas (kWh):</p>
+                <table>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Consumo</th>
+                    </tr>
+                    <script>
+                        for (let i = 0; i < 24; i++) {
+                            document.write(`
+                                <tr>
+                                    <td>${i}:00 - ${i+1}:00</td>
+                                    <td><input type="number" id="hour-${i}" min="0" step="0.1" value="0.2" class="form-control"></td>
+                                </tr>
+                            `);
+                        }
+                    </script>
+                </table>
+            </div>
+        </div>
+        
+        <div class="btn-container">
+            <a href="mes.html" class="btn btn-secondary">Anterior</a>
+            <a href="resultados.html" class="btn btn-primary">Siguiente</a>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Control del slider
+            const slider = document.getElementById('consumption-slider');
+            const sliderValue = document.getElementById('slider-value');
+            
+            slider.addEventListener('input', function() {
+                sliderValue.textContent = `${this.value} kWh/día`;
+            });
+            
+            // Mostrar/ocultar secciones según selección
+            const consumptionOption = document.getElementById('consumption-option');
+            const averageSection = document.getElementById('average-consumption-section');
+            const customSection = document.getElementById('custom-consumption-section');
+            
+            consumptionOption.addEventListener('change', function() {
+                if (this.value === 'promedio') {
+                    averageSection.style.display = 'block';
+                    customSection.style.display = 'none';
+                } else {
+                    averageSection.style.display = 'none';
+                    customSection.style.display = 'block';
+                }
+            });
+            
+            // Mostrar/ocultar consumo horario
+            const consumptionMethod = document.getElementById('consumption-method');
+            const dailyConsumption = document.getElementById('daily-consumption');
+            const hourlyConsumption = document.getElementById('hourly-consumption');
+            
+            consumptionMethod.addEventListener('change', function() {
+                if (this.value === 'diario') {
+                    dailyConsumption.style.display = 'block';
+                    hourlyConsumption.style.display = 'none';
+                } else {
+                    dailyConsumption.style.display = 'none';
+                    hourlyConsumption.style.display = 'block';
+                }
+            });
+            
+            // Guardar datos al hacer clic en Siguiente
+            document.querySelector('.btn-primary').addEventListener('click', function() {
+                const consumptionData = {
+                    method: consumptionOption.value
+                };
+                
+                if (consumptionOption.value === 'promedio') {
+                    consumptionData.dailyKwh = parseFloat(slider.value);
+                } else {
+                    if (consumptionMethod.value === 'diario') {
+                        consumptionData.dailyKwh = parseFloat(document.getElementById('daily-kwh').value);
+                    } else {
+                        consumptionData.hourly = [];
+                        for (let i = 0; i < 24; i++) {
+                            consumptionData.hourly.push(parseFloat(document.getElementById(`hour-${i}`).value));
+                        }
+                        consumptionData.dailyKwh = consumptionData.hourly.reduce((a, b) => a + b, 0);
+                    }
+                }
+                
+                // Guardar en localStorage
+                const simulationData = JSON.parse(localStorage.getItem('solarSimulationData') || {}); 
+                simulationData.consumption = consumptionData;
+                localStorage.setItem('solarSimulationData', JSON.stringify(simulationData));
+            });
+        });
+    </script>
+</body>
+</html>

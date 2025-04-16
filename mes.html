@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selección de Mes | Calculadora Solar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Calculadora de Paneles Solares</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="mapa.html">Ubicación</a></li>
+            <li><a href="mes.html" class="active">Selección de Mes</a></li>
+            <li><a href="consumo.html">Consumo Eléctrico</a></li>
+            <li><a href="resultados.html">Resultados</a></li>
+        </ul>
+    </nav>
+    
+    <div id="mes-page">
+        <div id="mes-container">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2>Selecciona el Mes a Analizar</h2>
+            </div>
+            
+            <div class="month-selection">
+                <div class="form-group">
+                    <label for="month-selector">Mes:</label>
+                    <select id="month-selector" class="form-control">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7" selected>Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+                
+                <div class="climate-info">
+                    <h3 id="month-title">Radiación Solar en Julio</h3>
+                    <div id="data-loading" class="loading">
+                        <div class="spinner"></div>
+                        <p>Cargando datos climáticos...</p>
+                    </div>
+                    <div id="climate-content" style="display: none;">
+                        <p id="month-description"></p>
+                        <div class="climate-data">
+                            <div class="data-point">
+                                <div class="data-label">Radiación promedio</div>
+                                <div class="data-value" id="radiation-avg">-- kWh/m²</div>
+                            </div>
+                            <div class="data-point">
+                                <div class="data-label">Días nublados</div>
+                                <div class="data-value" id="cloudy-days">--%</div>
+                            </div>
+                            <div class="data-point">
+                                <div class="data-label">Máxima diaria</div>
+                                <div class="data-value" id="max-radiation">-- kWh/m²</div>
+                            </div>
+                        </div>
+                        <div id="data-source" class="data-source"></div>
+                    </div>
+                    <div id="error-message" class="error-message" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="btn-container">
+                <a href="mapa.html" class="btn btn-secondary">Anterior</a>
+                <button id="btn-next" class="btn btn-primary" disabled>Siguiente</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+
+    <script>
+        // Meses para mostrar nombres
+        const monthNames = {
+            '1': 'Enero', '2': 'Febrero', '3': 'Marzo', '4': 'Abril',
+            '5': 'Mayo', '6': 'Junio', '7': 'Julio', '8': 'Agosto',
+            '9': 'Septiembre', '10': 'Octubre', '11': 'Noviembre', '12': 'Diciembre'
+        };
+
+        // Cargar datos de la ubicación seleccionada
+        document.addEventListener('DOMContentLoaded', async function() {
+            const savedData = JSON.parse(localStorage.getItem('solarLocationData')) || {};
+            const selectedCity = savedData.city || 'morelia';
+            const coords = savedData.location || { lat: 19.7008, lon: -101.1844 };
+            
+            // Configurar selector de mes
+            const monthSelector = document.getElementById('month-selector');
+            monthSelector.addEventListener('change', async function() {
+                await updateClimateInfo(coords.lat, coords.lon, this.value);
+            });
+            
+            // Cargar datos iniciales
+            await updateClimateInfo(coords.lat, coords.lon, monthSelector.value);
+        });
+
+        // Obtener datos climáticos
+        async function updateClimateInfo(lat, lon, month) {
+            const loadingElement = document.getElementById('data-loading');
+            const contentElement = document.getElementById('climate-content');
+            const errorElement = document.getElementById('error-message');
+            const btnNext = document.getElementById('btn-next');
+            
+            loadingElement.style.display = 'block';
+            contentElement.style.display = 'none';
+            errorElement.style.display = 'none';
+            btnNext.disabled = true;
+            
+            try {
+                const monthData = await getNASASolarData(lat, lon, month);
+                
+                document.getElementById('month-title').textContent = 
+                    `Radiación Solar en ${monthNames[month]}`;
+                
+                document.getElementById('month-description').textContent = 
+                    getClimateDescription(monthData.avg, month);
+                
+                document.getElementById('radiation-avg').textContent = 
+                    `${monthData.avg.toFixed(2)} kWh/m²`;
+                
+                document.getElementById('cloudy-days').textContent = 
+                    `${monthData.cloudyDays}%`;
+                
+                document.getElementById('max-radiation').textContent = 
+                    `${monthData.max.toFixed(2)} kWh/m²`;
+                
+                document.getElementById('data-source').textContent = 
+                    `Fuente: ${monthData.source === 'NASA' ? 'Datos reales de NASA POWER' : 'Datos estimados (la conexión con NASA POWER falló)'}`;
+                
+                // Guardar datos para el siguiente paso
+                const simulationData = {
+                    ...JSON.parse(localStorage.getItem('solarLocationData') || '{}'),
+                    month: month,
+                    monthName: monthNames[month],
+                    climateData: monthData
+                };
+                localStorage.setItem('solarSimulationData', JSON.stringify(simulationData));
+                
+                loadingElement.style.display = 'none';
+                contentElement.style.display = 'block';
+                btnNext.disabled = false;
+                
+            } catch (error) {
+                console.error("Error al obtener datos climáticos:", error);
+                
+                loadingElement.style.display = 'none';
+                errorElement.textContent = `Error: ${error.message || 'No se pudieron cargar los datos'}`;
+                errorElement.style.display = 'block';
+                
+                document.getElementById('radiation-avg').textContent = '-- kWh/m²';
+                document.getElementById('cloudy-days').textContent = '--%';
+                document.getElementById('max-radiation').textContent = '-- kWh/m²';
+            }
+        }
+
+        // Función principal para obtener datos (con solución temporal)
+        async function getNASASolarData(lat, lon, month) {
+            // Validación de parámetros
+            if (lat < -90 || lat > 90 || lon < -180 || lon > 180 || month < 1 || month > 12) {
+                throw new Error('Parámetros inválidos');
+            }
+
+            try {
+                const year = new Date().getFullYear();
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const startDate = `${year}${String(month).padStart(2,'0')}01`;
+                const endDate = `${year}${String(month).padStart(2,'0')}${daysInMonth}`;
+                
+                const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=ALLSKY_SFC_SW_DWN,CLOUD_AMT&community=RE&longitude=${lon}&latitude=${lat}&start=${startDate}&end=${endDate}&format=JSON`;
+                
+                // Intenta primero con CORS Anywhere (puede fallar)
+                try {
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    const response = await fetch(proxyUrl + url, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        return processNASAData(data, month);
+                    }
+                } catch (proxyError) {
+                    console.log("Proxy falló, intentando directo");
+                }
+                
+                // Si falla, intenta directo (puede fallar por CORS)
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                
+                const data = await response.json();
+                return processNASAData(data, month);
+                
+            } catch (error) {
+                console.error("Error al obtener datos reales:", error);
+                // Devuelve datos de ejemplo si la API falla
+                return getSampleData(lat, month);
+            }
+        }
+
+        // Procesar datos de NASA POWER
+        function processNASAData(data, month) {
+            if (!data.properties?.parameter) throw new Error('Estructura de datos inválida');
+            
+            const radiation = Object.values(data.properties.parameter.ALLSKY_SFC_SW_DWN || {})
+                .filter(v => v !== null);
+            const clouds = Object.values(data.properties.parameter.CLOUD_AMT || {})
+                .filter(v => v !== null);
+            
+            if (radiation.length === 0) throw new Error('No hay datos de radiación');
+            
+            return {
+                avg: radiation.reduce((a, b) => a + b, 0) / radiation.length,
+                max: Math.max(...radiation),
+                cloudyDays: Math.round((clouds.filter(v => v > 50).length / clouds.length) * 100) || 0,
+                source: 'NASA'
+            };
+        }
+
+        // Generar datos de ejemplo
+        function getSampleData(lat, month) {
+            // Datos de ejemplo basados en ubicación aproximada y mes
+            const baseValue = lat > 0 ? 
+                (5 + (lat/30)) * (month > 4 && month < 9 ? 1.2 : 0.8) : 
+                (4 + (Math.abs(lat)/30)) * (month < 5 || month > 8 ? 1.2 : 0.8);
+            
+            return {
+                avg: baseValue,
+                max: baseValue * 1.5,
+                cloudyDays: lat > 0 ? 
+                    (month > 4 && month < 9 ? 30 : 50) : 
+                    (month < 5 || month > 8 ? 30 : 60),
+                source: 'Ejemplo'
+            };
+        }
+
+        // Generar descripción climática
+        function getClimateDescription(avgRadiation, month) {
+            const monthName = monthNames[month];
+            
+            if (avgRadiation > 6.0) {
+                return `En ${monthName}, esta ubicación tiene excelente radiación solar (${avgRadiation.toFixed(2)} kWh/m²/día), ideal para energía fotovoltaica.`;
+            } else if (avgRadiation > 5.0) {
+                return `En ${monthName}, la radiación solar es buena (${avgRadiation.toFixed(2)} kWh/m²/día), adecuada para sistemas solares.`;
+            } else {
+                return `En ${monthName}, la radiación solar es moderada (${avgRadiation.toFixed(2)} kWh/m²/día), considere un sistema más grande.`;
+            }
+        }
+
+        // Funciones auxiliares
+        function getCityName(cityKey) {
+            const cities = {
+                morelia: 'Morelia',
+                cdmx: 'Ciudad de México',
+                guadalajara: 'Guadalajara',
+                monterrey: 'Monterrey'
+            };
+            return cities[cityKey] || 'esta ubicación';
+        }
+
+        // Configurar botón siguiente (MODIFICADO para redirigir a consumo.html)
+        document.getElementById('btn-next').addEventListener('click', function() {
+            window.location.href = 'consumo.html';
+        });
+    </script>
+</body>
+</html>
