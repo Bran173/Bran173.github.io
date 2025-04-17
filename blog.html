@@ -400,77 +400,137 @@
             </div>
             
             <h3>5. Página de Resultados (resultados.html)</h3>
-<div class="section-content">
-    <p>La página <strong>resultados.html</strong> es donde se consolidan todos los datos recolectados y se presentan los cálculos finales del sistema solar recomendado.</p>
-
-    <h4>Estructura Principal</h4>
-    <ul>
-        <li><strong>Resumen inicial:</strong> Muestra ubicación, consumo y número de paneles recomendados</li>
-        <li><strong>Resultados principales:</strong> Explicación detallada de la cobertura estimada</li>
-        <li><strong>Gráficos interactivos:</strong> Visualización de radiación vs consumo y distribución de energía</li>
-        <li><strong>Escenarios comparativos:</strong> Diferentes configuraciones de paneles con sus pros y contras</li>
-    </ul>
-
-    <h4>Procesos de Cálculo</h4>
-    <div class="feature-box">
-        <p><strong>1. Cálculo de paneles necesarios:</strong></p>
-        <ul>
-            <li>Considera radiación solar promedio del lugar</li>
-            <li>Eficiencia típica de paneles (18%)</li>
-            <li>Área estándar por panel (1.6 m²)</li>
-            <li>Factor de pérdidas por temperatura/suciedad (75%)</li>
-            <li>Aplica 10% adicional como margen de seguridad</li>
-        </ul>
-
-        <p><strong>2. Modelado de variabilidad:</strong></p>
-        <ul>
-            <li>Simula 30 días de radiación considerando días nublados</li>
-            <li>Genera patrones de consumo con distribución normal</li>
-            <li>Clasifica días en excedentes, suficientes y con déficit</li>
-        </ul>
-
-        <p><strong>3. Escenarios comparativos:</strong></p>
-        <ul>
-            <li>Configuración mínima (menos paneles, menor inversión)</li>
-            <li>Configuración recomendada (balance óptimo)</li>
-            <li>Configuración ampliada (más paneles, excedentes)</li>
-        </ul>
-    </div>
-
-    <h4>Fórmulas Clave</h4>
-    <div class="code-notes">
-        <p><strong>Cálculo básico de paneles:</strong></p>
-        <pre>Paneles = (Consumo diario) / (Radiación × 0.18 × 1.6 × 0.75) × 1.1</pre>
-        
-        <p><strong>Producción diaria estimada:</strong></p>
-        <pre>Producción = N° paneles × Radiación × 0.18 × 1.6 × 0.75</pre>
-        
-        <p><strong>Porcentaje de cobertura:</strong></p>
-        <pre>Cobertura = (Producción diaria / Consumo diario) × 100</pre>
-    </div>
-
-    <h4>Flujo de Trabajo</h4>
-    <ol>
-        <li>Recupera todos los datos almacenados (ubicación, mes, consumo)</li>
-        <li>Calcula número base de paneles necesarios</li>
-        <li>Genera simulaciones de 30 días considerando variabilidad</li>
-        <li>Clasifica días según cobertura energética</li>
-        <li>Prepara escenarios con diferentes cantidades de paneles</li>
-        <li>Renderiza gráficos y resúmenes visuales</li>
-    </ol>
-
-    <h4>Tecnologías Clave</h4>
-    <ul>
-        <li><strong>Chart.js:</strong> Para gráficos interactivos de radiación y consumo</li>
-        <li><strong>LocalStorage:</strong> Para recuperar todos los datos ingresados</li>
-        <li><strong>Modelado estadístico:</strong> Simulación de días nublados y patrones de consumo</li>
-    </ul>
-
-    <div class="design-notes">
-        <p><strong>Notas de Diseño:</strong> La página utiliza un diseño limpio con tarjetas informativas para presentar los resultados. Los gráficos proporcionan visión inmediata de los patrones, mientras que los escenarios permiten comparación fácil. La paleta de colores mantiene consistencia con el resto de la aplicación, usando verde para indicar excedentes y rojo para déficits.</p>
-    </div>
-</div>
-        
+            <div class="section-content">
+                <p>La página <strong>resultados.html</strong> consolida todos los datos y presenta un análisis completo del sistema solar recomendado, ahora con un enfoque probabilístico avanzado.</p>
+            
+                <h4>Estructura Principal Mejorada</h4>
+                <ul>
+                    <li><strong>Resumen inicial:</strong> Muestra ubicación, consumo (con media y desviación estándar) y paneles recomendados con 95% de confianza</li>
+                    <li><strong>Estadísticas detalladas:</strong> Nuevo panel con percentiles y rango típico de consumo</li>
+                    <li><strong>Gráficos avanzados:</strong> 
+                        <ul>
+                            <li>Distribución diaria del consumo</li>
+                            <li>Perfil horario de consumo</li>
+                            <li>Análisis probabilístico de cobertura</li>
+                            <li>Distribución de días por nivel de cobertura</li>
+                            <li>Comparación radiación/consumo/producción</li>
+                        </ul>
+                    </li>
+                    <li><strong>Escenarios mejorados:</strong> Ahora incluyen análisis de inversión y probabilidades</li>
+                </ul>
+            
+                <h4>Procesos de Cálculo Mejorados</h4>
+                <div class="feature-box">
+                    <p><strong>1. Modelado probabilístico del consumo:</strong></p>
+                    <ul>
+                        <li>Distribución normal usando método Box-Muller</li>
+                        <li>Media basada en consumo diario ingresado</li>
+                        <li>Desviación estándar calculada según tipo de datos de entrada</li>
+                        <li>Generación de perfiles horarios realistas</li>
+                    </ul>
+            
+                    <p><strong>2. Dimensionamiento con simulación Monte Carlo:</strong></p>
+                    <ul>
+                        <li>1000 iteraciones para cada configuración de paneles (1-20)</li>
+                        <li>Variabilidad en eficiencia de paneles (±5%)</li>
+                        <li>Variabilidad en factor de pérdidas (±10%)</li>
+                        <li>Cálculo de percentil 5 para garantizar 95% de confianza</li>
+                        <li>Análisis de días con excedente/suficiente/déficit</li>
+                    </ul>
+            
+                    <p><strong>3. Escenarios probabilísticos:</strong></p>
+                    <ul>
+                        <li><strong>Mínimo:</strong> Límite inferior con riesgo de déficit</li>
+                        <li><strong>Recomendado:</strong> Cobertura del 95% en peor escenario</li>
+                        <li><strong>Excedente:</strong> Mayor producción con posibilidad de inyección a red</li>
+                    </ul>
+                </div>
+            
+                <h4>Fórmulas y Modelos Clave</h4>
+                <div class="code-notes">
+                    <p><strong>Modelado del consumo (distribución normal):</strong></p>
+                    <pre>z = √(-2·ln(u)) · cos(2π·v)  // Transformación Box-Muller
+            Consumo diario = max(0.1, μ + z·σ)  // Evita valores negativos</pre>
+                    
+                    <p><strong>Simulación Monte Carlo:</strong></p>
+                    <pre>Para cada iteración (1000x):
+               Eficiencia = 18% × (0.95 + rand×0.1)
+               Pérdidas = 75% × (0.9 + rand×0.2)
+               Producción = Paneles × Radiación × Eficiencia × Área × Pérdidas
+               Cobertura = Producción / Consumo
+            Calcular percentil 5 de cobertura para 95% confianza</pre>
+                    
+                    <p><strong>Clasificación de días:</strong></p>
+                    <pre>Excedente: Producción > 110% Consumo
+            Suficiente: 90% ≤ Producción ≤ 110% Consumo
+            Déficit: Producción < 90% Consumo</pre>
+                </div>
+            
+                <h4>Flujo de Trabajo Mejorado</h4>
+                <ol>
+                    <li>Recupera datos de localStorage (ubicación, mes, consumo)</li>
+                    <li>Modela consumo eléctrico con distribución normal</li>
+                    <li>Ejecuta simulación Monte Carlo para diferentes configuraciones</li>
+                    <li>Determina número óptimo de paneles para 95% de confianza</li>
+                    <li>Genera visualizaciones estadísticas avanzadas</li>
+                    <li>Prepara escenarios comparativos con análisis de inversión</li>
+                </ol>
+            
+                <h4>Tecnologías Clave Mejoradas</h4>
+                <ul>
+                    <li><strong>Chart.js avanzado:</strong> 
+                        <ul>
+                            <li>Gráficos de distribución probabilística</li>
+                            <li>Anotaciones y líneas de referencia</li>
+                            <li>Visualización de percentiles</li>
+                        </ul>
+                    </li>
+                    <li><strong>Modelado estadístico:</strong>
+                        <ul>
+                            <li>Simulación Monte Carlo en JavaScript</li>
+                            <li>Cálculo de distribuciones normales</li>
+                            <li>Análisis de percentiles</li>
+                        </ul>
+                    </li>
+                    <li><strong>Visualización interactiva:</strong>
+                        <ul>
+                            <li>Gráficos responsive</li>
+                            <li>Tooltips con información detallada</li>
+                            <li>Codificación por colores intuitiva</li>
+                        </ul>
+                    </li>
+                </ul>
+            
+                <div class="design-notes">
+                    <p><strong>Notas de Diseño Mejoradas:</strong> La nueva versión utiliza un sistema de cuadrícula para organizar múltiples gráficos estadísticos. La paleta de colores se ha ampliado para representar diferentes distribuciones probabilísticas:</p>
+                    <ul>
+                        <li><span style="color:#2ecc71">Verde</span>: Cobertura adecuada y escenarios positivos</li>
+                        <li><span style="color:#e74c3c">Rojo</span>: Déficits y escenarios de riesgo</li>
+                        <li><span style="color:#3498db">Azul</span>: Escenarios recomendados y valores esperados</li>
+                        <li><span style="color:#f1c40f">Amarillo</span>: Datos de radiación solar</li>
+                    </ul>
+                    <p>Se añadieron elementos de diseño para mejorar la legibilidad de los análisis estadísticos, como líneas de percentiles y áreas sombreadas para intervalos de confianza.</p>
+                </div>
+            
+                <h4>Ejemplo de Resultados Estadísticos</h4>
+                <div class="stats-example">
+                    <p><strong>Para un consumo de 5 kWh/día (σ = 0.75 kWh):</strong></p>
+                    <ul>
+                        <li>Media de consumo: 5.0 kWh/día</li>
+                        <li>Rango típico: 4.25 - 5.75 kWh/día</li>
+                        <li>Percentil 5 (mínimo): 3.8 kWh/día</li>
+                        <li>Percentil 95 (máximo): 6.4 kWh/día</li>
+                        <li>Paneles recomendados: 8 (95% de días cubiertos)</li>
+                        <li>Distribución de días:
+                            <ul>
+                                <li>Excedente: 9 días (30%)</li>
+                                <li>Suficiente: 18 días (60%)</li>
+                                <li>Déficit: 3 días (10%)</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
           <!-- Conclusión -->
 <article id="conclusion">
     <h2>Conclusión</h2>
