@@ -64,6 +64,41 @@ nav ul li a:hover {
     transform: translateY(-2px);
 }
 
+/* ===== SECCIÓN CONSUMO ===== */
+#consumo-page {
+    min-height: 100vh;
+    padding-top: 140px;
+    position: relative;
+    background-image: url('../imagenes/fondo-consumo.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+#consumo-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.404);
+    z-index: 0;
+}
+
+#consumo-container {
+    position: relative;
+    z-index: 1;
+    background-color: rgba(255, 255, 255, 0.95);
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(255, 255, 255, 0.24);
+}
+
 /* ===== SECCIÓN BLOG ===== */
 #blog-page {
     min-height: 100vh;
@@ -292,7 +327,7 @@ nav ul li a:hover {
 #mes-container {
     position: relative;
     z-index: 1;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(241, 241, 241, 0.9);
     width: 90%;
     max-width: 800px;
     margin: 0 auto 2rem;
@@ -490,7 +525,7 @@ footer {
         margin-top: -120px;
     }
     
-    #mapa-page, #mes-page, #informacion-page, #blog-page {
+    #mapa-page, #mes-page, #informacion-page, #blog-page, #consumo-page {
         padding-top: 20px;
     }
     
@@ -516,7 +551,7 @@ footer {
         max-width: 250px;
     }
     
-    #map-container, #mes-container, .info-container, .blog-container {
+    #map-container, #mes-container, .info-container, .blog-container, #consumo-container {
         width: 95%;
         padding: 1rem;
     }

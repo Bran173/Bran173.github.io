@@ -10,15 +10,18 @@
             max-width: 800px;
             margin: 0 auto 20px;
             padding: 20px;
-            background-color: #f9f9f9;
+            background-color: #000000;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.123);
         }
         .page-title {
             margin-top: 100px;  /* Más espacio para separar del nav */
             text-align: center;
             margin-bottom: 30px;
             padding: 0 15px;
+            color: rgb(255, 255, 255);
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 4px rgb(255, 255, 255);
         }
         .form-group {
             margin-bottom: 20px;
@@ -75,7 +78,7 @@
             display: inline-block;
         }
         .btn-secondary {
-            background-color: #6c757d;
+            background-color: #000000;
         }
         .btn:hover {
             opacity: 0.9;
@@ -135,81 +138,84 @@
         </ul>
     </nav>
     
-    <div class="page-title">
-        <h2>Configuración de Consumo Eléctrico</h2>
-    </div>
-    
-    <div class="consumo-container">
-        <div class="step-header">
-            <div class="step-number">3</div>
-            <h3>Seleccione su consumo eléctrico</h3>
+    <div id="consumo-page">
+        <div class="page-title">
+            <h2>Configuración de Consumo Eléctrico</h2>
         </div>
         
-        <div class="form-group">
-            <label for="consumption-option">Seleccione el método de ingreso de consumo:</label>
-            <select id="consumption-option" class="form-control">
-                <option value="promedio">Consumo promedio predeterminado</option>
-                <option value="personalizado">Personalizar consumo</option>
-            </select>
-        </div>
-        
-        <div id="average-consumption-section">
-            <div class="form-group">
-                <label for="consumption-slider">Consumo promedio diario:</label>
-                <div class="slider-container" style="max-width: 500px; margin: 0 auto;">
-                    <input type="range" id="consumption-slider" min="1" max="20" step="0.5" value="5">
-                    <span id="slider-value" class="slider-value">5 kWh/día</span>
-                </div>
+        <div id="consumo-container">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h3>Seleccione su consumo eléctrico</h3>
             </div>
-        </div>
-        
-        <div id="custom-consumption-section" class="advanced-section" style="display: none;">
-            <h4 style="text-align: center;">Personalizar Consumo</h4>
             
             <div class="form-group">
-                <label for="consumption-method">Método de ingreso:</label>
-                <select id="consumption-method" class="form-control">
-                    <option value="diario">Consumo diario total</option>
-                    <option value="horario">Consumo por horas</option>
+                <label for="consumption-option">Seleccione el método de ingreso de consumo:</label>
+                <select id="consumption-option" class="form-control">
+                    <option value="promedio">Consumo promedio predeterminado</option>
+                    <option value="personalizado">Personalizar consumo</option>
                 </select>
             </div>
             
-            <div id="daily-consumption">
+            <div id="average-consumption-section">
                 <div class="form-group">
-                    <label for="daily-kwh">Consumo eléctrico diario (kWh):</label>
-                    <input type="number" id="daily-kwh" min="0" step="0.1" class="form-control" value="5">
+                    <label for="consumption-slider">Consumo promedio diario:</label>
+                    <div class="slider-container" style="max-width: 500px; margin: 0 auto;">
+                        <input type="range" id="consumption-slider" min="1" max="20" step="0.5" value="5">
+                        <span id="slider-value" class="slider-value">5 kWh/día</span>
+                    </div>
                 </div>
             </div>
             
-            <div id="hourly-consumption" class="hourly-consumption">
-                <p style="text-align: center;">Ingrese el consumo por horas (kWh):</p>
-                <table>
-                    <tr>
-                        <th>Hora</th>
-                        <th>Consumo</th>
-                    </tr>
-                    <script>
-                        for (let i = 0; i < 24; i++) {
-                            document.write(`
-                                <tr>
-                                    <td>${i}:00 - ${i+1}:00</td>
-                                    <td><input type="number" id="hour-${i}" min="0" step="0.1" value="0.2" class="form-control"></td>
-                                </tr>
-                            `);
-                        }
-                    </script>
-                </table>
+            <div id="custom-consumption-section" class="advanced-section" style="display: none;">
+                <h4 style="text-align: center;">Personalizar Consumo</h4>
+                
+                <div class="form-group">
+                    <label for="consumption-method">Método de ingreso:</label>
+                    <select id="consumption-method" class="form-control">
+                        <option value="diario">Consumo diario total</option>
+                        <option value="horario">Consumo por horas</option>
+                    </select>
+                </div>
+                
+                <div id="daily-consumption">
+                    <div class="form-group">
+                        <label for="daily-kwh">Consumo eléctrico diario (kWh):</label>
+                        <input type="number" id="daily-kwh" min="0" step="0.1" class="form-control" value="5">
+                    </div>
+                </div>
+                
+                <div id="hourly-consumption" class="hourly-consumption">
+                    <p style="text-align: center;">Ingrese el consumo por horas (kWh):</p>
+                    <table>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Consumo</th>
+                        </tr>
+                        <script>
+                            for (let i = 0; i < 24; i++) {
+                                document.write(`
+                                    <tr>
+                                        <td>${i}:00 - ${i+1}:00</td>
+                                        <td><input type="number" id="hour-${i}" min="0" step="0.1" value="0.2" class="form-control"></td>
+                                    </tr>
+                                `);
+                            }
+                        </script>
+                    </table>
+                </div>
             </div>
-        </div>
-        
-        <div class="btn-container">
-            <a href="mes.html" class="btn btn-secondary">Anterior</a>
-            <a href="resultados.html" class="btn btn-primary">Siguiente</a>
+            
+            <div class="btn-container">
+                <a href="mes.html" class="btn btn-secondary">Anterior</a>
+                <a href="resultados.html" class="btn btn-primary">Siguiente</a>
+            </div>
         </div>
     </div>
     
     <footer>
         <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
+        <p>Página desarrollada por Brandon Alexis Magaña Sanchez</p>
         <p>&copy; 2023 - Todos los derechos reservados</p>
     </footer>
 
