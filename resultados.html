@@ -3,353 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resultados | Calculadora Solar</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Calculadora Solar - Resultados</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f7fa;
-            color: #333;
-        }
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 15px 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        nav {
-            background-color: #34495e;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-        }
-        nav li {
-            padding: 15px 20px;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s;
-        }
-        nav a:hover {
-            color: #f1c40f;
-        }
-        nav a.active {
-            color: #f1c40f;
-            border-bottom: 2px solid #f1c40f;
-        }
-        .main-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        .result-section {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin-bottom: 30px;
-        }
-        .section-title {
-            color: #2c3e50;
-            border-bottom: 2px solid #f1c40f;
-            padding-bottom: 10px;
-            margin-top: 0;
-        }
-        .summary-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        .summary-card {
-            flex: 1;
-            min-width: 250px;
             background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        .summary-title {
-            color: #7f8c8d;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        .summary-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
         }
         .chart-container {
             position: relative;
             height: 400px;
             margin-bottom: 30px;
         }
-        .chart-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .chart-box {
-            flex: 1;
-            min-width: 300px;
-            background: white;
-            border-radius: 8px;
+        .highlight-panel {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196F3;
             padding: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-radius: 5px;
         }
-        .scenario-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+        .roi-calculator {
+            background-color: #e8f5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
         }
         .scenario-card {
-            flex: 1;
-            min-width: 250px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
         }
-        .scenario-title {
-            color: #16a085;
+        .scenario-card:hover {
+            transform: translateY(-5px);
+        }
+        .nav-tabs .nav-link.active {
             font-weight: bold;
-            margin-top: 0;
-        }
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-            gap: 20px;
-        }
-        .btn {
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            text-align: center;
-            display: inline-block;
-        }
-        .btn-primary {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #2ecc71;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .btn-secondary {
-            background-color: #7f8c8d;
-            color: white;
-            border: none;
-        }
-        .btn-secondary:hover {
-            background-color: #95a5a6;
-        }
-        footer {
-            background-color: #2c3e50;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 50px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .stat-title {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        @media (max-width: 768px) {
-            .summary-container, .scenario-container, .chart-row {
-                flex-direction: column;
-            }
-            .chart-container {
-                height: 300px;
-            }
+            border-bottom: 3px solid #0d6efd;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Calculadora de Paneles Solares</h1>
-    </header>
-    
-    <nav>
-        <ul>
-            <li><a href="index.html">Inicio</a></li>
-            <li><a href="mapa.html">Ubicación</a></li>
-            <li><a href="mes.html">Selección de Mes</a></li>
-            <li><a href="consumo.html">Consumo Eléctrico</a></li>
-            <li><a href="resultados.html" class="active">Resultados</a></li>
-        </ul>
-    </nav>
-    
-    <div class="main-content">
-        <div class="result-section">
-            <h2 class="section-title">Resumen Inicial</h2>
-            <div class="summary-container">
-                <div class="summary-card">
-                    <div class="summary-title">Ubicación</div>
-                    <div class="summary-value" id="location-summary">--</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-title">Consumo Diario</div>
-                    <div class="summary-value" id="consumption-summary">--</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-title">Paneles Recomendados</div>
-                    <div class="summary-value" id="panels-summary">--</div>
-                </div>
+    <div class="container py-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0"><i class="bi bi-sun"></i> Resultados de tu Sistema Solar</h2>
             </div>
-        </div>
-        
-        <div class="result-section">
-            <h2 class="section-title">Resultados Principales</h2>
-            <div id="main-results-container">
-                <!-- Los resultados principales se generarán con JavaScript -->
-            </div>
-        </div>
-        
-        <div class="result-section">
-            <h2 class="section-title">Estadísticas del Consumo</h2>
-            <div class="stats-grid" id="consumption-stats">
-                <!-- Estadísticas se generarán con JavaScript -->
-            </div>
-        </div>
-        
-        <div class="result-section">
-            <h2 class="section-title">Distribuciones y Análisis</h2>
-            <div class="chart-row">
-                <div class="chart-box">
-                    <div class="chart-container">
-                        <canvas id="consumptionDistributionChart"></canvas>
+            <div class="card-body">
+                <!-- Resumen inicial -->
+                <div id="summary-container" class="row"></div>
+                
+                <!-- Pestañas para diferentes secciones -->
+                <ul class="nav nav-tabs mt-4" id="resultsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">Análisis</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="scenarios-tab" data-bs-toggle="tab" data-bs-target="#scenarios" type="button" role="tab">Escenarios</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="roi-tab" data-bs-toggle="tab" data-bs-target="#roi" type="button" role="tab">Retorno de Inversión</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content pt-3" id="resultsTabsContent">
+                    <!-- Pestaña de Análisis -->
+                    <div class="tab-pane fade show active" id="analysis" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="consumptionDistributionChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="hourlyConsumptionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="radiationChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="chart-container">
+                                    <canvas id="coverageAnalysisChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña de Escenarios -->
+                    <div class="tab-pane fade" id="scenarios" role="tabpanel">
+                        <div class="row" id="scenarios-container"></div>
+                    </div>
+                    
+                    <!-- Pestaña de ROI -->
+                    <div class="tab-pane fade" id="roi" role="tabpanel">
+                        <div class="roi-calculator">
+                            <h4><i class="bi bi-calculator"></i> Análisis de Retorno de Inversión (ROI)</h4>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="electricity-rate" class="form-label">Costo actual de electricidad (por kWh):</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" step="0.01" class="form-control" id="electricity-rate" value="2.80">
+                                        </div>
+                                        <small class="form-text text-muted">Tarifa promedio en México: $2.50-$3.50/kWh</small>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="system-cost" class="form-label">Costo por panel instalado:</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control" id="system-cost" value="15000">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="inflation-rate" class="form-label">Inflación anual esperada (%):</label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.1" class="form-control" id="inflation-rate" value="4.5">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="energy-increase" class="form-label">Aumento anual en tarifa eléctrica (%):</label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.1" class="form-control" id="energy-increase" value="6.0">
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-success" onclick="calculateROI()">
+                                <i class="bi bi-calculator-fill"></i> Calcular ROI
+                            </button>
+                            
+                            <div id="roi-results" class="mt-4"></div>
+                            <div class="chart-container mt-4">
+                                <canvas id="roiChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="chart-box">
-                    <div class="chart-container">
-                        <canvas id="hourlyConsumptionChart"></canvas>
-                    </div>
-                </div>
             </div>
-            <div class="chart-row">
-                <div class="chart-box">
-                    <div class="chart-container">
-                        <canvas id="probabilisticAnalysisChart"></canvas>
-                    </div>
-                </div>
-                <div class="chart-box">
-                    <div class="chart-container">
-                        <canvas id="coverageAnalysisChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="result-section">
-            <h2 class="section-title">Radiación vs. Consumo</h2>
-            <div class="chart-container">
-                <canvas id="radiationChart"></canvas>
-            </div>
-        </div>
-        
-        <div class="result-section">
-            <h2 class="section-title">Análisis de Escenarios</h2>
-            <div class="scenario-container" id="scenarios-container">
-                <!-- Los escenarios se generarán con JavaScript -->
-            </div>
-        </div>
-        
-        <div class="btn-container">
-            <a href="consumo.html" class="btn btn-secondary">Volver a Consumo</a>
-            <a href="index.html" class="btn btn-primary">Finalizar</a>
         </div>
     </div>
-    
-    <footer>
-        <p>Proyecto de Energía Solar - Análisis de Consumo Eléctrico</p>
-        <p>Página desarrollada por Brandon Alexis Magaña Sanchez</p>
-        <p>&copy; 2023 - Todos los derechos reservados</p>
-    </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Datos globales
+        let simulationData = {};
+        let consumptionModel = {};
+        let sizingResults = {};
+        
         document.addEventListener('DOMContentLoaded', function() {
-            // Obtener datos guardados
-            const simulationData = JSON.parse(localStorage.getItem('solarSimulationData')) || {};
-            const consumptionData = simulationData.consumption || {};
+            // Obtener datos guardados o usar valores por defecto
+            simulationData = JSON.parse(localStorage.getItem('solarSimulationData')) || {
+                city: "Morelia",
+                monthName: "Junio",
+                consumption: {
+                    dailyKwh: 5,
+                    method: "promedio"
+                },
+                climateData: {
+                    avg: 6.2,
+                    cloudyDays: 25
+                }
+            };
             
-            // Mostrar resumen inicial
-            document.getElementById('location-summary').textContent = 
-                `${simulationData.city || 'Morelia'}, ${simulationData.monthName || 'Julio'}`;
+            // Modelar el consumo eléctrico
+            consumptionModel = modelElectricConsumption(simulationData.consumption);
             
-            // Modelar el consumo eléctrico con distribución normal
-            const consumptionModel = modelElectricConsumption(consumptionData);
-            
-            document.getElementById('consumption-summary').textContent = 
-                `${consumptionModel.mean.toFixed(1)} kWh/día (σ = ${consumptionModel.stdDev.toFixed(1)} kWh)`;
-            
-            // Calcular número de paneles necesarios con análisis probabilístico
-            const sizingResults = probabilisticSizing(simulationData, consumptionModel);
+            // Calcular número de paneles necesarios (versión optimizada)
+            sizingResults = optimizedProbabilisticSizing(simulationData, consumptionModel);
             const panelCount = sizingResults.recommendedPanels;
             
-            document.getElementById('panels-summary').textContent = 
-                `${panelCount} paneles (95% confianza)`;
+            // Mostrar resumen inicial
+            displaySummary(simulationData, consumptionModel, panelCount);
             
-            // Mostrar resultados principales
-            displayMainResults(panelCount, simulationData, consumptionModel, sizingResults);
+            // Generar todas las gráficas
+            generateAllCharts(simulationData, consumptionModel, panelCount, sizingResults);
             
-            // Mostrar estadísticas del consumo
-            displayConsumptionStats(consumptionModel);
+            // Mostrar escenarios optimizados
+            displayOptimizedScenarios(panelCount, simulationData, consumptionModel);
             
-            // Generar gráficos
-            generateCharts(simulationData, consumptionModel, panelCount, sizingResults);
-            
-            // Mostrar escenarios
-            displayScenarios(panelCount, simulationData, consumptionModel);
+            // Calcular ROI inicial
+            calculateROI();
         });
         
         // ==================================================================
         // FUNCIONES PARA MODELADO DEL CONSUMO ELÉCTRICO
         // ==================================================================
         
-        /**
-         * Modela el consumo eléctrico con distribución normal y variabilidad
-         * @param {Object} consumptionData - Datos de consumo del usuario
-         * @returns {Object} Modelo completo de consumo con media, desviación y valores diarios/horarios
-         */
         function modelElectricConsumption(consumptionData) {
             const mean = consumptionData.dailyKwh || 5;
             const stdDev = calculateStandardDeviation(consumptionData);
@@ -357,13 +213,10 @@
             // Generar 30 días de consumo con distribución normal
             const dailyConsumption = [];
             for (let i = 0; i < 30; i++) {
-                // Usamos el método Box-Muller para generar distribución normal
                 let u = 0, v = 0;
                 while(u === 0) u = Math.random();
                 while(v === 0) v = Math.random();
                 const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-                
-                // Aseguramos que el consumo no sea negativo
                 dailyConsumption.push(Math.max(0.1, mean + z * stdDev));
             }
             
@@ -375,136 +228,132 @@
             };
         }
         
-        /**
-         * Calcula la desviación estándar del consumo basado en los datos del usuario
-         * @param {Object} consumptionData - Datos de consumo del usuario
-         * @returns {Number} Desviación estándar en kWh/día
-         */
         function calculateStandardDeviation(consumptionData) {
             if (consumptionData.method === 'promedio') {
-                // Asumir una desviación estándar del 20% para consumo promedio
-                return consumptionData.dailyKwh * 0.2;
+                return consumptionData.dailyKwh * 0.15; // Reducida la variabilidad
             } else if (consumptionData.hourly) {
-                // Calcular desviación estándar real para consumo horario
                 const mean = consumptionData.dailyKwh;
                 const hourlyMean = mean / 24;
                 const squaredDifferences = consumptionData.hourly.map(h => Math.pow(h - hourlyMean, 2));
                 const variance = squaredDifferences.reduce((a, b) => a + b, 0) / squaredDifferences.length;
-                return Math.sqrt(variance) * 24; // Escalar a desviación diaria
+                return Math.sqrt(variance) * 24;
             } else {
-                // Para consumo diario personalizado, asumir 15%
-                return consumptionData.dailyKwh * 0.15;
+                return consumptionData.dailyKwh * 0.1; // Reducida la variabilidad
             }
         }
         
-        /**
-         * Genera un perfil horario de consumo típico residencial
-         * @param {Number} dailyMean - Consumo medio diario en kWh
-         * @param {Number} dailyStdDev - Desviación estándar diaria en kWh
-         * @returns {Array} Perfil horario de consumo para un día
-         */
         function generateHourlyProfile(dailyMean, dailyStdDev) {
-            // Patrón típico de consumo residencial (porcentajes por hora)
             const hourlyPattern = [
-                0.03, 0.02, 0.02, 0.02, 0.02, 0.03,  // 12am-5am
-                0.04, 0.05, 0.06, 0.05, 0.05, 0.05,  // 6am-11am
-                0.04, 0.04, 0.04, 0.04, 0.05, 0.07,  // 12pm-5pm
-                0.08, 0.09, 0.08, 0.07, 0.05, 0.04   // 6pm-11pm
+                0.03, 0.02, 0.02, 0.02, 0.02, 0.03,
+                0.04, 0.05, 0.06, 0.05, 0.05, 0.05,
+                0.04, 0.04, 0.04, 0.04, 0.05, 0.07,
+                0.08, 0.09, 0.08, 0.07, 0.05, 0.04
             ];
             
-            // Normalizar el patrón para que sume 1
             const patternSum = hourlyPattern.reduce((a, b) => a + b, 0);
             const normalizedPattern = hourlyPattern.map(x => x / patternSum);
-            
-            // Aplicar variabilidad diaria (dentro de 1 desviación estándar)
             const dailyVariation = dailyMean + (Math.random() * 2 - 1) * dailyStdDev;
             
             return normalizedPattern.map(hour => hour * dailyVariation);
         }
         
         // ==================================================================
-        // FUNCIONES PARA DIMENSIONAMIENTO PROBABILÍSTICO
+        // FUNCIÓN DE DIMENSIONAMIENTO OPTIMIZADO (REDUCIR EXCEDENTE)
         // ==================================================================
         
-        /**
-         * Realiza un análisis probabilístico para determinar el número óptimo de paneles
-         * @param {Object} simulationData - Datos de simulación (ubicación, radiación)
-         * @param {Object} consumptionModel - Modelo de consumo eléctrico
-         * @returns {Object} Resultados del análisis probabilístico
-         */
-        function probabilisticSizing(simulationData, consumptionModel) {
+        function optimizedProbabilisticSizing(simulationData, consumptionModel) {
             const radiationData = simulationData.climateData?.daily || generateDailyRadiation(simulationData.climateData);
             const consumptionData = consumptionModel.dailyValues;
+            
             const panelSpecs = {
-                efficiency: 0.18,    // Eficiencia típica de panel comercial
-                area: 1.6,          // Área estándar de panel (m²)
-                performanceRatio: 0.75 // Factor de pérdidas del sistema
+                power: 300,         // Watts por panel
+                performanceRatio: 0.75 // 25% pérdidas del sistema
             };
             
-            // Simulación de Monte Carlo (1000 iteraciones)
+            // Primero calculamos el número mínimo teórico de paneles
+            const avgConsumption = consumptionModel.mean;
+            const avgRadiation = simulationData.climateData?.avg || 6.2;
+            const minPanels = Math.ceil(avgConsumption / (panelSpecs.power/1000 * avgRadiation * panelSpecs.performanceRatio));
+            
+            // Ajustamos el rango de búsqueda alrededor del mínimo teórico
+            const startPanels = Math.max(1, minPanels - 2);
+            const endPanels = minPanels + 4;
+            
             const monteCarloResults = [];
-            const numSimulations = 1000;
+            const numSimulations = 300; // Reducido para mejor rendimiento
             
             for (let i = 0; i < numSimulations; i++) {
-                // Variar parámetros dentro de rangos razonables
-                const variedEfficiency = panelSpecs.efficiency * (0.95 + Math.random() * 0.1); // ±5%
-                const variedPR = panelSpecs.performanceRatio * (0.9 + Math.random() * 0.2);    // ±10%
+                const variedPR = panelSpecs.performanceRatio * (0.85 + Math.random() * 0.15); // Menor variabilidad
                 
-                // Probar diferentes números de paneles (de 1 a 20)
-                for (let panels = 1; panels <= 20; panels++) {
+                for (let panels = startPanels; panels <= endPanels; panels++) {
                     let coveredDays = 0;
+                    let totalCoverage = 0;
                     
                     for (let day = 0; day < 30; day++) {
-                        // Variabilidad en radiación (días nublados, ángulo solar, etc.)
-                        const radiationVariation = radiationData[day] * (0.7 + Math.random() * 0.6);
+                        const radiationVariation = radiationData[day] * (0.7 + Math.random() * 0.6); // Menor variabilidad
+                        const production = panels * (panelSpecs.power/1000) * radiationVariation * variedPR;
+                        const consumption = consumptionData[day] * (0.9 + Math.random() * 0.2); // Menor variabilidad
                         
-                        // Calcular producción energética
-                        const production = panels * radiationVariation * variedEfficiency * panelSpecs.area * variedPR;
+                        const dailyCoverage = production / consumption;
+                        totalCoverage += dailyCoverage;
                         
-                        // Variabilidad en consumo (comportamiento del usuario)
-                        const consumption = consumptionData[day] * (0.9 + Math.random() * 0.2);
-                        
-                        // Consideramos cubierto si produce al menos 95% del consumo
-                        if (production >= consumption * 0.95) {
+                        if (dailyCoverage >= 0.95) { // Umbral más estricto (95%)
                             coveredDays++;
                         }
                     }
                     
-                    if (!monteCarloResults[panels]) {
-                        monteCarloResults[panels] = [];
-                    }
-                    monteCarloResults[panels].push(coveredDays / 30);
+                    if (!monteCarloResults[panels]) monteCarloResults[panels] = [];
+                    monteCarloResults[panels].push({
+                        coverageRatio: totalCoverage / 30,
+                        coveredDays: coveredDays / 30
+                    });
                 }
             }
             
-            // Analizar resultados de la simulación
             const confidenceResults = [];
-            for (let panels = 1; panels <= 20; panels++) {
+            for (let panels = startPanels; panels <= endPanels; panels++) {
                 if (!monteCarloResults[panels]) continue;
                 
                 const coverages = monteCarloResults[panels];
-                const mean = coverages.reduce((a, b) => a + b, 0) / coverages.length;
-                const sorted = [...coverages].sort((a, b) => a - b);
+                const meanCoverageRatio = coverages.reduce((a, b) => a + b.coverageRatio, 0) / coverages.length;
+                const meanCoveredDays = coverages.reduce((a, b) => a + b.coveredDays, 0) / coverages.length;
                 
-                // Percentil 5 (peor escenario con 95% de confianza)
-                const p5 = sorted[Math.floor(0.05 * sorted.length)];
+                const sortedCoverage = [...coverages].sort((a, b) => a.coveredDays - b.coveredDays);
+                const p5Coverage = sortedCoverage[Math.floor(0.05 * sortedCoverage.length)].coveredDays;
                 
                 confidenceResults.push({
                     panels,
-                    meanCoverage: mean,
-                    p5Coverage: p5,
-                    probability95: mean >= 0.95 ? 1 : 0
+                    meanCoverageRatio,
+                    meanCoveredDays,
+                    p5Coverage,
+                    probability95: p5Coverage >= 0.95 ? 1 : 0
                 });
             }
             
-            // Encontrar el número mínimo de paneles que cumple con 95% de confianza
-            const recommendedPanels = confidenceResults.find(r => r.p5Coverage >= 0.95)?.panels || 
-                                   Math.ceil(consumptionModel.mean / 1.5); // Fallback
+            // Encontramos la solución óptima que cumple con el 95% de confianza con el menor excedente
+            let recommendedPanels = minPanels;
+            let foundOptimal = false;
+            
+            // Primero buscamos la configuración mínima que cumple con el 95% de confianza
+            for (let i = 0; i < confidenceResults.length; i++) {
+                if (confidenceResults[i].p5Coverage >= 0.95) {
+                    recommendedPanels = confidenceResults[i].panels;
+                    foundOptimal = true;
+                    break;
+                }
+            }
+            
+            // Si no encontramos, usamos la que tenga mayor probabilidad
+            if (!foundOptimal) {
+                confidenceResults.sort((a, b) => b.p5Coverage - a.p5Coverage);
+                recommendedPanels = confidenceResults[0].panels;
+            }
             
             return {
                 recommendedPanels,
                 confidenceResults,
-                monteCarloData: monteCarloResults
+                monteCarloData: monteCarloResults,
+                minTheoreticalPanels: minPanels
             };
         }
         
@@ -512,267 +361,127 @@
         // FUNCIONES DE VISUALIZACIÓN
         // ==================================================================
         
-        /**
-         * Muestra los resultados principales del análisis
-         */
-        function displayMainResults(panelCount, simulationData, consumptionModel, sizingResults) {
-            const container = document.getElementById('main-results-container');
-            
-            // Calcular métricas clave
-            const avgRadiation = simulationData.climateData?.avg || 5;
+        function displaySummary(simulationData, consumptionModel, panelCount) {
+            const avgRadiation = simulationData.climateData?.avg || 6.2;
             const panelProduction = calculatePanelProduction(panelCount, avgRadiation);
-            const coverage = calculateCoverage(panelCount, consumptionModel.mean, avgRadiation);
-            const worstCaseCoverage = sizingResults.confidenceResults.find(r => r.panels === panelCount)?.p5Coverage || 0;
+            const coverage = (panelProduction / consumptionModel.mean) * 100;
+            const worstCaseCoverage = (sizingResults.confidenceResults.find(r => r.panels === panelCount)?.p5Coverage || 0) * 100;
             
-            container.innerHTML = `
-                <p>Con <strong>${panelCount} paneles solares</strong>, el sistema puede cubrir:</p>
-                <ul>
-                    <li><strong>${Math.round(coverage * 100)}%</strong> del consumo en promedio</li>
-                    <li><strong>${Math.round(worstCaseCoverage * 100)}%</strong> en el peor escenario (95% confianza)</li>
-                </ul>
-                <p>La producción estimada es de <strong>${panelProduction.toFixed(1)} kWh/día</strong>, basada en:</p>
-                <ul>
-                    <li>Radiación solar promedio: <strong>${avgRadiation.toFixed(1)} kWh/m²/día</strong></li>
-                    <li>Eficiencia del panel: <strong>18%</strong></li>
-                    <li>Factor de pérdidas: <strong>25%</strong> (por nubes, temperatura, etc.)</li>
-                </ul>
-                <p>En días muy nublados (${simulationData.climateData?.cloudyDays || 30}% del tiempo), la producción podría reducirse hasta un <strong>60%</strong>.</p>
-            `;
-        }
-        
-        /**
-         * Muestra estadísticas detalladas del modelo de consumo
-         */
-        function displayConsumptionStats(consumptionModel) {
-            const container = document.getElementById('consumption-stats');
-            
-            // Calcular percentiles
-            const sortedDaily = [...consumptionModel.dailyValues].sort((a, b) => a - b);
-            const p5 = sortedDaily[Math.floor(0.05 * sortedDaily.length)];
-            const p95 = sortedDaily[Math.floor(0.95 * sortedDaily.length)];
-            
-            container.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-title">Consumo Promedio</div>
-                    <div class="stat-value">${consumptionModel.mean.toFixed(1)} kWh/día</div>
+            document.getElementById('summary-container').innerHTML = `
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-geo-alt"></i> Ubicación</h5>
+                            <p class="card-text">${simulationData.city || 'Morelia'}, ${simulationData.monthName || 'Junio'}</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-title">Variabilidad (σ)</div>
-                    <div class="stat-value">${consumptionModel.stdDev.toFixed(1)} kWh</div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-lightning-charge"></i> Consumo</h5>
+                            <p class="card-text">${consumptionModel.mean.toFixed(1)} kWh/día<br>
+                            <small>Variabilidad: ±${consumptionModel.stdDev.toFixed(1)} kWh</small></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-title">Percentil 5 (mínimo)</div>
-                    <div class="stat-value">${p5.toFixed(1)} kWh</div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-solar-panel"></i> Sistema Recomendado</h5>
+                            <p class="card-text">${panelCount} paneles (${panelCount * 300}W)<br>
+                            <small>95% de confianza</small></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-title">Percentil 95 (máximo)</div>
-                    <div class="stat-value">${p95.toFixed(1)} kWh</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">Rango típico</div>
-                    <div class="stat-value">${(consumptionModel.mean - consumptionModel.stdDev).toFixed(1)} - ${(consumptionModel.mean + consumptionModel.stdDev).toFixed(1)} kWh</div>
+                <div class="col-12 mt-3">
+                    <div class="highlight-panel">
+                        <h4><i class="bi bi-graph-up"></i> Rendimiento Esperado</h4>
+                        <p>Producción estimada: <strong>${panelProduction.toFixed(1)} kWh/día</strong></p>
+                        <p>Cobertura: <strong>${Math.round(coverage)}%</strong> (promedio) | 
+                        <strong>${Math.round(worstCaseCoverage)}%</strong> (peor caso)</p>
+                        <p>En días nublados (${simulationData.climateData?.cloudyDays || 25}% del tiempo): 
+                        <strong>${(panelProduction * 0.6).toFixed(1)} kWh/día</strong></p>
+                        <p class="text-muted"><small>Diseño optimizado para minimizar excedentes</small></p>
+                    </div>
                 </div>
             `;
         }
         
-        /**
-         * Genera todos los gráficos necesarios
-         */
-        function generateCharts(simulationData, consumptionModel, panelCount, sizingResults) {
-            // Datos para los gráficos
+        function generateAllCharts(simulationData, consumptionModel, panelCount, sizingResults) {
             const days = Array.from({length: 30}, (_, i) => i + 1);
             const radiationData = simulationData.climateData?.daily || generateDailyRadiation(simulationData.climateData);
             const productionData = radiationData.map(r => calculatePanelProduction(panelCount, r));
             
             // 1. Gráfico de distribución del consumo
-            const consumptionDistCtx = document.getElementById('consumptionDistributionChart').getContext('2d');
-            new Chart(consumptionDistCtx, {
+            new Chart(document.getElementById('consumptionDistributionChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: consumptionModel.dailyValues.map((_, i) => `Día ${i+1}`),
+                    labels: days.map(d => `Día ${d}`),
                     datasets: [{
                         label: 'Consumo Diario (kWh)',
                         data: consumptionModel.dailyValues,
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        borderWidth: 1,
+                        borderWidth: 2,
                         tension: 0.1,
                         fill: true
                     }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: `Distribución del Consumo (Media: ${consumptionModel.mean.toFixed(1)} kWh, σ: ${consumptionModel.stdDev.toFixed(1)} kWh)`
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Consumo: ${context.parsed.y.toFixed(1)} kWh`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Consumo (kWh)'
-                            },
-                            beginAtZero: false
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Días del mes'
-                            }
-                        }
-                    }
-                }
+                options: getChartOptions(`Distribución del Consumo (Media: ${consumptionModel.mean.toFixed(1)} kWh, σ: ${consumptionModel.stdDev.toFixed(1)} kWh)`, 'kWh')
             });
             
             // 2. Gráfico de perfil horario
-            const hourlyCtx = document.getElementById('hourlyConsumptionChart').getContext('2d');
-            new Chart(hourlyCtx, {
+            new Chart(document.getElementById('hourlyConsumptionChart').getContext('2d'), {
                 type: 'bar',
                 data: {
                     labels: Array.from({length: 24}, (_, i) => `${i}:00`),
                     datasets: [{
-                        label: 'Consumo Horario Promedio (kWh)',
+                        label: 'Consumo Horario (kWh)',
                         data: consumptionModel.hourlyValues,
                         backgroundColor: 'rgba(52, 152, 219, 0.7)',
                         borderColor: 'rgba(52, 152, 219, 1)',
                         borderWidth: 1
                     }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Perfil Horario de Consumo'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Consumo (kWh)'
-                            },
-                            beginAtZero: true
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Hora del día'
-                            }
-                        }
-                    }
-                }
+                options: getChartOptions('Perfil Horario de Consumo', 'kWh')
             });
             
-            // 3. Gráfico de análisis probabilístico
-            const probCtx = document.getElementById('probabilisticAnalysisChart').getContext('2d');
-            const panelCounts = sizingResults.confidenceResults.map(r => r.panels);
-            const meanCoverages = sizingResults.confidenceResults.map(r => r.meanCoverage * 100);
-            const p5Coverages = sizingResults.confidenceResults.map(r => r.p5Coverage * 100);
-            
-            new Chart(probCtx, {
+            // 3. Gráfico de radiación vs producción
+            new Chart(document.getElementById('radiationChart').getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: panelCounts,
+                    labels: days.map(d => `Día ${d}`),
                     datasets: [
                         {
-                            label: 'Cobertura Promedio',
-                            data: meanCoverages,
-                            borderColor: '#2ecc71',
-                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            label: 'Radiación Solar (kWh/m²)',
+                            data: radiationData,
+                            borderColor: '#f1c40f',
+                            backgroundColor: 'rgba(241, 196, 15, 0.1)',
                             borderWidth: 2,
-                            fill: true
+                            tension: 0.1
                         },
                         {
-                            label: 'Peor Escenario (P5)',
-                            data: p5Coverages,
-                            borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            label: 'Producción Solar (kWh)',
+                            data: productionData,
+                            borderColor: '#27ae60',
+                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
                             borderWidth: 2,
-                            borderDash: [5, 5],
-                            fill: false
+                            tension: 0.1
                         }
                     ]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Análisis Probabilístico de Cobertura'
-                        },
-                        annotation: {
-                            annotations: {
-                                line1: {
-                                    type: 'line',
-                                    yMin: 95,
-                                    yMax: 95,
-                                    borderColor: 'rgb(255, 99, 132)',
-                                    borderWidth: 2,
-                                    borderDash: [6, 6],
-                                    label: {
-                                        content: 'Objetivo 95%',
-                                        enabled: true,
-                                        position: 'right'
-                                    }
-                                },
-                                line2: {
-                                    type: 'line',
-                                    xMin: panelCount,
-                                    xMax: panelCount,
-                                    borderColor: 'rgb(54, 162, 235)',
-                                    borderWidth: 2,
-                                    label: {
-                                        content: `Recomendado: ${panelCount} paneles`,
-                                        enabled: true,
-                                        position: 'top'
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Porcentaje de Cobertura (%)'
-                            },
-                            min: 0,
-                            max: 100
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Número de Paneles'
-                            }
-                        }
-                    }
-                }
+                options: getChartOptions('Radiación Solar vs Producción', 'kWh/m² / kWh')
             });
             
-            // 4. Gráfico de cobertura
-            const coverageCtx = document.getElementById('coverageAnalysisChart').getContext('2d');
-            const coverageData = calculateDailyCoverage(panelCount, radiationData, consumptionModel.dailyValues);
-            
-            new Chart(coverageCtx, {
+            // 4. Gráfico de cobertura optimizado
+            const coverageData = calculateOptimizedCoverage(panelCount, radiationData, consumptionModel.dailyValues);
+            new Chart(document.getElementById('coverageAnalysisChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
-                    labels: ['Excedente (>110%)', 'Suficiente (90-110%)', 'Déficit (<90%)'],
+                    labels: ['Excedente (>105%)', 'Óptimo (95-105%)', 'Déficit (<95%)'],
                     datasets: [{
-                        data: [
-                            coverageData.excessDays,
-                            coverageData.sufficientDays,
-                            coverageData.deficitDays
-                        ],
+                        data: [coverageData.excessDays, coverageData.sufficientDays, coverageData.deficitDays],
                         backgroundColor: [
                             'rgba(46, 204, 113, 0.7)',
                             'rgba(52, 152, 219, 0.7)',
@@ -791,7 +500,7 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Distribución de Cobertura Diaria'
+                            text: 'Distribución de Cobertura Diaria (Optimizada)'
                         },
                         tooltip: {
                             callbacks: {
@@ -806,37 +515,235 @@
                     }
                 }
             });
+        }
+        
+        // Función para mostrar escenarios optimizados
+        function displayOptimizedScenarios(basePanelCount, simulationData, consumptionModel) {
+            const container = document.getElementById('scenarios-container');
+            const avgRadiation = simulationData.climateData?.avg || 6.2;
+            const dailyConsumption = consumptionModel.mean;
+            const minPanels = sizingResults.minTheoreticalPanels;
             
-            // 5. Gráfico de radiación vs consumo (existente)
-            const radiationCtx = document.getElementById('radiationChart').getContext('2d');
-            new Chart(radiationCtx, {
+            // Escenarios más ajustados al consumo real
+            const scenarios = [
+                {
+                    panels: Math.max(minPanels - 1, 1),
+                    title: "Mínimo",
+                    description: "Menor inversión, posible déficit",
+                    color: "#e74c3c",
+                    icon: "bi-coin"
+                },
+                {
+                    panels: basePanelCount,
+                    title: "Recomendado",
+                    description: "Cobertura óptima (95% confianza)",
+                    color: "#2ecc71",
+                    icon: "bi-check-circle"
+                },
+                {
+                    panels: Math.min(basePanelCount + 1, minPanels + 2),
+                    title: "Conservador",
+                    description: "Margen adicional para crecimiento",
+                    color: "#3498db",
+                    icon: "bi-shield-check"
+                }
+            ];
+            
+            container.innerHTML = scenarios.map(scenario => {
+                const production = calculatePanelProduction(scenario.panels, avgRadiation);
+                const coverage = (production / dailyConsumption) * 100;
+                const excessDays = Math.round(30 * Math.max(0, (coverage - 100) / 100));
+                const cost = scenario.panels * parseFloat(document.getElementById('system-cost').value || 15000);
+                const worstCaseCoverage = (sizingResults.confidenceResults.find(r => r.panels === scenario.panels)?.p5Coverage || 0) * 100;
+                
+                return `
+                    <div class="col-md-4">
+                        <div class="card scenario-card h-100" style="border-top: 3px solid ${scenario.color}">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="bi ${scenario.icon}"></i> ${scenario.panels} Paneles - ${scenario.title}</h5>
+                                <p class="card-text">${scenario.description}</p>
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item">
+                                        <strong>Producción:</strong> ${production.toFixed(1)} kWh/día
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Cobertura:</strong> ${Math.round(coverage)}% (${Math.round(worstCaseCoverage)}% peor caso)
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Excedentes:</strong> ${excessDays} días/mes
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Inversión:</strong> $${cost.toLocaleString()} MXN
+                                    </li>
+                                </ul>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: ${Math.min(100, coverage)}%; background-color: ${scenario.color}" 
+                                    aria-valuenow="${Math.round(coverage)}" aria-valuemin="0" aria-valuemax="150">
+                                        ${Math.round(coverage)}% cobertura
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // ==================================================================
+        // FUNCIONES AUXILIARES OPTIMIZADAS
+        // ==================================================================
+        
+        function calculatePanelProduction(panelCount, radiation) {
+            return panelCount * (300/1000) * radiation * 0.75;
+        }
+        
+        // Función de cobertura optimizada con rangos más ajustados
+        function calculateOptimizedCoverage(panelCount, radiationData, consumptionData) {
+            let excessDays = 0, sufficientDays = 0, deficitDays = 0;
+            
+            for (let i = 0; i < radiationData.length; i++) {
+                const production = calculatePanelProduction(panelCount, radiationData[i]);
+                const coverage = (production / consumptionData[i]) * 100;
+                
+                if (coverage > 105) excessDays++;
+                else if (coverage >= 95) sufficientDays++;
+                else deficitDays++;
+            }
+            
+            return { excessDays, sufficientDays, deficitDays };
+        }
+        
+        function generateDailyRadiation(climateData) {
+            const avg = climateData?.avg || 6.2;
+            const variability = climateData?.cloudyDays ? climateData.cloudyDays / 100 : 0.25;
+            
+            return Array.from({length: 30}, () => {
+                const isCloudy = Math.random() < variability;
+                const baseValue = avg * (isCloudy ? 0.5 + Math.random() * 0.2 : 0.85 + Math.random() * 0.3);
+                return baseValue * (0.9 + Math.random() * 0.2);
+            });
+        }
+        
+        function getChartOptions(title, yAxisTitle) {
+            return {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: title
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: yAxisTitle
+                        },
+                        beginAtZero: true
+                    }
+                }
+            };
+        }
+        
+        // ==================================================================
+        // FUNCIONES PARA CÁLCULO DE ROI (MEJORADO)
+        // ==================================================================
+        
+        function calculateROI() {
+            const panelCount = sizingResults.recommendedPanels;
+            const costPerPanel = parseFloat(document.getElementById('system-cost').value || 15000);
+            const electricityRate = parseFloat(document.getElementById('electricity-rate').value || 2.80);
+            const inflationRate = parseFloat(document.getElementById('inflation-rate').value || 4.5) / 100;
+            const energyIncrease = parseFloat(document.getElementById('energy-increase').value || 6.0) / 100;
+            
+            const totalCost = panelCount * costPerPanel;
+            const avgProduction = calculatePanelProduction(panelCount, simulationData.climateData?.avg || 6.2);
+            const monthlySavings = avgProduction * 30 * electricityRate;
+            
+            // Cálculo de ROI con inflación y aumento energético
+            let accumulatedSavings = 0;
+            let monthsToROI = 0;
+            let currentMonthlySavings = monthlySavings;
+            let roiData = [];
+            let currentCost = totalCost;
+            
+            while (accumulatedSavings < totalCost && monthsToROI < 240) { // Máximo 20 años
+                accumulatedSavings += currentMonthlySavings;
+                currentMonthlySavings *= (1 + (energyIncrease - inflationRate)/12);
+                monthsToROI++;
+                roiData.push({
+                    month: monthsToROI,
+                    accumulated: accumulatedSavings,
+                    remaining: Math.max(0, totalCost - accumulatedSavings)
+                });
+            }
+            
+            const roiYears = (monthsToROI / 12).toFixed(1);
+            
+            // Mostrar resultados
+            document.getElementById('roi-results').innerHTML = `
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Concepto</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Inversión inicial</td>
+                                <td>$${totalCost.toLocaleString()} MXN</td>
+                            </tr>
+                            <tr>
+                                <td>Ahorro mensual inicial</td>
+                                <td>$${monthlySavings.toLocaleString('es-MX', {maximumFractionDigits: 2})} MXN</td>
+                            </tr>
+                            <tr>
+                                <td>Ahorro anual estimado</td>
+                                <td>$${(monthlySavings * 12).toLocaleString('es-MX', {maximumFractionDigits: 2})} MXN</td>
+                            </tr>
+                            <tr class="table-success">
+                                <td><strong>Tiempo de recuperación (ROI)</strong></td>
+                                <td><strong>${monthsToROI} meses (${roiYears} años)</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted mt-3">
+                    * Considerando una inflación del ${(inflationRate*100).toFixed(1)}% anual y aumento en tarifa eléctrica del ${(energyIncrease*100).toFixed(1)}% anual.
+                </p>
+            `;
+            
+            // Gráfico de ROI
+            const roiCtx = document.getElementById('roiChart').getContext('2d');
+            new Chart(roiCtx, {
                 type: 'line',
                 data: {
-                    labels: days,
+                    labels: roiData.map(d => `Mes ${d.month}`),
                     datasets: [
                         {
-                            label: 'Radiación Solar (kWh/m²)',
-                            data: radiationData,
-                            borderColor: '#f1c40f',
-                            backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                            label: 'Ahorro Acumulado',
+                            data: roiData.map(d => d.accumulated),
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
                             borderWidth: 2,
+                            fill: true,
                             tension: 0.1
                         },
                         {
-                            label: 'Consumo de Energía (kWh)',
-                            data: consumptionModel.dailyValues,
+                            label: 'Inversión Inicial',
+                            data: roiData.map(() => totalCost),
                             borderColor: '#e74c3c',
-                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.1
-                        },
-                        {
-                            label: 'Producción Solar (kWh)',
-                            data: productionData,
-                            borderColor: '#27ae60',
-                            backgroundColor: 'rgba(39, 174, 96, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.1
+                            borderWidth: 1,
+                            borderDash: [5, 5]
                         }
                     ]
                 },
@@ -845,135 +752,31 @@
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Comparación Diaria: Radiación, Consumo y Producción'
+                            text: 'Proyección de Retorno de Inversión'
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: totalCost,
+                                    yMax: totalCost,
+                                    borderColor: 'rgb(255, 99, 132)',
+                                    borderWidth: 2,
+                                    borderDash: [6, 6]
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             title: {
                                 display: true,
-                                text: 'kWh'
+                                text: 'MXN'
                             },
                             beginAtZero: true
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Días del mes'
-                            }
                         }
                     }
                 }
-            });
-        }
-        
-        /**
-         * Muestra diferentes escenarios de instalación
-         */
-        function displayScenarios(basePanelCount, simulationData, consumptionModel) {
-            const container = document.getElementById('scenarios-container');
-            const avgRadiation = simulationData.climateData?.avg || 5;
-            const dailyConsumption = consumptionModel.mean;
-            
-            const scenarios = [
-                {
-                    panels: Math.max(basePanelCount - 2, 1),
-                    title: "Mínimo",
-                    description: "Menor inversión inicial",
-                    color: "#e74c3c"
-                },
-                {
-                    panels: basePanelCount,
-                    title: "Recomendado",
-                    description: "Cobertura óptima (95% confianza)",
-                    color: "#2ecc71"
-                },
-                {
-                    panels: basePanelCount + 2,
-                    title: "Excedente",
-                    description: "Mayor capacidad y posibilidad de inyección a red",
-                    color: "#3498db"
-                }
-            ];
-            
-            container.innerHTML = scenarios.map(scenario => {
-                const production = calculatePanelProduction(scenario.panels, avgRadiation);
-                const coverage = calculateCoverage(scenario.panels, dailyConsumption, avgRadiation);
-                const excessDays = Math.round(30 * (coverage > 100 ? 0.3 + (coverage - 100) * 0.02 : 0));
-                
-                return `
-                    <div class="scenario-card" style="border-top: 4px solid ${scenario.color}">
-                        <h3 class="scenario-title">${scenario.panels} Paneles - ${scenario.title}</h3>
-                        <p>${scenario.description}</p>
-                        <p><strong>Cobertura:</strong> ${Math.min(Math.round(coverage * 100), 100)}% de tus necesidades</p>
-                        <p><strong>Excedentes:</strong> ${excessDays} días con energía sobrante</p>
-                        <p><strong>Producción:</strong> ${production.toFixed(1)} kWh/día</p>
-                        <p><strong>Inversión estimada:</strong> $${(scenario.panels * 15000).toLocaleString()} MXN</p>
-                    </div>
-                `;
-            }).join('');
-        }
-        
-        // ==================================================================
-        // FUNCIONES AUXILIARES
-        // ==================================================================
-        
-        /**
-         * Calcula la producción diaria de un número dado de paneles
-         */
-        function calculatePanelProduction(panelCount, avgRadiation) {
-            const panelEfficiency = 0.18;
-            const panelArea = 1.6;
-            const performanceRatio = 0.75;
-            return panelCount * avgRadiation * panelEfficiency * panelArea * performanceRatio;
-        }
-        
-        /**
-         * Calcula el porcentaje de cobertura del consumo
-         */
-        function calculateCoverage(panelCount, dailyConsumption, avgRadiation) {
-            const production = calculatePanelProduction(panelCount, avgRadiation);
-            return production / dailyConsumption;
-        }
-        
-        /**
-         * Calcula días con excedente, suficientes y con déficit
-         */
-        function calculateDailyCoverage(panelCount, radiationData, consumptionData) {
-            let excessDays = 0;
-            let sufficientDays = 0;
-            let deficitDays = 0;
-            
-            for (let i = 0; i < radiationData.length; i++) {
-                const production = calculatePanelProduction(panelCount, radiationData[i]);
-                const coverage = production / consumptionData[i];
-                
-                if (coverage > 1.1) {
-                    excessDays++;
-                } else if (coverage >= 0.9) {
-                    sufficientDays++;
-                } else {
-                    deficitDays++;
-                }
-            }
-            
-            return { excessDays, sufficientDays, deficitDays };
-        }
-        
-        /**
-         * Genera datos diarios de radiación solar simulados
-         */
-        function generateDailyRadiation(climateData) {
-            const avg = climateData?.avg || 5;
-            const variability = climateData?.cloudyDays ? climateData.cloudyDays / 100 : 0.3;
-            
-            return Array.from({length: 30}, () => {
-                // Variabilidad basada en días nublados
-                const isCloudy = Math.random() < variability;
-                const baseValue = avg * (isCloudy ? 0.4 + Math.random() * 0.3 : 0.8 + Math.random() * 0.4);
-                
-                // Variación aleatoria adicional
-                return baseValue * (0.9 + Math.random() * 0.2);
             });
         }
     </script>
