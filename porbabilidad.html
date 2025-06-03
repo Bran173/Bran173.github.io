@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Probabilidad</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .blog-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #16a085;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1001;
+            transition: background-color 0.3s;
+        }
+        
+        .blog-btn:hover {
+            background-color: #1abc9c;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            height: 400px;
+        }
+        
+        .simulation-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón del blog -->
+    <a href="blog.html" class="blog-btn">Blog de la Página</a>
+    
+    <header>
+        <h1>Simulación de Probabilidad</h1>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="mapa.html">Seleccionar Ubicación</a></li>
+            <li><a href="informacion.html">Más Información</a></li>
+            <li><a href="probabilidad.html">Simulación de Probabilidad</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <section id="explicacion">
+            <h2>Problema de Probabilidad</h2>
+            <p>Una urna contiene 4 pelotas numeradas: 1, 2, 3, 4.</p>
+            <p>Si se sacan al azar 2 pelotas de la urna y Z es la suma de los números de las pelotas que se sacaron:</p>
+            <p>Esquematice en una gráfica la probabilidad de distribución de Z.</p>
+        </section>
+        
+        <div class="simulation-controls">
+            <button id="simulateBtn" class="btn">Ejecutar Simulación</button>
+            <button id="resetBtn" class="btn btn-secondary">Reiniciar</button>
+            <div>
+                <label for="simulations">Número de simulaciones:</label>
+                <input type="number" id="simulations" min="1" max="10000" value="1000">
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="probabilityChart"></canvas>
+        </div>
+        
+        <div class="results">
+            <h3>Resultados Teóricos</h3>
+            <p>Combinaciones posibles al sacar 2 pelotas de 4:</p>
+            <ul id="combinationsList"></ul>
+            <p>Distribución teórica de probabilidades:</p>
+            <ul id="probabilitiesList"></ul>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Simulación de Probabilidad</p>
+        <p>Página desarrollada por Brandon Alexis Magaña Sanchez</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Todas las combinaciones posibles (sin repetición, orden no importa)
+            const allCombinations = [
+                [1, 2], // suma = 3
+                [1, 3], // suma = 4
+                [1, 4], // suma = 5
+                [2, 3], // suma = 5
+                [2, 4], // suma = 6
+                [3, 4]  // suma = 7
+            ];
+            
+            // Sumas posibles y sus frecuencias teóricas
+            const theoreticalSums = {
+                3: 1,
+                4: 1,
+                5: 2,
+                6: 1,
+                7: 1
+            };
+            
+            // Configuración inicial del gráfico
+            const ctx = document.getElementById('probabilityChart').getContext('2d');
+            let probabilityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['3', '4', '5', '6', '7'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/6, 1/6, 2/6, 1/6, 1/6],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Suma de las pelotas (Z)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mostrar combinaciones teóricas
+            const combinationsList = document.getElementById('combinationsList');
+            allCombinations.forEach(comb => {
+                const li = document.createElement('li');
+                li.textContent = `${comb[0]} + ${comb[1]} = ${comb[0] + comb[1]}`;
+                combinationsList.appendChild(li);
+            });
+            
+            // Mostrar probabilidades teóricas
+            const probabilitiesList = document.getElementById('probabilitiesList');
+            for (const sum in theoreticalSums) {
+                const li = document.createElement('li');
+                const prob = theoreticalSums[sum] / 6;
+                li.textContent = `P(Z=${sum}) = ${theoreticalSums[sum]}/6 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+                probabilitiesList.appendChild(li);
+            }
+            
+            // Función para simular extracciones
+            function simulate() {
+                const numSimulations = parseInt(document.getElementById('simulations').value);
+                const counts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+                
+                for (let i = 0; i < numSimulations; i++) {
+                    // Seleccionar una combinación al azar
+                    const randomIndex = Math.floor(Math.random() * allCombinations.length);
+                    const selectedCombination = allCombinations[randomIndex];
+                    const sum = selectedCombination[0] + selectedCombination[1];
+                    
+                    counts[sum]++;
+                }
+                
+                // Actualizar el gráfico con los resultados de la simulación
+                const simulatedData = [
+                    counts[3] / numSimulations,
+                    counts[4] / numSimulations,
+                    counts[5] / numSimulations,
+                    counts[6] / numSimulations,
+                    counts[7] / numSimulations
+                ];
+                
+                probabilityChart.data.datasets[1].data = simulatedData;
+                probabilityChart.update();
+            }
+            
+            // Event listeners
+            document.getElementById('simulateBtn').addEventListener('click', simulate);
+            
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                probabilityChart.data.datasets[1].data = [0, 0, 0, 0, 0];
+                probabilityChart.update();
+            });
+        });
+    </script>
+</body>
+</html>
