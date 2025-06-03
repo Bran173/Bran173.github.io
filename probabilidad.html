@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Probabilidad</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #16a085;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #1abc9c;
+            transform: translateY(-2px);
+        }
+        
+        .urn-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .urn {
+            position: relative;
+            width: 200px;
+            height: 250px;
+            margin: 0 auto;
+            background-color: #8B4513;
+            border-radius: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+        }
+        
+        .ball {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.5s;
+        }
+        
+        .ball-1 { background-color: #e74c3c; top: 30px; left: 30px; }
+        .ball-2 { background-color: #3498db; top: 30px; right: 30px; }
+        .ball-3 { background-color: #2ecc71; bottom: 60px; left: 30px; }
+        .ball-4 { background-color: #f39c12; bottom: 60px; right: 30px; }
+        
+        .urn-opening {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background-color: #A0522D;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .selected-balls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+        
+        .selected-ball {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s;
+        }
+        
+        .selected-ball.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .sum-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de regreso -->
+    <a href="index.html" class="back-btn">← Regresar</a>
+    
+    <div class="container">
+        <section id="explicacion">
+            <h2>Simulación de Probabilidad</h2>
+            <p>Una urna contiene 4 pelotas numeradas: 1, 2, 3, 4.</p>
+            <p>Se sacan al azar 2 pelotas y Z es la suma de sus números.</p>
+        </section>
+        
+        <!-- Ilustración de la urna -->
+        <div class="urn-container">
+            <div class="urn">
+                <div class="urn-opening"></div>
+                <div class="ball ball-1">1</div>
+                <div class="ball ball-2">2</div>
+                <div class="ball ball-3">3</div>
+                <div class="ball ball-4">4</div>
+            </div>
+            
+            <div class="selected-balls">
+                <div class="selected-ball" id="selected-ball-1"></div>
+                <div class="selected-ball" id="selected-ball-2"></div>
+            </div>
+            
+            <div class="sum-display">
+                Suma: <span id="sum-value">0</span>
+            </div>
+        </div>
+        
+        <div class="simulation-controls">
+            <button id="simulateBtn" class="btn">Ejecutar Simulación</button>
+            <button id="resetBtn" class="btn btn-secondary">Reiniciar</button>
+            <div>
+                <label for="simulations">Número de simulaciones:</label>
+                <input type="number" id="simulations" min="1" max="10000" value="1000">
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="probabilityChart"></canvas>
+        </div>
+        
+        <div class="results">
+            <h3>Resultados Teóricos</h3>
+            <p>Combinaciones posibles al sacar 2 pelotas de 4:</p>
+            <ul id="combinationsList"></ul>
+            <p>Distribución teórica de probabilidades:</p>
+            <ul id="probabilitiesList"></ul>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Simulación de Probabilidad</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Combinaciones posibles (sin repetición, orden no importa)
+            const allCombinations = [
+                [1, 2], // suma = 3
+                [1, 3], // suma = 4
+                [1, 4], // suma = 5
+                [2, 3], // suma = 5
+                [2, 4], // suma = 6
+                [3, 4]  // suma = 7
+            ];
+            
+            // Sumas posibles y sus frecuencias teóricas
+            const theoreticalSums = {
+                3: 1,
+                4: 1,
+                5: 2,
+                6: 1,
+                7: 1
+            };
+            
+            // Elementos de la interfaz
+            const selectedBall1 = document.getElementById('selected-ball-1');
+            const selectedBall2 = document.getElementById('selected-ball-2');
+            const sumValue = document.getElementById('sum-value');
+            
+            // Configuración del gráfico
+            const ctx = document.getElementById('probabilityChart').getContext('2d');
+            let probabilityChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['3', '4', '5', '6', '7'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/6, 1/6, 2/6, 1/6, 1/6],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Suma de las pelotas (Z)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mostrar combinaciones teóricas
+            const combinationsList = document.getElementById('combinationsList');
+            allCombinations.forEach(comb => {
+                const li = document.createElement('li');
+                li.textContent = `${comb[0]} + ${comb[1]} = ${comb[0] + comb[1]}`;
+                combinationsList.appendChild(li);
+            });
+            
+            // Mostrar probabilidades teóricas
+            const probabilitiesList = document.getElementById('probabilitiesList');
+            for (const sum in theoreticalSums) {
+                const li = document.createElement('li');
+                const prob = theoreticalSums[sum] / 6;
+                li.textContent = `P(Z=${sum}) = ${theoreticalSums[sum]}/6 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+                probabilitiesList.appendChild(li);
+            }
+            
+            // Función para animar la selección de pelotas
+            function animateBallSelection(ball1, ball2) {
+                // Resetear
+                selectedBall1.style.opacity = 0;
+                selectedBall1.style.transform = 'scale(0)';
+                selectedBall2.style.opacity = 0;
+                selectedBall2.style.transform = 'scale(0)';
+                
+                // Configurar las nuevas pelotas
+                selectedBall1.textContent = ball1;
+                selectedBall2.textContent = ball2;
+                
+                // Colores según el número
+                const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+                selectedBall1.style.backgroundColor = colors[ball1-1];
+                selectedBall2.style.backgroundColor = colors[ball2-1];
+                
+                // Mostrar con animación
+                setTimeout(() => {
+                    selectedBall1.classList.add('show');
+                    selectedBall2.classList.add('show');
+                    sumValue.textContent = ball1 + ball2;
+                }, 100);
+            }
+            
+            // Función para simular extracciones
+            function simulate() {
+                const numSimulations = parseInt(document.getElementById('simulations').value);
+                const counts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+                
+                // Animación de la primera simulación
+                const randomIndexFirst = Math.floor(Math.random() * allCombinations.length);
+                const firstCombination = allCombinations[randomIndexFirst];
+                animateBallSelection(firstCombination[0], firstCombination[1]);
+                
+                // Realizar todas las simulaciones
+                for (let i = 0; i < numSimulations; i++) {
+                    const randomIndex = Math.floor(Math.random() * allCombinations.length);
+                    const selectedCombination = allCombinations[randomIndex];
+                    const sum = selectedCombination[0] + selectedCombination[1];
+                    counts[sum]++;
+                }
+                
+                // Actualizar el gráfico
+                const simulatedData = [
+                    counts[3] / numSimulations,
+                    counts[4] / numSimulations,
+                    counts[5] / numSimulations,
+                    counts[6] / numSimulations,
+                    counts[7] / numSimulations
+                ];
+                
+                probabilityChart.data.datasets[1].data = simulatedData;
+                probabilityChart.update();
+            }
+            
+            // Event listeners
+            document.getElementById('simulateBtn').addEventListener('click', simulate);
+            
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                probabilityChart.data.datasets[1].data = [0, 0, 0, 0, 0];
+                probabilityChart.update();
+                
+                // Resetear animación
+                selectedBall1.classList.remove('show');
+                selectedBall2.classList.remove('show');
+                sumValue.textContent = '0';
+            });
+        });
+    </script>
+</body>
+</html>
