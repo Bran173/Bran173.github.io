@@ -3,10 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Probabilidad</title>
+    <title>Simulaciones de Probabilidad</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* Estilos específicos para esta página */
+        #probabilidad-page {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            background-color: #6a0f1a; /* Color vino de fondo */
+            background-image: url('fondo-proba.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: rgb(0, 0, 0);
+        }
+
+        #probabilidad-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(106, 15, 26, 0.8); /* Overlay vino */
+            z-index: 0;
+        }
+
         .back-btn {
             position: fixed;
             top: 20px;
@@ -26,12 +51,94 @@
             background-color: #1abc9c;
             transform: translateY(-2px);
         }
-        
+
+        .simulation-menu {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-title {
+            color: #6a0f1a;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #6a0f1a;
+            padding-bottom: 10px;
+        }
+
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            color: #6a0f1a;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .menu-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .menu-option {
+            background-color: #16a085;
+            color: rgb(255, 255, 255);
+            padding: 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .menu-option:hover {
+            background-color: #1abc9c;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Estilos para las diferentes simulaciones (inicialmente ocultas) */
+        .simulation-container {
+            display: none;
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-container.active {
+            display: block;
+        }
+
+        .simulation-title {
+            color: #6a0f1a;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Estilos específicos para la urna */
         .urn-container {
             text-align: center;
             margin: 20px 0;
         }
-        
+
         .urn {
             position: relative;
             width: 200px;
@@ -41,7 +148,7 @@
             border-radius: 10px;
             box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-        
+
         .ball {
             position: absolute;
             width: 40px;
@@ -50,17 +157,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: rgb(0, 0, 0);
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             transition: all 0.5s;
         }
-        
+
         .ball-1 { background-color: #e74c3c; top: 30px; left: 30px; }
         .ball-2 { background-color: #3498db; top: 30px; right: 30px; }
         .ball-3 { background-color: #2ecc71; bottom: 60px; left: 30px; }
         .ball-4 { background-color: #f39c12; bottom: 60px; right: 30px; }
-        
+
         .urn-opening {
             position: absolute;
             top: -15px;
@@ -70,7 +177,7 @@
             background-color: #A0522D;
             border-radius: 50% 50% 0 0;
         }
-        
+
         .selected-balls {
             display: flex;
             justify-content: center;
@@ -78,7 +185,7 @@
             margin: 20px 0;
             min-height: 60px;
         }
-        
+
         .selected-ball {
             width: 50px;
             height: 50px;
@@ -86,19 +193,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: rgb(255, 255, 255);
             font-weight: bold;
             font-size: 1.5rem;
             opacity: 0;
             transform: scale(0);
             transition: all 0.5s;
         }
-        
+
         .selected-ball.show {
             opacity: 1;
             transform: scale(1);
         }
-        
+
         .sum-display {
             font-size: 1.8rem;
             font-weight: bold;
@@ -106,95 +213,288 @@
             text-align: center;
             margin: 20px 0;
         }
+
+        /* Estilos para el dado */
+        .dice-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+
+        /* Estilos para la moneda */
+        .coin-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .coin {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(to right, #b87333, #daa520);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: 10px;
+            transition: transform 1s;
+        }
+
+        .coin.flipping {
+            animation: flip 1s ease-in-out;
+        }
+
+        @keyframes flip {
+            0% { transform: rotateY(0); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(0); }
+        }
+
+        /* Controles comunes */
+        .simulation-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+            position: relative;
+        }
     </style>
 </head>
 <body>
     <!-- Botón de regreso -->
     <a href="index.html" class="back-btn">← Regresar</a>
     
-    <div class="container">
-        <section id="explicacion">
-            <h2>Simulación de Probabilidad</h2>
-            <p>Una urna contiene 4 pelotas numeradas: 1, 2, 3, 4.</p>
-            <p>Se sacan al azar 2 pelotas y Z es la suma de sus números.</p>
-        </section>
-        
-        <!-- Ilustración de la urna -->
-        <div class="urn-container">
-            <div class="urn">
-                <div class="urn-opening"></div>
-                <div class="ball ball-1">1</div>
-                <div class="ball ball-2">2</div>
-                <div class="ball ball-3">3</div>
-                <div class="ball ball-4">4</div>
+    <!-- Página principal del menú -->
+    <div id="probabilidad-page">
+        <div class="simulation-menu">
+            <h1 class="menu-title">Simulaciones de Probabilidad</h1>
+            
+            <div class="menu-section">
+                <h2 class="section-title">PROBABILIDAD NORMAL</h2>
+                <div class="menu-options">
+                    <a href="#" class="menu-option" data-simulation="urna">Simulación de la Urna</a>
+                </div>
             </div>
             
-            <div class="selected-balls">
-                <div class="selected-ball" id="selected-ball-1"></div>
-                <div class="selected-ball" id="selected-ball-2"></div>
+            <div class="menu-section">
+                <h2 class="section-title">DISTRIBUCIONES DE PROBABILIDAD ESPECIAL</h2>
+                <div class="menu-options">
+                    <a href="#" class="menu-option" data-simulation="dado">Simulación de un Dado (Distribución Uniforme)</a>
+                    <a href="#" class="menu-option" data-simulation="dos-dados">Simulación de Dos Dados (Distribución de Bernoulli)</a>
+                    <a href="#" class="menu-option" data-simulation="moneda">Simulación de Moneda (Ensayos Repetidos de Bernoulli)</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenedor para la simulación de la urna -->
+        <div id="urna-simulation" class="simulation-container">
+            <h2 class="simulation-title">Simulación de la Urna</h2>
+            
+            <div class="urn-container">
+                <div class="urn">
+                    <div class="urn-opening"></div>
+                    <div class="ball ball-1">1</div>
+                    <div class="ball ball-2">2</div>
+                    <div class="ball ball-3">3</div>
+                    <div class="ball ball-4">4</div>
+                </div>
+                
+                <div class="selected-balls">
+                    <div class="selected-ball" id="selected-ball-1"></div>
+                    <div class="selected-ball" id="selected-ball-2"></div>
+                </div>
+                
+                <div class="sum-display">
+                    Suma: <span id="sum-value">0</span>
+                </div>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-urna" class="btn">Ejecutar Simulación</button>
+                <button id="reset-urna" class="btn btn-secondary">Reiniciar</button>
+                <div>
+                    <label for="simulations-urna">Número de simulaciones:</label>
+                    <input type="number" id="simulations-urna" min="1" max="10000" value="1000">
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="urna-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>Combinaciones posibles al sacar 2 pelotas de 4:</p>
+                <ul id="combinationsList"></ul>
+                <p>Distribución teórica de probabilidades:</p>
+                <ul id="probabilitiesList"></ul>
+            </div>
+        </div>
+
+        <!-- Contenedor para la simulación de un dado -->
+        <div id="dado-simulation" class="simulation-container">
+            <h2 class="simulation-title">Simulación de un Dado (Distribución Uniforme)</h2>
+            
+            <div class="dice-container">
+                <div class="dice" id="dice-result">1</div>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-dado" class="btn">Lanzar Dado</button>
+                <button id="simulate-multiple-dado" class="btn">Lanzar 100 veces</button>
+                <button id="reset-dado" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="dado-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>En un dado justo de 6 caras, cada número tiene la misma probabilidad de salir:</p>
+                <p>P(X=1) = P(X=2) = ... = P(X=6) = 1/6 ≈ 16.67%</p>
+            </div>
+        </div>
+
+        <!-- Contenedor para la simulación de dos dados -->
+        <div id="dos-dados-simulation" class="simulation-container">
+            <h2 class="simulation-title">Simulación de Dos Dados (Distribución de Bernoulli)</h2>
+            
+            <div class="dice-container">
+                <div class="dice" id="dice1-result">1</div>
+                <div class="dice" id="dice2-result">1</div>
             </div>
             
             <div class="sum-display">
-                Suma: <span id="sum-value">0</span>
+                Suma: <span id="sum-dados-value">2</span>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-dos-dados" class="btn">Lanzar Dados</button>
+                <button id="simulate-multiple-dos-dados" class="btn">Lanzar 100 veces</button>
+                <button id="reset-dos-dados" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="dos-dados-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>La suma de dos dados sigue una distribución diferente:</p>
+                <ul id="dados-probabilities"></ul>
             </div>
         </div>
-        
-        <div class="simulation-controls">
-            <button id="simulateBtn" class="btn">Ejecutar Simulación</button>
-            <button id="resetBtn" class="btn btn-secondary">Reiniciar</button>
-            <div>
-                <label for="simulations">Número de simulaciones:</label>
-                <input type="number" id="simulations" min="1" max="10000" value="1000">
+
+        <!-- Contenedor para la simulación de moneda -->
+        <div id="moneda-simulation" class="simulation-container">
+            <h2 class="simulation-title">Simulación de Moneda (Ensayos Repetidos de Bernoulli)</h2>
+            
+            <div class="coin-container">
+                <div class="coin" id="coin-result">C</div>
             </div>
-        </div>
-        
-        <div class="chart-container">
-            <canvas id="probabilityChart"></canvas>
-        </div>
-        
-        <div class="results">
-            <h3>Resultados Teóricos</h3>
-            <p>Combinaciones posibles al sacar 2 pelotas de 4:</p>
-            <ul id="combinationsList"></ul>
-            <p>Distribución teórica de probabilidades:</p>
-            <ul id="probabilitiesList"></ul>
+            
+            <div class="simulation-controls">
+                <button id="simulate-moneda" class="btn">Lanzar Moneda</button>
+                <button id="simulate-multiple-moneda" class="btn">Lanzar 100 veces</button>
+                <button id="reset-moneda" class="btn btn-secondary">Reiniciar</button>
+                <div>
+                    <label for="moneda-trials">Número de lanzamientos:</label>
+                    <input type="number" id="moneda-trials" min="1" max="1000" value="10">
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="moneda-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>Para una moneda justa:</p>
+                <p>P(Cara) = 0.5 (50%)</p>
+                <p>P(Cruz) = 0.5 (50%)</p>
+            </div>
         </div>
     </div>
     
     <footer>
-        <p>Proyecto de Energía Solar - Simulación de Probabilidad</p>
+        <p>Proyecto de Energía Solar - Simulaciones de Probabilidad</p>
         <p>&copy; 2023 - Todos los derechos reservados</p>
     </footer>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Combinaciones posibles (sin repetición, orden no importa)
+            // Manejar el menú de simulaciones
+            const menuOptions = document.querySelectorAll('.menu-option');
+            const simulationContainers = document.querySelectorAll('.simulation-container');
+            
+            menuOptions.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const simulationType = this.getAttribute('data-simulation');
+                    
+                    // Ocultar todos los contenedores
+                    simulationContainers.forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    // Mostrar el contenedor seleccionado
+                    document.getElementById(`${simulationType}-simulation`).classList.add('active');
+                    
+                    // Desplazar hacia la simulación
+                    document.getElementById(`${simulationType}-simulation`).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Función para volver al menú principal
+            function backToMenu() {
+                simulationContainers.forEach(container => {
+                    container.classList.remove('active');
+                });
+                document.querySelector('.simulation-menu').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+            
+            // ===== SIMULACIÓN DE URNA =====
             const allCombinations = [
-                [1, 2], // suma = 3
-                [1, 3], // suma = 4
-                [1, 4], // suma = 5
-                [2, 3], // suma = 5
-                [2, 4], // suma = 6
-                [3, 4]  // suma = 7
+                [1, 2], [1, 3], [1, 4],
+                [2, 3], [2, 4], [3, 4]
             ];
             
-            // Sumas posibles y sus frecuencias teóricas
-            const theoreticalSums = {
-                3: 1,
-                4: 1,
-                5: 2,
-                6: 1,
-                7: 1
-            };
+            const theoreticalSums = {3: 1, 4: 1, 5: 2, 6: 1, 7: 1};
             
-            // Elementos de la interfaz
             const selectedBall1 = document.getElementById('selected-ball-1');
             const selectedBall2 = document.getElementById('selected-ball-2');
             const sumValue = document.getElementById('sum-value');
             
-            // Configuración del gráfico
-            const ctx = document.getElementById('probabilityChart').getContext('2d');
-            let probabilityChart = new Chart(ctx, {
+            // Configurar gráfico de urna
+            const urnaCtx = document.getElementById('urna-chart').getContext('2d');
+            let urnaChart = new Chart(urnaCtx, {
                 type: 'bar',
                 data: {
                     labels: ['3', '4', '5', '6', '7'],
@@ -253,22 +553,18 @@
             
             // Función para animar la selección de pelotas
             function animateBallSelection(ball1, ball2) {
-                // Resetear
                 selectedBall1.style.opacity = 0;
                 selectedBall1.style.transform = 'scale(0)';
                 selectedBall2.style.opacity = 0;
                 selectedBall2.style.transform = 'scale(0)';
                 
-                // Configurar las nuevas pelotas
                 selectedBall1.textContent = ball1;
                 selectedBall2.textContent = ball2;
                 
-                // Colores según el número
                 const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
                 selectedBall1.style.backgroundColor = colors[ball1-1];
                 selectedBall2.style.backgroundColor = colors[ball2-1];
                 
-                // Mostrar con animación
                 setTimeout(() => {
                     selectedBall1.classList.add('show');
                     selectedBall2.classList.add('show');
@@ -277,8 +573,8 @@
             }
             
             // Función para simular extracciones
-            function simulate() {
-                const numSimulations = parseInt(document.getElementById('simulations').value);
+            function simulateUrna() {
+                const numSimulations = parseInt(document.getElementById('simulations-urna').value);
                 const counts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
                 
                 // Animación de la primera simulación
@@ -303,21 +599,306 @@
                     counts[7] / numSimulations
                 ];
                 
-                probabilityChart.data.datasets[1].data = simulatedData;
-                probabilityChart.update();
+                urnaChart.data.datasets[1].data = simulatedData;
+                urnaChart.update();
             }
             
-            // Event listeners
-            document.getElementById('simulateBtn').addEventListener('click', simulate);
+            // Event listeners para urna
+            document.getElementById('simulate-urna').addEventListener('click', simulateUrna);
             
-            document.getElementById('resetBtn').addEventListener('click', function() {
-                probabilityChart.data.datasets[1].data = [0, 0, 0, 0, 0];
-                probabilityChart.update();
+            document.getElementById('reset-urna').addEventListener('click', function() {
+                urnaChart.data.datasets[1].data = [0, 0, 0, 0, 0];
+                urnaChart.update();
                 
-                // Resetear animación
                 selectedBall1.classList.remove('show');
                 selectedBall2.classList.remove('show');
                 sumValue.textContent = '0';
+            });
+            
+            // ===== SIMULACIÓN DE DADO =====
+            const diceResult = document.getElementById('dice-result');
+            const dadoCounts = [0, 0, 0, 0, 0, 0];
+            
+            // Configurar gráfico de dado
+            const dadoCtx = document.getElementById('dado-chart').getContext('2d');
+            let dadoChart = new Chart(dadoCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/6, 1/6, 1/6, 1/6, 1/6, 1/6],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Resultado del dado'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            function rollDice() {
+                const result = Math.floor(Math.random() * 6) + 1;
+                diceResult.textContent = result;
+                return result;
+            }
+            
+            function simulateDado(numRolls = 1) {
+                for (let i = 0; i < numRolls; i++) {
+                    const result = rollDice();
+                    dadoCounts[result-1]++;
+                }
+                
+                const total = dadoCounts.reduce((a, b) => a + b, 0);
+                const simulatedData = dadoCounts.map(count => count / total);
+                
+                dadoChart.data.datasets[1].data = simulatedData;
+                dadoChart.update();
+            }
+            
+            // Event listeners para dado
+            document.getElementById('simulate-dado').addEventListener('click', function() {
+                simulateDado(1);
+            });
+            
+            document.getElementById('simulate-multiple-dado').addEventListener('click', function() {
+                simulateDado(100);
+            });
+            
+            document.getElementById('reset-dado').addEventListener('click', function() {
+                for (let i = 0; i < dadoCounts.length; i++) {
+                    dadoCounts[i] = 0;
+                }
+                dadoChart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
+                dadoChart.update();
+                diceResult.textContent = '1';
+            });
+            
+            // ===== SIMULACIÓN DE DOS DADOS =====
+            const dice1Result = document.getElementById('dice1-result');
+            const dice2Result = document.getElementById('dice2-result');
+            const sumDadosValue = document.getElementById('sum-dados-value');
+            const dosDadosCounts = Array(11).fill(0); // Sumas de 2 a 12
+            
+            // Configurar gráfico de dos dados
+            const dosDadosCtx = document.getElementById('dos-dados-chart').getContext('2d');
+            let dosDadosChart = new Chart(dosDadosCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/36, 2/36, 3/36, 4/36, 5/36, 6/36, 5/36, 4/36, 3/36, 2/36, 1/36],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: Array(11).fill(0),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 0.2,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Suma de los dados'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mostrar probabilidades teóricas para dos dados
+            const dadosProbabilities = document.getElementById('dados-probabilities');
+            const theoreticalDados = {
+                2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 
+                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
+            };
+            
+            for (const sum in theoreticalDados) {
+                const li = document.createElement('li');
+                const prob = theoreticalDados[sum] / 36;
+                li.textContent = `P(Suma=${sum}) = ${theoreticalDados[sum]}/36 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+                dadosProbabilities.appendChild(li);
+            }
+            
+            function rollTwoDice() {
+                const result1 = Math.floor(Math.random() * 6) + 1;
+                const result2 = Math.floor(Math.random() * 6) + 1;
+                const sum = result1 + result2;
+                
+                dice1Result.textContent = result1;
+                dice2Result.textContent = result2;
+                sumDadosValue.textContent = sum;
+                
+                return sum;
+            }
+            
+            function simulateDosDados(numRolls = 1) {
+                for (let i = 0; i < numRolls; i++) {
+                    const sum = rollTwoDice();
+                    dosDadosCounts[sum-2]++;
+                }
+                
+                const total = dosDadosCounts.reduce((a, b) => a + b, 0);
+                const simulatedData = dosDadosCounts.map(count => count / total);
+                
+                dosDadosChart.data.datasets[1].data = simulatedData;
+                dosDadosChart.update();
+            }
+            
+            // Event listeners para dos dados
+            document.getElementById('simulate-dos-dados').addEventListener('click', function() {
+                simulateDosDados(1);
+            });
+            
+            document.getElementById('simulate-multiple-dos-dados').addEventListener('click', function() {
+                simulateDosDados(100);
+            });
+            
+            document.getElementById('reset-dos-dados').addEventListener('click', function() {
+                for (let i = 0; i < dosDadosCounts.length; i++) {
+                    dosDadosCounts[i] = 0;
+                }
+                dosDadosChart.data.datasets[1].data = Array(11).fill(0);
+                dosDadosChart.update();
+                dice1Result.textContent = '1';
+                dice2Result.textContent = '1';
+                sumDadosValue.textContent = '2';
+            });
+            
+            // ===== SIMULACIÓN DE MONEDA =====
+            const coinResult = document.getElementById('coin-result');
+            const coinCounts = {cara: 0, cruz: 0};
+            
+            // Configurar gráfico de moneda
+            const monedaCtx = document.getElementById('moneda-chart').getContext('2d');
+            let monedaChart = new Chart(monedaCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Cara', 'Cruz'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [0.5, 0.5],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: [0, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Resultado'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            function flipCoin() {
+                const coin = document.getElementById('coin-result');
+                coin.classList.add('flipping');
+                
+                setTimeout(() => {
+                    const result = Math.random() < 0.5 ? 'C' : 'X';
+                    coin.textContent = result;
+                    coin.classList.remove('flipping');
+                    
+                    if (result === 'C') {
+                        coinCounts.cara++;
+                    } else {
+                        coinCounts.cruz++;
+                    }
+                    
+                    const total = coinCounts.cara + coinCounts.cruz;
+                    const caraProb = coinCounts.cara / total;
+                    const cruzProb = coinCounts.cruz / total;
+                    
+                    monedaChart.data.datasets[1].data = [caraProb, cruzProb];
+                    monedaChart.update();
+                }, 500);
+            }
+            
+            function simulateMoneda(numFlips = 1) {
+                for (let i = 0; i < numFlips; i++) {
+                    setTimeout(() => {
+                        flipCoin();
+                    }, i * 100);
+                }
+            }
+            
+            // Event listeners para moneda
+            document.getElementById('simulate-moneda').addEventListener('click', function() {
+                flipCoin();
+            });
+            
+            document.getElementById('simulate-multiple-moneda').addEventListener('click', function() {
+                const numTrials = parseInt(document.getElementById('moneda-trials').value);
+                simulateMoneda(numTrials);
+            });
+            
+            document.getElementById('reset-moneda').addEventListener('click', function() {
+                coinCounts.cara = 0;
+                coinCounts.cruz = 0;
+                monedaChart.data.datasets[1].data = [0, 0];
+                monedaChart.update();
+                coinResult.textContent = 'C';
             });
         });
     </script>
