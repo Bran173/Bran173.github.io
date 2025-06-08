@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Moneda - Caras y Cruces</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #moneda-page {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            background-color: #0a0706;
+            background-image: url('fondo-proba.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        #moneda-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(170, 8, 35, 0.589);
+            z-index: 0;
+        }
+
+        .simulation-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-title {
+            color: #1a3e6a;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .coin-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .coin {
+            width: 100px;
+            height: 100px;
+            background-color: #d4af37;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .simulation-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+            position: relative;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9rem;
+        }
+
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .results-table th {
+            background-color: #1a3e6a;
+            color: white;
+        }
+
+        .results-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .btn {
+            background-color: #1a3e6a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0d2b4a;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+            z-index: 2;
+        }
+
+        .highlight {
+            background-color: #d4edda !important;
+            font-weight: bold;
+        }
+
+        .sequence-container {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
+
+        .sequence {
+            display: inline-block;
+            margin: 2px;
+            padding: 2px 5px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            flex: 1;
+            padding: 15px;
+            margin: 0 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1a3e6a;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de regreso -->
+    <a href="probabilidad.html" class="back-btn">← Regresar</a>
+    
+    <div id="moneda-page">
+        <div class="simulation-container">
+            <h2 class="simulation-title">Simulación de Moneda - Caras y Cruces</h2>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h3>Experimentos realizados</h3>
+                    <div class="stat-value" id="total-experiments">0</div>
+                </div>
+                <div class="stat-box">
+                    <h3>5 caras / 7 cruces</h3>
+                    <div class="stat-value" id="target-count">0</div>
+                    <div id="target-percentage">0%</div>
+                </div>
+                <div class="stat-box">
+                    <h3>Probabilidad teórica</h3>
+                    <div class="stat-value">19.34%</div>
+                    <div>C(12,5) × (0.5)<sup>12</sup></div>
+                </div>
+            </div>
+            
+            <div class="coin-container">
+                <div class="coin" id="coin-result">C</div>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-coin" class="btn">Lanzar Moneda</button>
+                <button id="simulate-12-coins" class="btn">Lanzar 12 monedas</button>
+                <button id="simulate-100-groups" class="btn">Lanzar 100 grupos</button>
+                <button id="simulate-1000-groups" class="btn">Lanzar 1,000 grupos</button>
+                <button id="reset-coin" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="coin-chart"></canvas>
+            </div>
+            
+            <h3>Última secuencia de 12 lanzamientos:</h3>
+            <div class="sequence-container" id="last-sequence">
+                <!-- Secuencia se mostrará aquí -->
+            </div>
+            
+            <h3>Resultados Detallados</h3>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Caras</th>
+                        <th>Cruces</th>
+                        <th>Frecuencia</th>
+                        <th>Prob. Observada</th>
+                        <th>Prob. Teórica</th>
+                        <th>Diferencia</th>
+                        <th>Combinaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Los resultados se llenarán dinámicamente -->
+                </tbody>
+            </table>
+            
+            <div class="results">
+                <h3>Explicación Teórica</h3>
+                <p>Este es un problema de distribución binomial donde:</p>
+                <ul>
+                    <li><strong>Número de ensayos (n)</strong> = 12 lanzamientos</li>
+                    <li><strong>Probabilidad de éxito (p)</strong> = 0.5 (moneda justa)</li>
+                    <li><strong>Número de éxitos (k)</strong> = Número de caras deseadas (5 en nuestro caso)</li>
+                </ul>
+                <p>La probabilidad teórica se calcula con:</p>
+                <p>P(X=k) = C(n,k) × p<sup>k</sup> × (1-p)<sup>n-k</sup></p>
+                <p>Para 5 caras y 7 cruces:</p>
+                <p>P(X=5) = C(12,5) × (0.5)<sup>5</sup> × (0.5)<sup>7</sup> = 792 × 0.03125 × 0.0078125 ≈ 0.1934 (19.34%)</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Probabilidad - Simulación de Moneda (Caras y Cruces)</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const coinResult = document.getElementById('coin-result');
+            const resultsBody = document.getElementById('results-body');
+            const lastSequenceContainer = document.getElementById('last-sequence');
+            const totalExperimentsElement = document.getElementById('total-experiments');
+            const targetCountElement = document.getElementById('target-count');
+            const targetPercentageElement = document.getElementById('target-percentage');
+            
+            // Contadores para los resultados
+            let totalExperiments = 0;
+            let counts = Array(13).fill(0); // De 0 a 12 caras posibles
+            let lastSequence = [];
+            let targetCount = 0; // Contador específico para 5 caras/7 cruces
+            
+            // Configurar gráfico
+            const coinCtx = document.getElementById('coin-chart').getContext('2d');
+            let coinChart = new Chart(coinCtx, {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 13}, (_, i) => `${i} caras / ${12-i} cruces`),
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: calculateTheoreticalProbabilities(),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: Array(13).fill(0),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 0.3,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Resultados (caras/cruces)'
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw.toFixed(4);
+                                    const percentage = (value * 100).toFixed(2);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Función para calcular probabilidades teóricas
+            function calculateTheoreticalProbabilities() {
+                const probs = [];
+                for (let k = 0; k <= 12; k++) {
+                    probs.push(combination(12, k) * Math.pow(0.5, 12));
+                }
+                return probs;
+            }
+            
+            // Función para calcular combinaciones
+            function combination(n, k) {
+                return factorial(n) / (factorial(k) * factorial(n - k));
+            }
+            
+            // Función para calcular factorial
+            function factorial(num) {
+                if (num === 0 || num === 1) return 1;
+                let result = 1;
+                for (let i = 2; i <= num; i++) {
+                    result *= i;
+                }
+                return result;
+            }
+            
+            // Lanzar una moneda (Cara o Cruz)
+            function flipCoin() {
+                return Math.random() < 0.5 ? 'C' : 'X';
+            }
+            
+            // Lanzar 12 monedas y contar caras
+            function flip12Coins() {
+                let heads = 0;
+                const sequence = [];
+                for (let i = 0; i < 12; i++) {
+                    const result = flipCoin();
+                    sequence.push(result);
+                    if (result === 'C') heads++;
+                }
+                return { heads, tails: 12 - heads, sequence };
+            }
+            
+            // Mostrar la última secuencia
+            function displayLastSequence(sequence) {
+                lastSequenceContainer.innerHTML = '';
+                sequence.forEach(result => {
+                    const span = document.createElement('span');
+                    span.className = 'sequence';
+                    span.textContent = result;
+                    span.style.backgroundColor = result === 'C' ? '#d4af37' : '#6c757d';
+                    span.style.color = 'white';
+                    lastSequenceContainer.appendChild(span);
+                });
+            }
+            
+            // Actualizar la tabla de resultados
+            function updateResultsTable() {
+                let html = '';
+                for (let k = 0; k <= 12; k++) {
+                    const tails = 12 - k;
+                    const observedCount = counts[k];
+                    const observedProb = totalExperiments > 0 ? (counts[k] / totalExperiments) : 0;
+                    const theoreticalProb = combination(12, k) * Math.pow(0.5, 12);
+                    const difference = observedProb - theoreticalProb;
+                    
+                    html += `
+                        <tr ${k === 5 ? 'class="highlight"' : ''}>
+                            <td>${k}</td>
+                            <td>${tails}</td>
+                            <td>${observedCount}</td>
+                            <td>${(observedProb * 100).toFixed(2)}%</td>
+                            <td>${(theoreticalProb * 100).toFixed(2)}%</td>
+                            <td style="color: ${difference >= 0 ? 'green' : 'red'}">${(difference * 100).toFixed(2)}%</td>
+                            <td>C(12,${k}) = ${combination(12, k)}</td>
+                        </tr>
+                    `;
+                }
+                resultsBody.innerHTML = html;
+            }
+            
+            // Actualizar el gráfico
+            function updateChart() {
+                const simulatedData = counts.map(count => totalExperiments > 0 ? count / totalExperiments : 0);
+                coinChart.data.datasets[1].data = simulatedData;
+                coinChart.update();
+            }
+            
+            // Actualizar estadísticas
+            function updateStats() {
+                totalExperimentsElement.textContent = totalExperiments;
+                targetCountElement.textContent = targetCount;
+                const percentage = totalExperiments > 0 ? (targetCount / totalExperiments * 100).toFixed(2) : 0;
+                targetPercentageElement.textContent = `${percentage}%`;
+            }
+            
+            // Event listeners
+            document.getElementById('simulate-coin').addEventListener('click', function() {
+                coinResult.textContent = flipCoin();
+            });
+            
+            document.getElementById('simulate-12-coins').addEventListener('click', function() {
+                const { heads, tails, sequence } = flip12Coins();
+                counts[heads]++;
+                totalExperiments++;
+                if (heads === 5) targetCount++;
+                
+                displayLastSequence(sequence);
+                updateResultsTable();
+                updateChart();
+                updateStats();
+                
+                // Mostrar animación de lanzamiento
+                coinResult.textContent = 'Lanzando...';
+                setTimeout(() => {
+                    coinResult.textContent = `${heads} caras, ${tails} cruces`;
+                }, 500);
+            });
+            
+            document.getElementById('simulate-100-groups').addEventListener('click', function() {
+                for (let i = 0; i < 100; i++) {
+                    const { heads, sequence } = flip12Coins();
+                    counts[heads]++;
+                    if (heads === 5) targetCount++;
+                    if (i === 99) displayLastSequence(sequence);
+                }
+                totalExperiments += 100;
+                updateResultsTable();
+                updateChart();
+                updateStats();
+                
+                coinResult.textContent = '100 grupos de 12 lanzamientos completados';
+            });
+            
+            document.getElementById('simulate-1000-groups').addEventListener('click', function() {
+                for (let i = 0; i < 1000; i++) {
+                    const { heads, sequence } = flip12Coins();
+                    counts[heads]++;
+                    if (heads === 5) targetCount++;
+                    if (i === 999) displayLastSequence(sequence);
+                }
+                totalExperiments += 1000;
+                updateResultsTable();
+                updateChart();
+                updateStats();
+                
+                coinResult.textContent = '1,000 grupos de 12 lanzamientos completados';
+            });
+            
+            document.getElementById('reset-coin').addEventListener('click', function() {
+                counts = Array(13).fill(0);
+                totalExperiments = 0;
+                targetCount = 0;
+                lastSequence = [];
+                lastSequenceContainer.innerHTML = '';
+                updateResultsTable();
+                updateChart();
+                updateStats();
+                coinResult.textContent = 'C';
+            });
+            
+            // Inicializar la tabla y estadísticas
+            updateResultsTable();
+            updateStats();
+        });
+    </script>
+</body>
+</html>

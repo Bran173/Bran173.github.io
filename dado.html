@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Dado</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #dado-page {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            background-color: #6a0f1a;
+            background-image: url('fondo-proba.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        #dado-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(106, 15, 26, 0.8);
+            z-index: 0;
+        }
+
+        .simulation-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-title {
+            color: #6a0f1a;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .dice-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+
+        .simulation-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de regreso -->
+    <a href="probabilidad.html" class="back-btn">← Regresar</a>
+    
+    <div id="dado-page">
+        <div class="simulation-container">
+            <h2 class="simulation-title">Simulación de un Dado (Distribución Uniforme)</h2>
+            
+            <div class="dice-container">
+                <div class="dice" id="dice-result">1</div>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-dado" class="btn">Lanzar Dado</button>
+                <button id="simulate-multiple-dado" class="btn">Lanzar 100 veces</button>
+                <button id="reset-dado" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="dado-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>En un dado justo de 6 caras, cada número tiene la misma probabilidad de salir:</p>
+                <p>P(X=1) = P(X=2) = ... = P(X=6) = 1/6 ≈ 16.67%</p>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Simulación de Dado</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const diceResult = document.getElementById('dice-result');
+            const dadoCounts = [0, 0, 0, 0, 0, 0];
+            
+            // Configurar gráfico de dado
+            const dadoCtx = document.getElementById('dado-chart').getContext('2d');
+            let dadoChart = new Chart(dadoCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/6, 1/6, 1/6, 1/6, 1/6, 1/6],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Resultado del dado'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            function rollDice() {
+                const result = Math.floor(Math.random() * 6) + 1;
+                diceResult.textContent = result;
+                return result;
+            }
+            
+            function simulateDado(numRolls = 1) {
+                for (let i = 0; i < numRolls; i++) {
+                    const result = rollDice();
+                    dadoCounts[result-1]++;
+                }
+                
+                const total = dadoCounts.reduce((a, b) => a + b, 0);
+                const simulatedData = dadoCounts.map(count => count / total);
+                
+                dadoChart.data.datasets[1].data = simulatedData;
+                dadoChart.update();
+            }
+            
+            // Event listeners para dado
+            document.getElementById('simulate-dado').addEventListener('click', function() {
+                simulateDado(1);
+            });
+            
+            document.getElementById('simulate-multiple-dado').addEventListener('click', function() {
+                simulateDado(100);
+            });
+            
+            document.getElementById('reset-dado').addEventListener('click', function() {
+                for (let i = 0; i < dadoCounts.length; i++) {
+                    dadoCounts[i] = 0;
+                }
+                dadoChart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
+                dadoChart.update();
+                diceResult.textContent = '1';
+            });
+        });
+    </script>
+</body>
+</html>

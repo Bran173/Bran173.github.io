@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Dos Dados</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #dos-dados-page {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            background-color: #6a0f1a;
+            background-image: url('fondo-proba.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        #dos-dados-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(106, 15, 26, 0.8);
+            z-index: 0;
+        }
+
+        .simulation-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-title {
+            color: #6a0f1a;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .dice-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            margin: 10px;
+        }
+
+        .sum-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .simulation-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!-- Botón de regreso -->
+    <a href="probabilidad.html" class="back-btn">← Regresar</a>
+    
+    <div id="dos-dados-page">
+        <div class="simulation-container">
+            <h2 class="simulation-title">Simulación de Dos Dados (Distribución de Bernoulli)</h2>
+            
+            <div class="dice-container">
+                <div class="dice" id="dice1-result">1</div>
+                <div class="dice" id="dice2-result">1</div>
+            </div>
+            
+            <div class="sum-display">
+                Suma: <span id="sum-dados-value">2</span>
+            </div>
+            
+            <div class="simulation-controls">
+                <button id="simulate-dos-dados" class="btn">Lanzar Dados</button>
+                <button id="simulate-multiple-dos-dados" class="btn">Lanzar 100 veces</button>
+                <button id="reset-dos-dados" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="dos-dados-chart"></canvas>
+            </div>
+            
+            <div class="results">
+                <h3>Resultados Teóricos</h3>
+                <p>La suma de dos dados sigue una distribución diferente:</p>
+                <ul id="dados-probabilities"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Proyecto de Energía Solar - Simulación de Dos Dados</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dice1Result = document.getElementById('dice1-result');
+            const dice2Result = document.getElementById('dice2-result');
+            const sumDadosValue = document.getElementById('sum-dados-value');
+            const dosDadosCounts = Array(11).fill(0); // Sumas de 2 a 12
+            
+            // Configurar gráfico de dos dados
+            const dosDadosCtx = document.getElementById('dos-dados-chart').getContext('2d');
+            let dosDadosChart = new Chart(dosDadosCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+                    datasets: [{
+                        label: 'Probabilidad teórica',
+                        data: [1/36, 2/36, 3/36, 4/36, 5/36, 6/36, 5/36, 4/36, 3/36, 2/36, 1/36],
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'Probabilidad simulada',
+                        data: Array(11).fill(0),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 0.2,
+                            title: {
+                                display: true,
+                                text: 'Probabilidad'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Suma de los dados'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Mostrar probabilidades teóricas para dos dados
+            const dadosProbabilities = document.getElementById('dados-probabilities');
+            const theoreticalDados = {
+                2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 
+                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
+            };
+            
+            for (const sum in theoreticalDados) {
+                const li = document.createElement('li');
+                const prob = theoreticalDados[sum] / 36;
+                li.textContent = `P(Suma=${sum}) = ${theoreticalDados[sum]}/36 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+                dadosProbabilities.appendChild(li);
+            }
+            
+            function rollTwoDice() {
+                const result1 = Math.floor(Math.random() * 6) + 1;
+                const result2 = Math.floor(Math.random() * 6) + 1;
+                const sum = result1 + result2;
+                
+                dice1Result.textContent = result1;
+                dice2Result.textContent = result2;
+                sumDadosValue.textContent = sum;
+                
+                return sum;
+            }
+            
+            function simulateDosDados(numRolls = 1) {
+                for (let i = 0; i < numRolls; i++) {
+                    const sum = rollTwoDice();
+                    dosDadosCounts[sum-2]++;
+                }
+                
+                const total = dosDadosCounts.reduce((a, b) => a + b, 0);
+                const simulatedData = dosDadosCounts.map(count => count / total);
+                
+                dosDadosChart.data.datasets[1].data = simulatedData;
+                dosDadosChart.update();
+            }
+            
+            // Event listeners para dos dados
+            document.getElementById('simulate-dos-dados').addEventListener('click', function() {
+                simulateDosDados(1);
+            });
+            
+            document.getElementById('simulate-multiple-dos-dados').addEventListener('click', function() {
+                simulateDosDados(100);
+            });
+            
+            document.getElementById('reset-dos-dados').addEventListener('click', function() {
+                for (let i = 0; i < dosDadosCounts.length; i++) {
+                    dosDadosCounts[i] = 0;
+                }
+                dosDadosChart.data.datasets[1].data = Array(11).fill(0);
+                dosDadosChart.update();
+                dice1Result.textContent = '1';
+                dice2Result.textContent = '1';
+                sumDadosValue.textContent = '2';
+            });
+        });
+    </script>
+</body>
+</html>
