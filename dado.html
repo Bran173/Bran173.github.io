@@ -67,6 +67,14 @@
             margin: 10px;
         }
 
+        .counter-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin: 10px 0;
+        }
+
         .simulation-controls {
             margin: 30px 0;
             padding: 20px;
@@ -75,10 +83,84 @@
             text-align: center;
         }
 
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .control-group .range-value {
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #16a085;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1abc9c;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
         .chart-container {
             margin: 30px 0;
             height: 400px;
             position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
         }
     </style>
 </head>
@@ -94,10 +176,22 @@
                 <div class="dice" id="dice-result">1</div>
             </div>
             
+            <div class="counter-display">
+                Lanzamientos realizados: <span id="lanzamientos-counter">0</span>
+            </div>
+            
             <div class="simulation-controls">
-                <button id="simulate-dado" class="btn">Lanzar Dado</button>
-                <button id="simulate-multiple-dado" class="btn">Lanzar 100 veces</button>
-                <button id="reset-dado" class="btn btn-secondary">Reiniciar</button>
+                <div class="control-group">
+                    <label for="simulations-range">Cantidad de lanzamientos:</label>
+                    <input type="range" id="simulations-range" min="1" max="1000" value="100" step="1">
+                    <span class="range-value" id="range-value">100</span>
+                </div>
+                
+                <div class="btn-group">
+                    <button id="simulate-dado" class="btn btn-primary">Lanzar Dado</button>
+                    <button id="simulate-multiple-dado" class="btn btn-primary">Lanzar</button>
+                    <button id="reset-dado" class="btn btn-secondary">Reiniciar</button>
+                </div>
             </div>
             
             <div class="chart-container">
@@ -120,7 +214,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const diceResult = document.getElementById('dice-result');
+            const lanzamientosCounter = document.getElementById('lanzamientos-counter');
+            const simulationsRange = document.getElementById('simulations-range');
+            const rangeValue = document.getElementById('range-value');
             const dadoCounts = [0, 0, 0, 0, 0, 0];
+            let totalLanzamientos = 0;
+            
+            // Actualizar el valor del rango
+            simulationsRange.addEventListener('input', function() {
+                rangeValue.textContent = this.value;
+            });
             
             // Configurar gráfico de dado
             const dadoCtx = document.getElementById('dado-chart').getContext('2d');
@@ -174,11 +277,16 @@
                 for (let i = 0; i < numRolls; i++) {
                     const result = rollDice();
                     dadoCounts[result-1]++;
+                    totalLanzamientos++;
                 }
                 
-                const total = dadoCounts.reduce((a, b) => a + b, 0);
-                const simulatedData = dadoCounts.map(count => count / total);
+                // Actualizar contador
+                lanzamientosCounter.textContent = totalLanzamientos;
                 
+                // Calcular probabilidades
+                const simulatedData = dadoCounts.map(count => count / totalLanzamientos);
+                
+                // Actualizar gráfico
                 dadoChart.data.datasets[1].data = simulatedData;
                 dadoChart.update();
             }
@@ -189,13 +297,19 @@
             });
             
             document.getElementById('simulate-multiple-dado').addEventListener('click', function() {
-                simulateDado(100);
+                const numSimulations = parseInt(simulationsRange.value);
+                simulateDado(numSimulations);
             });
             
             document.getElementById('reset-dado').addEventListener('click', function() {
+                // Reiniciar contadores
                 for (let i = 0; i < dadoCounts.length; i++) {
                     dadoCounts[i] = 0;
                 }
+                totalLanzamientos = 0;
+                
+                // Actualizar interfaz
+                lanzamientosCounter.textContent = '0';
                 dadoChart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
                 dadoChart.update();
                 diceResult.textContent = '1';
