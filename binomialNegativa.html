@@ -3,129 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binomial Negativa - Lanzamientos para k caras</title>
+    <title>Simulación Binomial Negativa</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
-        /* Estilos previos... */
-        .theory-section {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            border-left: 4px solid #16a085;
+        #moneda-page {
+            min-height: 100vh;
+            padding-top: 80px;
+            position: relative;
+            background-color: #6a0f1a;
+            background-image: url('fondo-proba.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
-        
-        .stats-display {
-            display: flex;
-            justify-content: space-around;
+
+        #moneda-page::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(106, 15, 26, 0.8);
+            z-index: 0;
+        }
+
+        .simulation-container {
+            position: relative;
+            z-index: 1;
+            background-color: rgba(255, 255, 255, 0.95);
+            width: 90%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .simulation-title {
+            color: #6a0f1a;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .coin-container {
+            text-align: center;
             margin: 20px 0;
-            flex-wrap: wrap;
         }
-        
-        .stat-box {
+
+        .coin {
+            width: 80px;
+            height: 80px;
             background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
             margin: 10px;
-            min-width: 200px;
+            background-color: gold;
+        }
+
+        .counter-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .simulation-controls {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
             text-align: center;
         }
-        
-        .stat-value {
-            font-size: 1.5rem;
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
             font-weight: bold;
             color: #2c3e50;
         }
-        
-        .stat-label {
-            color: #7f8c8d;
-            font-size: 0.9rem;
+
+        .control-group input[type="range"] {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
         }
-        
-        .math-formula {
-            background-color: #f0f0f0;
-            padding: 10px;
+
+        .control-group .range-value {
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
             border-radius: 5px;
-            font-family: monospace;
-            overflow-x: auto;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
         }
-        
+
+        .btn-primary {
+            background-color: #16a085;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1abc9c;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .chart-container {
+            margin: 30px 0;
+            height: 400px;
+            position: relative;
+        }
+
+        .results-container {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .result-box {
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .result-box h4 {
+            margin-top: 0;
+            color: #6a0f1a;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f0f7fa;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+
         @media (max-width: 768px) {
-            .stats-display {
+            .btn-group {
                 flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
+    <!-- Botón de regreso -->
     <a href="probabilidad.html" class="back-btn">← Regresar</a>
     
-    <div id="binomial-negativa-page">
+    <div id="moneda-page">
         <div class="simulation-container">
-            <h2 class="simulation-title">Distribución Binomial Negativa</h2>
-            <h3 style="text-align: center;">Lanzamientos necesarios para obtener <span id="k-value">3</span> caras</h3>
-            
-            <div class="theory-section">
-                <h4>¿Qué es la Distribución Binomial Negativa?</h4>
-                <p>La distribución binomial negativa modela el número de ensayos necesarios para obtener un número determinado de éxitos en una secuencia de ensayos de Bernoulli independientes.</p>
-                
-                <div class="math-formula">
-                    <p>Fórmula: \( P(X = x) = \binom{x-1}{k-1} p^k (1-p)^{x-k} \)</p>
-                    <p>Donde:</p>
-                    <ul>
-                        <li>\( x \): Número total de ensayos (lanzamientos)</li>
-                        <li>\( k \): Número de éxitos requeridos (caras)</li>
-                        <li>\( p \): Probabilidad de éxito en cada ensayo (0.5 para moneda justa)</li>
-                    </ul>
-                </div>
-                
-                <h4>Media y Varianza</h4>
-                <div class="math-formula">
-                    <p>Media (valor esperado): \( \mu = \frac{k}{p} \)</p>
-                    <p>Varianza: \( \sigma^2 = \frac{k(1-p)}{p^2} \)</p>
-                </div>
-            </div>
-            
-            <div class="probability-control">
-                <label>Número de caras requeridas (k):</label>
-                <input type="number" id="successes-required" min="1" max="10" value="3">
-                <label>Probabilidad de cara (p):</label>
-                <input type="number" id="probability-input" min="0.1" max="0.9" step="0.1" value="0.5">
-            </div>
+            <h2 class="simulation-title">Simulación de Lanzamientos de Moneda (Distribución Binomial Negativa)</h2>
             
             <div class="coin-container">
                 <div class="coin" id="coin-result">C</div>
             </div>
             
-            <div class="stats-display">
-                <div class="stat-box">
-                    <div class="stat-label">Caras obtenidas</div>
-                    <div class="stat-value"><span id="success-counter">0</span>/<span id="required-successes">3</span></div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Lanzamientos totales</div>
-                    <div class="stat-value" id="attempts-counter">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Media (simulada)</div>
-                    <div class="stat-value" id="mean-value">0</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Varianza (simulada)</div>
-                    <div class="stat-value" id="variance-value">0</div>
-                </div>
+            <div class="counter-display">
+                Lanzamientos realizados: <span id="lanzamientos-counter">0</span> |
+                Caras obtenidas: <span id="caras-counter">0</span> |
+                Cruces obtenidas: <span id="cruces-counter">0</span>
             </div>
             
-            <div id="experiment-result" class="results-display"></div>
-            
             <div class="simulation-controls">
+                <div class="control-group">
+                    <label for="success-range">Número de caras deseadas (r):</label>
+                    <input type="range" id="success-range" min="1" max="20" value="5" step="1">
+                    <span class="range-value" id="success-value">5</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="prob-range">Probabilidad de cara (p):</label>
+                    <input type="range" id="prob-range" min="1" max="99" value="50" step="1">
+                    <span class="range-value" id="prob-value">0.50</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="simulations-range">Cantidad de experimentos:</label>
+                    <input type="range" id="simulations-range" min="1" max="1000" value="100" step="1">
+                    <span class="range-value" id="range-value">100</span>
+                </div>
+                
                 <div class="btn-group">
-                    <button id="simulate-single" class="btn btn-primary">Lanzar Moneda</button>
-                    <button id="simulate-until-k" class="btn btn-primary">Lanzar hasta k caras</button>
-                    <button id="simulate-multiple" class="btn btn-primary">Simular 100 experimentos</button>
+                    <button id="simulate-coin" class="btn btn-primary">Lanzar Moneda</button>
+                    <button id="simulate-multiple" class="btn btn-primary">Realizar Experimentos</button>
                     <button id="reset-simulation" class="btn btn-secondary">Reiniciar</button>
                 </div>
             </div>
@@ -134,78 +253,179 @@
                 <canvas id="binomial-chart"></canvas>
             </div>
             
-            <div class="theory-section">
-                <h4>Interpretación de la Simulación</h4>
-                <p>En esta simulación:</p>
-                <ol>
-                    <li><strong>Configuración inicial</strong>: Establece cuántas caras (k) necesitas y la probabilidad de cara (p).</li>
-                    <li><strong>Lanzar moneda</strong>: Cada lanzamiento es un ensayo Bernoulli independiente.</li>
-                    <li><strong>Conteo</strong>: Contamos cuántos lanzamientos se necesitan para obtener las k caras.</li>
-                    <li><strong>Resultados</strong>: El gráfico muestra la frecuencia de cuántos lanzamientos fueron necesarios en múltiples experimentos.</li>
-                    <li><strong>Estadísticas</strong>: Calculamos la media y varianza de los resultados para comparar con los valores teóricos.</li>
-                </ol>
-                
-                <div class="math-formula">
-                    <p>Para k=3 y p=0.5:</p>
-                    <p>Media teórica: \( \frac{3}{0.5} = 6 \)</p>
-                    <p>Varianza teórica: \( \frac{3(1-0.5)}{0.5^2} = 6 \)</p>
+            <div class="results-container">
+                <h3>Resultados Estadísticos</h3>
+                <div class="results-grid">
+                    <div class="result-box">
+                        <h4>Media (Valor Esperado)</h4>
+                        <p>Simulada: <span id="media-simulada">0</span></p>
+                        <p>Teórica: <span id="media-teorica">0</span></p>
+                    </div>
+                    <div class="result-box">
+                        <h4>Varianza</h4>
+                        <p>Simulada: <span id="varianza-simulada">0</span></p>
+                        <p>Teórica: <span id="varianza-teorica">0</span></p>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>Explicación de la Distribución Binomial Negativa</h3>
+                <p>La distribución binomial negativa modela el número de ensayos de Bernoulli necesarios para obtener un número determinado de éxitos (caras).</p>
+                
+                <p><strong>Parámetros:</strong></p>
+                <ul>
+                    <li><strong>r</strong>: Número de éxitos deseados (caras)</li>
+                    <li><strong>p</strong>: Probabilidad de éxito en cada ensayo (probabilidad de cara)</li>
+                </ul>
+                
+                <p><strong>Fórmulas teóricas:</strong></p>
+                <ul>
+                    <li>Media (valor esperado): E[X] = r / p</li>
+                    <li>Varianza: Var(X) = r(1 - p) / p²</li>
+                    <li>Función de probabilidad: P(X = k) = C(k-1, r-1) * pʳ * (1-p)ᵏ⁻ʳ, para k = r, r+1, ...</li>
+                </ul>
+                
+                <p>En esta simulación, contamos cuántos lanzamientos de moneda se necesitan para obtener el número deseado de caras (r), y repetimos este experimento muchas veces para observar la distribución de los resultados.</p>
             </div>
         </div>
     </div>
+    
+    <footer>
+        <p>Simulación de Distribución Binomial Negativa</p>
+        <p>&copy; 2023 - Todos los derechos reservados</p>
+    </footer>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Elementos del DOM
             const coinResult = document.getElementById('coin-result');
-            const successCounter = document.getElementById('success-counter');
-            const attemptsCounter = document.getElementById('attempts-counter');
-            const experimentResult = document.getElementById('experiment-result');
-            const successesRequiredInput = document.getElementById('successes-required');
-            const probabilityInput = document.getElementById('probability-input');
-            const kValue = document.getElementById('k-value');
-            const requiredSuccesses = document.getElementById('required-successes');
-            const meanValue = document.getElementById('mean-value');
-            const varianceValue = document.getElementById('variance-value');
+            const lanzamientosCounter = document.getElementById('lanzamientos-counter');
+            const carasCounter = document.getElementById('caras-counter');
+            const crucesCounter = document.getElementById('cruces-counter');
+            const successRange = document.getElementById('success-range');
+            const successValue = document.getElementById('success-value');
+            const probRange = document.getElementById('prob-range');
+            const probValue = document.getElementById('prob-value');
+            const simulationsRange = document.getElementById('simulations-range');
+            const rangeValue = document.getElementById('range-value');
+            
+            // Elementos de resultados
+            const mediaSimulada = document.getElementById('media-simulada');
+            const mediaTeorica = document.getElementById('media-teorica');
+            const varianzaSimulada = document.getElementById('varianza-simulada');
+            const varianzaTeorica = document.getElementById('varianza-teorica');
             
             // Variables de estado
-            let successes = 0;
-            let attempts = 0;
-            let experimentCounts = {};
-            let currentExperimentAttempts = 0;
-            let currentExperimentSuccesses = 0;
-            let allResults = [];
-            let p = 0.5;
+            let totalLanzamientos = 0;
+            let totalCaras = 0;
+            let totalCruces = 0;
+            let resultados = []; // Almacena los resultados de cada experimento (número de lanzamientos para alcanzar r caras)
+            let experimentosRealizados = 0;
+            
+            // Actualizar valores de los rangos
+            successRange.addEventListener('input', function() {
+                successValue.textContent = this.value;
+            });
+            
+            probRange.addEventListener('input', function() {
+                const prob = parseInt(this.value) / 100;
+                probValue.textContent = prob.toFixed(2);
+            });
+            
+            simulationsRange.addEventListener('input', function() {
+                rangeValue.textContent = this.value;
+            });
+            
+            // Función para lanzar una moneda (true = cara, false = cruz)
+            function flipCoin() {
+                const p = parseInt(probRange.value) / 100;
+                return Math.random() < p;
+            }
+            
+            // Función para realizar un experimento binomial negativo
+            function runNegativeBinomialExperiment() {
+                const r = parseInt(successRange.value);
+                let caras = 0;
+                let lanzamientos = 0;
+                
+                while (caras < r) {
+                    const resultado = flipCoin();
+                    lanzamientos++;
+                    totalLanzamientos++;
+                    
+                    if (resultado) {
+                        caras++;
+                        totalCaras++;
+                        coinResult.textContent = 'C';
+                        coinResult.style.backgroundColor = 'gold';
+                    } else {
+                        totalCruces++;
+                        coinResult.textContent = 'X';
+                        coinResult.style.backgroundColor = 'silver';
+                    }
+                    
+                    // Pequeña pausa para animación (solo en lanzamientos individuales)
+                    if (parseInt(simulationsRange.value) === 1) {
+                        // No hacemos nada aquí, pero podríamos agregar un setTimeout si quisiéramos animación
+                    }
+                }
+                
+                return lanzamientos;
+            }
+            
+            // Función para actualizar los contadores
+            function updateCounters() {
+                lanzamientosCounter.textContent = totalLanzamientos;
+                carasCounter.textContent = totalCaras;
+                crucesCounter.textContent = totalCruces;
+            }
+            
+            // Función para calcular media y varianza
+            function calculateStatistics() {
+                if (resultados.length === 0) return;
+                
+                // Media simulada
+                const media = resultados.reduce((a, b) => a + b, 0) / resultados.length;
+                mediaSimulada.textContent = media.toFixed(2);
+                
+                // Varianza simulada
+                const varianza = resultados.reduce((a, b) => a + Math.pow(b - media, 2), 0) / resultados.length;
+                varianzaSimulada.textContent = varianza.toFixed(2);
+                
+                // Valores teóricos
+                const r = parseInt(successRange.value);
+                const p = parseInt(probRange.value) / 100;
+                const mediaT = r / p;
+                const varianzaT = r * (1 - p) / Math.pow(p, 2);
+                
+                mediaTeorica.textContent = mediaT.toFixed(2);
+                varianzaTeorica.textContent = varianzaT.toFixed(2);
+            }
             
             // Configurar gráfico
-            const ctx = document.getElementById('binomial-chart').getContext('2d');
-            let binomialChart = new Chart(ctx, {
+            const binomialCtx = document.getElementById('binomial-chart').getContext('2d');
+            let binomialChart = new Chart(binomialCtx, {
                 type: 'bar',
                 data: {
                     labels: [],
                     datasets: [{
-                        label: 'Resultados simulados',
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1,
-                        data: []
-                    }, {
-                        label: 'Probabilidad teórica',
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
+                        label: 'Frecuencia observada',
                         data: [],
-                        type: 'line'
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Frecuencia/Probabilidad'
+                                text: 'Frecuencia'
                             }
                         },
                         x: {
@@ -218,181 +438,98 @@
                 }
             });
             
-            // Event listeners
-            successesRequiredInput.addEventListener('change', updateParameters);
-            probabilityInput.addEventListener('change', updateParameters);
-            
-            document.getElementById('simulate-single').addEventListener('click', flipCoin);
-            document.getElementById('simulate-until-k').addEventListener('click', runFullExperiment);
-            document.getElementById('simulate-multiple').addEventListener('click', () => runMultipleExperiments(100));
-            document.getElementById('reset-simulation').addEventListener('click', resetExperiment);
-            
-            function updateParameters() {
-                const k = parseInt(successesRequiredInput.value);
-                p = parseFloat(probabilityInput.value);
-                kValue.textContent = k;
-                requiredSuccesses.textContent = k;
-                resetExperiment();
-            }
-            
-            function flipCoin() {
-                const result = Math.random() < p ? 'C' : 'X';
-                animateCoinFlip(result);
-                
-                attempts++;
-                attemptsCounter.textContent = attempts;
-                currentExperimentAttempts++;
-                
-                if (result === 'C') {
-                    successes++;
-                    currentExperimentSuccesses++;
-                    successCounter.textContent = successes;
-                }
-                
-                const k = parseInt(successesRequiredInput.value);
-                if (currentExperimentSuccesses >= k) {
-                    recordExperimentResult(k);
-                }
-            }
-            
-            function animateCoinFlip(result) {
-                coinResult.classList.add('flipping');
-                setTimeout(() => {
-                    coinResult.textContent = result;
-                    coinResult.classList.remove('flipping');
-                }, 500);
-            }
-            
-            function runFullExperiment() {
-                const k = parseInt(successesRequiredInput.value);
-                currentExperimentAttempts = 0;
-                currentExperimentSuccesses = 0;
-                
-                while (currentExperimentSuccesses < k) {
-                    const result = Math.random() < p ? 'C' : 'X';
-                    attempts++;
-                    currentExperimentAttempts++;
-                    
-                    if (result === 'C') {
-                        successes++;
-                        currentExperimentSuccesses++;
-                    }
-                }
-                
-                attemptsCounter.textContent = attempts;
-                successCounter.textContent = successes;
-                recordExperimentResult(k);
-            }
-            
-            function runMultipleExperiments(numExperiments) {
-                const k = parseInt(successesRequiredInput.value);
-                
-                for (let i = 0; i < numExperiments; i++) {
-                    let attempts = 0;
-                    let successes = 0;
-                    
-                    while (successes < k) {
-                        attempts++;
-                        if (Math.random() < p) successes++;
-                    }
-                    
-                    if (!experimentCounts[attempts]) {
-                        experimentCounts[attempts] = 0;
-                    }
-                    experimentCounts[attempts]++;
-                    allResults.push(attempts);
-                }
-                
-                updateChart();
-                updateStatistics();
-                experimentResult.textContent = `Se completaron ${numExperiments} experimentos.`;
-            }
-            
-            function recordExperimentResult(k) {
-                if (!experimentCounts[currentExperimentAttempts]) {
-                    experimentCounts[currentExperimentAttempts] = 0;
-                }
-                experimentCounts[currentExperimentAttempts]++;
-                allResults.push(currentExperimentAttempts);
-                
-                updateChart();
-                updateStatistics();
-                experimentResult.textContent = `¡Se necesitaron ${currentExperimentAttempts} lanzamientos para obtener ${k} caras!`;
-                
-                // Reset para nuevo experimento
-                currentExperimentAttempts = 0;
-                currentExperimentSuccesses = 0;
-            }
-            
+            // Función para actualizar el gráfico
             function updateChart() {
-                const k = parseInt(successesRequiredInput.value);
-                const labels = Object.keys(experimentCounts).sort((a,b) => a-b);
-                const data = labels.map(label => experimentCounts[label]);
+                if (resultados.length === 0) return;
                 
-                // Calcular probabilidades teóricas
-                const theoreticalProbs = labels.map(x => {
-                    x = parseInt(x);
-                    return combination(x-1, k-1) * Math.pow(p, k) * Math.pow(1-p, x-k);
+                // Crear histograma de los resultados
+                const min = Math.min(...resultados);
+                const max = Math.max(...resultados);
+                const bins = {};
+                
+                // Determinar el tamaño de los bins (usamos la regla de Sturges)
+                const numBins = Math.ceil(Math.log2(resultados.length)) + 1 || 10;
+                const binSize = Math.ceil((max - min) / numBins);
+                
+                // Crear bins
+                for (let i = 0; i <= numBins; i++) {
+                    const binStart = min + i * binSize;
+                    const binEnd = binStart + binSize;
+                    bins[`${binStart}-${binEnd}`] = 0;
+                }
+                
+                // Llenar los bins con los datos
+                resultados.forEach(val => {
+                    for (let i = 0; i <= numBins; i++) {
+                        const binStart = min + i * binSize;
+                        const binEnd = binStart + binSize;
+                        
+                        if (val >= binStart && val < binEnd) {
+                            bins[`${binStart}-${binEnd}`]++;
+                            break;
+                        } else if (i === numBins && val >= binStart) {
+                            // Para el último valor
+                            bins[`${binStart}-${binEnd}`]++;
+                        }
+                    }
                 });
                 
+                // Preparar datos para el gráfico
+                const labels = Object.keys(bins);
+                const data = Object.values(bins);
+                
+                // Actualizar gráfico
                 binomialChart.data.labels = labels;
                 binomialChart.data.datasets[0].data = data;
-                binomialChart.data.datasets[1].data = theoreticalProbs.map(prob => prob * allResults.length);
                 binomialChart.update();
             }
             
-            function updateStatistics() {
-                if (allResults.length === 0) return;
-                
-                // Calcular media
-                const mean = allResults.reduce((sum, x) => sum + x, 0) / allResults.length;
-                meanValue.textContent = mean.toFixed(2);
-                
-                // Calcular varianza
-                const variance = allResults.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / allResults.length;
-                varianceValue.textContent = variance.toFixed(2);
-                
-                // Mostrar comparación con valores teóricos
-                const k = parseInt(successesRequiredInput.value);
-                const theoreticalMean = k / p;
-                const theoreticalVariance = k * (1 - p) / Math.pow(p, 2);
-                
-                experimentResult.innerHTML += `<br>Media teórica: ${theoreticalMean.toFixed(2)} | Varianza teórica: ${theoreticalVariance.toFixed(2)}`;
-            }
+            // Event listeners
+            document.getElementById('simulate-coin').addEventListener('click', function() {
+                // Realizar un solo experimento (hasta obtener r caras)
+                const lanzamientos = runNegativeBinomialExperiment();
+                resultados.push(lanzamientos);
+                experimentosRealizados++;
+                updateCounters();
+                calculateStatistics();
+                updateChart();
+            });
             
-            function combination(n, k) {
-                if (k < 0 || k > n) return 0;
-                if (k === 0 || k === n) return 1;
-                k = Math.min(k, n - k);
-                let res = 1;
-                for (let i = 1; i <= k; i++) {
-                    res = res * (n - k + i) / i;
+            document.getElementById('simulate-multiple').addEventListener('click', function() {
+                const numExperimentos = parseInt(simulationsRange.value);
+                
+                for (let i = 0; i < numExperimentos; i++) {
+                    const lanzamientos = runNegativeBinomialExperiment();
+                    resultados.push(lanzamientos);
+                    experimentosRealizados++;
                 }
-                return res;
-            }
+                
+                updateCounters();
+                calculateStatistics();
+                updateChart();
+            });
             
-            function resetExperiment() {
-                successes = 0;
-                attempts = 0;
-                experimentCounts = {};
-                allResults = [];
-                currentExperimentAttempts = 0;
-                currentExperimentSuccesses = 0;
+            document.getElementById('reset-simulation').addEventListener('click', function() {
+                // Reiniciar todos los contadores y resultados
+                totalLanzamientos = 0;
+                totalCaras = 0;
+                totalCruces = 0;
+                resultados = [];
+                experimentosRealizados = 0;
                 
-                successCounter.textContent = '0';
-                attemptsCounter.textContent = '0';
-                meanValue.textContent = '0';
-                varianceValue.textContent = '0';
-                experimentResult.textContent = '';
+                // Actualizar interfaz
+                updateCounters();
+                calculateStatistics();
                 
+                // Reiniciar gráfico
                 binomialChart.data.labels = [];
                 binomialChart.data.datasets[0].data = [];
-                binomialChart.data.datasets[1].data = [];
                 binomialChart.update();
-            }
-            
-            // Inicialización
-            updateParameters();
+                
+                // Restablecer moneda
+                coinResult.textContent = 'C';
+                coinResult.style.backgroundColor = 'gold';
+            });
         });
     </script>
 </body>
