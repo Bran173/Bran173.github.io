@@ -1,11 +1,452 @@
-6. Distribución Hipergeométrica
-Ejemplo: Sacar 5 cartas de una baraja y contar cuántas son corazones.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación Hipergeométrica - Cartas de Corazones</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #6a0f1a;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .simulation-container {
+            background-color: #f8f8f8;
+            width: 90%;
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #6a0f1a;
+        }
+        .cards-container {
+            text-align: center;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        .card {
+            width: 60px;
+            height: 90px;
+            background-color: white;
+            border-radius: 5px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            position: relative;
+            font-weight: bold;
+        }
+        .heart {
+            color: red;
+            font-size: 24px;
+        }
+        .other {
+            color: black;
+            font-size: 24px;
+        }
+        .counter-display, .stats-display {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: #333;
+        }
+        .btn-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            background-color: #16a085;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #1abc9c;
+            transform: translateY(-3px);
+        }
+        .chart-container {
+            height: 350px;
+            margin: 30px 0;
+        }
+        .explanation {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
+        }
+        .input-group {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .params-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .param-box {
+            background-color: #e6e6e6;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            text-align: center;
+        }
+        .stats-box {
+            background-color: #e6f3ff;
+            border: 2px solid #a0c4ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-item {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .stat-item.theoretical {
+            border-left: 4px solid #4a90e2;
+        }
+        .stat-item.experimental {
+            border-left: 4px solid #e24a4a;
+        }
+        .stat-item h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        .probabilities-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .probabilities-table th, .probabilities-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .probabilities-table th {
+            background-color: #f2f2f2;
+        }
+        .probabilities-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <h2>Simulación de Distribución Hipergeométrica</h2>
+        <p style="text-align: center; margin-bottom: 20px;">Extracción de cartas de corazones de una baraja</p>
 
-Población (N): 52 cartas.
+        <div class="params-container">
+            <div class="param-box">
+                <h4>Población (N)</h4>
+                <p>52 cartas</p>
+            </div>
+            <div class="param-box">
+                <h4>Éxitos en población (K)</h4>
+                <p>13 corazones</p>
+            </div>
+            <div class="param-box">
+                <h4>Muestra (n)</h4>
+                <p>5 cartas</p>
+            </div>
+        </div>
 
-Éxitos en población (K): 13 corazones.
+        <div class="cards-container" id="cards-display">
+            <!-- Las cartas aparecerán aquí -->
+        </div>
 
-Muestra (n): 5 cartas extraídas sin reemplazo.
+        <div class="counter-display">
+            Simulaciones realizadas: <span id="simulaciones-counter">0</span> | 
+            Corazones en última extracción: <span id="hearts-counter">0</span>
+        </div>
 
-Aplicación:
+        <div class="stats-box">
+            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Estadísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-item theoretical">
+                    <h4>Teóricas</h4>
+                    <p><strong>Media:</strong> 1.25</p>
+                    <p><strong>Varianza:</strong> 0.864</p>
+                </div>
+                <div class="stat-item experimental">
+                    <h4>Experimentales</h4>
+                    <p><strong>Media:</strong> <span id="media-exp">0</span></p>
+                    <p><strong>Varianza:</strong> <span id="varianza-exp">0</span></p>
+                </div>
+            </div>
+        </div>
 
+        <div class="stats-box">
+            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Probabilidades de cada caso</h3>
+            <table class="probabilities-table">
+                <thead>
+                    <tr>
+                        <th>Corazones (k)</th>
+                        <th>Prob. Teórica</th>
+                        <th>Prob. Experimental</th>
+                        <th>Diferencia</th>
+                    </tr>
+                </thead>
+                <tbody id="probabilities-body">
+                    <!-- Las probabilidades se llenarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="simular(1)">Simular 1 vez</button>
+            <button class="btn" onclick="simular(parseInt(document.getElementById('simulaciones').value))">Simular múltiples</button>
+            <button class="btn" onclick="reiniciar()">Reiniciar</button><br>
+            <div class="input-group">
+                <label for="simulaciones">Número de simulaciones:</label>
+                <input type="range" id="simulaciones" min="1" max="1000" value="100" oninput="document.getElementById('rangeValue').textContent=this.value;">
+                <span id="rangeValue">100</span>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="explanation">
+            <h3>Explicación Teórica</h3>
+            <p>La distribución hipergeométrica describe la probabilidad de obtener k éxitos (en este caso, cartas de corazones) en n extracciones sin reemplazo de una población finita de tamaño N que contiene exactamente K objetos con esa característica.</p>
+            
+            <p><strong>Fórmulas:</strong></p>
+            <ul>
+                <li>Media teórica (μ) = n × (K/N) = 5 × (13/52) = 1.25</li>
+                <li>Varianza teórica (σ²) = n × (K/N) × ((N-K)/N) × ((N-n)/(N-1)) = 5 × (13/52) × (39/52) × (47/51) ≈ 0.864</li>
+                <li>Probabilidad P(X=k) = [C(K,k) × C(N-K, n-k)] / C(N,n)</li>
+            </ul>
+            
+            <p>Donde C(a,b) es el número de combinaciones de a elementos tomados de b en b.</p>
+            
+            <h3>¿Qué estamos simulando?</h3>
+            <p>Estamos simulando el proceso de sacar 5 cartas de una baraja estándar (52 cartas, 13 de cada palo) y contar cuántas de ellas son corazones. Cada simulación representa una extracción de 5 cartas sin reemplazo.</p>
+            
+            <h3>Paso a paso para usar la simulación:</h3>
+            <ol>
+                <li>Observa los parámetros fijos: 52 cartas (población), 13 corazones (éxitos), 5 cartas extraídas (muestra).</li>
+                <li>Selecciona el número de simulaciones que deseas realizar usando el control deslizante.</li>
+                <li>Presiona "Simular 1 vez" para una sola extracción o "Simular múltiples" para varias extracciones.</li>
+                <li>Observa las cartas obtenidas en la última extracción (visualizadas como corazones rojos u otros palos en negro).</li>
+                <li>Revisa las estadísticas: media y varianza teóricas vs. experimentales.</li>
+                <li>El gráfico muestra la distribución teórica vs. la experimental.</li>
+                <li>Puedes reiniciar la simulación en cualquier momento.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const cardsDisplay = document.getElementById('cards-display');
+        const simulacionesCounter = document.getElementById('simulaciones-counter');
+        const heartsCounter = document.getElementById('hearts-counter');
+        const mediaExpElem = document.getElementById('media-exp');
+        const varianzaExpElem = document.getElementById('varianza-exp');
+        const probabilitiesBody = document.getElementById('probabilities-body');
+        
+        // Parámetros de la distribución hipergeométrica
+        const N = 52;  // Población total (cartas en la baraja)
+        const K = 13;  // Éxitos en población (corazones)
+        const n = 5;    // Tamaño de la muestra (cartas extraídas)
+        
+        let totalSimulaciones = 0;
+        let counts = [0, 0, 0, 0, 0, 0]; // Para contar resultados de 0 a 5 corazones
+        let resultados = []; // Almacena el número de corazones en cada simulación
+        const probsTeoricas = calcularProbabilidadesTeoricas();
+
+        // Configuración del gráfico
+        const ctx = document.getElementById('chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['0', '1', '2', '3', '4', '5'],
+                datasets: [{
+                    label: 'Probabilidad Teórica',
+                    data: probsTeoricas,
+                    backgroundColor: 'rgba(54,162,235,0.5)',
+                    borderColor: 'rgba(54,162,235,1)',
+                    borderWidth: 1
+                },{
+                    label: 'Probabilidad Experimental',
+                    data: [0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(255,99,132,0.5)',
+                    borderColor: 'rgba(255,99,132,1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 0.5
+                    }
+                }
+            }
+        });
+
+        // Función para calcular las probabilidades teóricas
+        function calcularProbabilidadesTeoricas() {
+            const probs = [];
+            for (let k = 0; k <= 5; k++) {
+                // C(K,k) × C(N-K, n-k) / C(N,n)
+                const prob = (combinaciones(K, k) * combinaciones(N-K, n-k)) / combinaciones(N, n);
+                probs.push(prob);
+            }
+            return probs;
+        }
+
+        // Función combinatoria C(n,k)
+        function combinaciones(n, k) {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            k = Math.min(k, n - k);
+            let res = 1;
+            for (let i = 1; i <= k; i++) {
+                res = res * (n - k + i) / i;
+            }
+            return res;
+        }
+
+        // Función para actualizar la tabla de probabilidades
+        function actualizarTablaProbabilidades() {
+            probabilitiesBody.innerHTML = '';
+            for (let k = 0; k <= 5; k++) {
+                const probExp = counts[k] / totalSimulaciones || 0;
+                const probTeo = probsTeoricas[k];
+                const diferencia = Math.abs(probTeo - probExp);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${k}</td>
+                    <td>${(probTeo * 100).toFixed(2)}%</td>
+                    <td>${(probExp * 100).toFixed(2)}%</td>
+                    <td>${(diferencia * 100).toFixed(2)}%</td>
+                `;
+                probabilitiesBody.appendChild(row);
+            }
+        }
+
+        // Función para simular una extracción de cartas
+        function simularExtraccion() {
+            // Creamos una "baraja" virtual: 0-12 son corazones (13), otros son 13-51
+            let baraja = [];
+            for (let i = 0; i < N; i++) {
+                baraja.push(i < K ? 1 : 0); // 1 = corazón, 0 = otro
+            }
+            
+            // Barajamos (mezclamos el array)
+            for (let i = baraja.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [baraja[i], baraja[j]] = [baraja[j], baraja[i]];
+            }
+            
+            // Extraemos las primeras n cartas
+            const extraccion = baraja.slice(0, n);
+            const corazones = extraccion.filter(x => x === 1).length;
+            
+            return {
+                cartas: extraccion,
+                corazones: corazones
+            };
+        }
+
+        // Función para mostrar las cartas
+        function mostrarCartas(extraccion) {
+            cardsDisplay.innerHTML = '';
+            extraccion.cartas.forEach((esCorazon, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                const symbol = document.createElement('div');
+                symbol.classList.add(esCorazon ? 'heart' : 'other');
+                symbol.innerHTML = esCorazon ? '♥' : ['♠', '♣', '♦'][index % 3];
+                card.appendChild(symbol);
+                cardsDisplay.appendChild(card);
+            });
+        }
+
+        // Función principal de simulación
+        function simular(numSimulaciones) {
+            for (let i = 0; i < numSimulaciones; i++) {
+                const extraccion = simularExtraccion();
+                counts[extraccion.corazones]++;
+                resultados.push(extraccion.corazones);
+                totalSimulaciones++;
+                
+                // Mostramos solo la última extracción
+                if (i === numSimulaciones - 1) {
+                    mostrarCartas(extraccion);
+                    heartsCounter.textContent = extraccion.corazones;
+                }
+            }
+            
+            // Actualizamos contadores y gráfico
+            simulacionesCounter.textContent = totalSimulaciones;
+            
+            const probsExp = counts.map(c => c / totalSimulaciones);
+            chart.data.datasets[1].data = probsExp;
+            chart.update();
+            
+            // Calculamos media y varianza experimental
+            const media = resultados.reduce((a, b) => a + b, 0) / resultados.length;
+            const varianza = resultados.reduce((a, b) => a + Math.pow(b - media, 2), 0) / resultados.length;
+            
+            mediaExpElem.textContent = media.toFixed(4);
+            varianzaExpElem.textContent = varianza.toFixed(4);
+            
+            // Actualizamos la tabla de probabilidades
+            actualizarTablaProbabilidades();
+        }
+
+        // Función para reiniciar la simulación
+        function reiniciar() {
+            counts = [0, 0, 0, 0, 0, 0];
+            totalSimulaciones = 0;
+            resultados = [];
+            chart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
+            chart.update();
+            simulacionesCounter.textContent = '0';
+            heartsCounter.textContent = '0';
+            mediaExpElem.textContent = '0';
+            varianzaExpElem.textContent = '0';
+            cardsDisplay.innerHTML = '<p>No se ha realizado ninguna extracción aún</p>';
+            actualizarTablaProbabilidades();
+        }
+
+        // Inicialización
+        reiniciar();
+    </script>
+</body>
+</html>
