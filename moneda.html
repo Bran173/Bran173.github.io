@@ -45,6 +45,9 @@
             color: #1a3e6a;
             text-align: center;
             margin-bottom: 1.5rem;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .coin-container {
@@ -74,6 +77,24 @@
             background-color: #f5f5f5;
             border-radius: 8px;
             text-align: center;
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            max-width: 300px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
 
         .chart-container {
@@ -165,12 +186,14 @@
             display: flex;
             justify-content: space-between;
             margin: 20px 0;
+            flex-wrap: wrap;
         }
 
         .stat-box {
             flex: 1;
+            min-width: 200px;
             padding: 15px;
-            margin: 0 10px;
+            margin: 10px;
             background-color: #f8f9fa;
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -180,6 +203,36 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: #1a3e6a;
+        }
+
+        .explanation {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .explanation h3 {
+            margin-top: 0;
+            color: #1a3e6a;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .instructions {
+            background-color: #e7f1ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: #1a3e6a;
+        }
+
+        .instructions ol {
+            padding-left: 20px;
         }
     </style>
 </head>
@@ -191,10 +244,23 @@
         <div class="simulation-container">
             <h2 class="simulation-title">Simulación de Moneda - Caras y Cruces</h2>
             
+            <div class="instructions">
+                <h3>Instrucciones de Uso</h3>
+                <ol>
+                    <li>Ingrese el número de grupos de 12 lanzamientos que desea simular.</li>
+                    <li>Haga clic en "Lanzar Moneda" para un solo lanzamiento.</li>
+                    <li>Haga clic en "Lanzar 12 monedas" para un grupo completo.</li>
+                    <li>Use "Lanzar N grupos" para realizar múltiples simulaciones.</li>
+                    <li>Revise los resultados en la tabla y gráfico.</li>
+                    <li>Use "Reiniciar" para comenzar de nuevo.</li>
+                </ol>
+            </div>
+            
             <div class="stats-container">
                 <div class="stat-box">
                     <h3>Experimentos realizados</h3>
                     <div class="stat-value" id="total-experiments">0</div>
+                    <div>Grupos de 12 lanzamientos</div>
                 </div>
                 <div class="stat-box">
                     <h3>5 caras / 7 cruces</h3>
@@ -206,6 +272,16 @@
                     <div class="stat-value">19.34%</div>
                     <div>C(12,5) × (0.5)<sup>12</sup></div>
                 </div>
+                <div class="stat-box">
+                    <h3>Media teórica</h3>
+                    <div class="stat-value">6</div>
+                    <div>n × p = 12 × 0.5</div>
+                </div>
+                <div class="stat-box">
+                    <h3>Varianza teórica</h3>
+                    <div class="stat-value">3</div>
+                    <div>n × p × (1-p) = 12 × 0.5 × 0.5</div>
+                </div>
             </div>
             
             <div class="coin-container">
@@ -213,11 +289,33 @@
             </div>
             
             <div class="simulation-controls">
+                <div class="input-group">
+                    <label for="num-groups">Número de grupos a simular:</label>
+                    <input type="number" id="num-groups" min="1" max="100000" value="100">
+                </div>
+                
                 <button id="simulate-coin" class="btn">Lanzar Moneda</button>
                 <button id="simulate-12-coins" class="btn">Lanzar 12 monedas</button>
-                <button id="simulate-100-groups" class="btn">Lanzar 100 grupos</button>
-                <button id="simulate-1000-groups" class="btn">Lanzar 1,000 grupos</button>
+                <button id="simulate-n-groups" class="btn">Lanzar N grupos</button>
                 <button id="reset-coin" class="btn btn-secondary">Reiniciar</button>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stat-box">
+                    <h3>Media muestral</h3>
+                    <div class="stat-value" id="sample-mean">0.00</div>
+                    <div>Promedio de caras por grupo</div>
+                </div>
+                <div class="stat-box">
+                    <h3>Varianza muestral</h3>
+                    <div class="stat-value" id="sample-variance">0.00</div>
+                    <div>Varianza de caras por grupo</div>
+                </div>
+                <div class="stat-box">
+                    <h3>Diferencia media</h3>
+                    <div class="stat-value" id="mean-difference">0.00</div>
+                    <div>Diferencia con valor teórico</div>
+                </div>
             </div>
             
             <div class="chart-container">
@@ -247,18 +345,34 @@
                 </tbody>
             </table>
             
-            <div class="results">
+            <div class="explanation">
                 <h3>Explicación Teórica</h3>
                 <p>Este es un problema de distribución binomial donde:</p>
                 <ul>
-                    <li><strong>Número de ensayos (n)</strong> = 12 lanzamientos</li>
+                    <li><strong>Número de ensayos (n)</strong> = 12 lanzamientos por grupo</li>
                     <li><strong>Probabilidad de éxito (p)</strong> = 0.5 (moneda justa)</li>
-                    <li><strong>Número de éxitos (k)</strong> = Número de caras deseadas (5 en nuestro caso)</li>
+                    <li><strong>Número de éxitos (k)</strong> = Número de caras obtenidas</li>
                 </ul>
-                <p>La probabilidad teórica se calcula con:</p>
+                
+                <h4>Cálculo de probabilidad:</h4>
+                <p>La probabilidad teórica se calcula con la fórmula binomial:</p>
                 <p>P(X=k) = C(n,k) × p<sup>k</sup> × (1-p)<sup>n-k</sup></p>
                 <p>Para 5 caras y 7 cruces:</p>
                 <p>P(X=5) = C(12,5) × (0.5)<sup>5</sup> × (0.5)<sup>7</sup> = 792 × 0.03125 × 0.0078125 ≈ 0.1934 (19.34%)</p>
+                
+                <h4>Cálculo de media y varianza:</h4>
+                <p>Para una distribución binomial:</p>
+                <ul>
+                    <li><strong>Media (μ)</strong> = n × p = 12 × 0.5 = 6</li>
+                    <li><strong>Varianza (σ²)</strong> = n × p × (1-p) = 12 × 0.5 × 0.5 = 3</li>
+                </ul>
+                
+                <h4>Cálculo muestral:</h4>
+                <p>Los valores muestrales se calculan sobre los resultados obtenidos:</p>
+                <ul>
+                    <li><strong>Media muestral</strong> = (Σ xᵢ) / N, donde xᵢ son las caras por grupo y N el número de grupos</li>
+                    <li><strong>Varianza muestral</strong> = Σ (xᵢ - media)<sup>2</sup> / N</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -276,12 +390,17 @@
             const totalExperimentsElement = document.getElementById('total-experiments');
             const targetCountElement = document.getElementById('target-count');
             const targetPercentageElement = document.getElementById('target-percentage');
+            const sampleMeanElement = document.getElementById('sample-mean');
+            const sampleVarianceElement = document.getElementById('sample-variance');
+            const meanDifferenceElement = document.getElementById('mean-difference');
             
             // Contadores para los resultados
             let totalExperiments = 0;
             let counts = Array(13).fill(0); // De 0 a 12 caras posibles
             let lastSequence = [];
             let targetCount = 0; // Contador específico para 5 caras/7 cruces
+            let sumHeads = 0; // Suma total de caras para calcular media
+            let sumSquaredHeads = 0; // Suma de cuadrados para varianza
             
             // Configurar gráfico
             const coinCtx = document.getElementById('coin-chart').getContext('2d');
@@ -434,6 +553,33 @@
                 targetCountElement.textContent = targetCount;
                 const percentage = totalExperiments > 0 ? (targetCount / totalExperiments * 100).toFixed(2) : 0;
                 targetPercentageElement.textContent = `${percentage}%`;
+                
+                // Calcular media y varianza muestral
+                const sampleMean = totalExperiments > 0 ? sumHeads / totalExperiments : 0;
+                const sampleVariance = totalExperiments > 0 ? 
+                    (sumSquaredHeads / totalExperiments) - Math.pow(sampleMean, 2) : 0;
+                
+                sampleMeanElement.textContent = sampleMean.toFixed(2);
+                sampleVarianceElement.textContent = sampleVariance.toFixed(2);
+                meanDifferenceElement.textContent = (sampleMean - 6).toFixed(2);
+            }
+            
+            // Función para realizar múltiples grupos de lanzamientos
+            function simulateGroups(numGroups) {
+                for (let i = 0; i < numGroups; i++) {
+                    const { heads, sequence } = flip12Coins();
+                    counts[heads]++;
+                    sumHeads += heads;
+                    sumSquaredHeads += heads * heads;
+                    if (heads === 5) targetCount++;
+                    if (i === numGroups - 1) displayLastSequence(sequence);
+                }
+                totalExperiments += numGroups;
+                updateResultsTable();
+                updateChart();
+                updateStats();
+                
+                coinResult.textContent = `${numGroups} grupos de 12 lanzamientos completados`;
             }
             
             // Event listeners
@@ -444,6 +590,8 @@
             document.getElementById('simulate-12-coins').addEventListener('click', function() {
                 const { heads, tails, sequence } = flip12Coins();
                 counts[heads]++;
+                sumHeads += heads;
+                sumSquaredHeads += heads * heads;
                 totalExperiments++;
                 if (heads === 5) targetCount++;
                 
@@ -459,40 +607,21 @@
                 }, 500);
             });
             
-            document.getElementById('simulate-100-groups').addEventListener('click', function() {
-                for (let i = 0; i < 100; i++) {
-                    const { heads, sequence } = flip12Coins();
-                    counts[heads]++;
-                    if (heads === 5) targetCount++;
-                    if (i === 99) displayLastSequence(sequence);
+            document.getElementById('simulate-n-groups').addEventListener('click', function() {
+                const numGroups = parseInt(document.getElementById('num-groups').value);
+                if (numGroups > 0) {
+                    simulateGroups(numGroups);
+                } else {
+                    alert('Por favor ingrese un número válido de grupos');
                 }
-                totalExperiments += 100;
-                updateResultsTable();
-                updateChart();
-                updateStats();
-                
-                coinResult.textContent = '100 grupos de 12 lanzamientos completados';
-            });
-            
-            document.getElementById('simulate-1000-groups').addEventListener('click', function() {
-                for (let i = 0; i < 1000; i++) {
-                    const { heads, sequence } = flip12Coins();
-                    counts[heads]++;
-                    if (heads === 5) targetCount++;
-                    if (i === 999) displayLastSequence(sequence);
-                }
-                totalExperiments += 1000;
-                updateResultsTable();
-                updateChart();
-                updateStats();
-                
-                coinResult.textContent = '1,000 grupos de 12 lanzamientos completados';
             });
             
             document.getElementById('reset-coin').addEventListener('click', function() {
                 counts = Array(13).fill(0);
                 totalExperiments = 0;
                 targetCount = 0;
+                sumHeads = 0;
+                sumSquaredHeads = 0;
                 lastSequence = [];
                 lastSequenceContainer.innerHTML = '';
                 updateResultsTable();

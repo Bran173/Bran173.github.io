@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulación Binomial Negativa</title>
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         #moneda-page {
@@ -211,7 +210,7 @@
     
     <div id="moneda-page">
         <div class="simulation-container">
-            <h2 class="simulation-title">Simulación de Lanzamientos de Moneda (Distribución Binomial Negativa)</h2>
+            <h2 class="simulation-title">Simulación de Distribución Binomial Negativa</h2>
             
             <div class="coin-container">
                 <div class="coin" id="coin-result">C</div>
@@ -238,8 +237,8 @@
                 
                 <div class="control-group">
                     <label for="simulations-range">Cantidad de experimentos:</label>
-                    <input type="range" id="simulations-range" min="1" max="1000" value="100" step="1">
-                    <span class="range-value" id="range-value">100</span>
+                    <input type="range" id="simulations-range" min="100" max="10000" value="1000" step="100">
+                    <span class="range-value" id="range-value">1000</span>
                 </div>
                 
                 <div class="btn-group">
@@ -260,41 +259,32 @@
                         <h4>Media (Valor Esperado)</h4>
                         <p>Simulada: <span id="media-simulada">0</span></p>
                         <p>Teórica: <span id="media-teorica">0</span></p>
+                        <p>Diferencia: <span id="diff-media">0</span></p>
                     </div>
                     <div class="result-box">
                         <h4>Varianza</h4>
                         <p>Simulada: <span id="varianza-simulada">0</span></p>
                         <p>Teórica: <span id="varianza-teorica">0</span></p>
+                        <p>Diferencia: <span id="diff-varianza">0</span></p>
                     </div>
                 </div>
             </div>
             
             <div class="explanation">
-                <h3>Explicación de la Distribución Binomial Negativa</h3>
-                <p>La distribución binomial negativa modela el número de ensayos de Bernoulli necesarios para obtener un número determinado de éxitos (caras).</p>
+                <h3>Explicación Teórica</h3>
+                <p>La distribución binomial negativa modela el número de ensayos necesarios para obtener <strong>r</strong> éxitos en experimentos independientes con probabilidad <strong>p</strong>.</p>
                 
-                <p><strong>Parámetros:</strong></p>
+                <p><strong>Fórmulas clave:</strong></p>
                 <ul>
-                    <li><strong>r</strong>: Número de éxitos deseados (caras)</li>
-                    <li><strong>p</strong>: Probabilidad de éxito en cada ensayo (probabilidad de cara)</li>
+                    <li>Media teórica: μ = r/p</li>
+                    <li>Varianza teórica: σ² = r(1-p)/p²</li>
+                    <li>Función de probabilidad: P(X=k) = C(k-1, r-1)·pʳ·(1-p)ᵏ⁻ʳ</li>
                 </ul>
                 
-                <p><strong>Fórmulas teóricas:</strong></p>
-                <ul>
-                    <li>Media (valor esperado): E[X] = r / p</li>
-                    <li>Varianza: Var(X) = r(1 - p) / p²</li>
-                    <li>Función de probabilidad: P(X = k) = C(k-1, r-1) * pʳ * (1-p)ᵏ⁻ʳ, para k = r, r+1, ...</li>
-                </ul>
-                
-                <p>En esta simulación, contamos cuántos lanzamientos de moneda se necesitan para obtener el número deseado de caras (r), y repetimos este experimento muchas veces para observar la distribución de los resultados.</p>
+                <p>Para mejores resultados, use al menos 1000 experimentos. La precisión mejora con más simulaciones.</p>
             </div>
         </div>
     </div>
-    
-    <footer>
-        <p>Simulación de Distribución Binomial Negativa</p>
-        <p>&copy; 2023 - Todos los derechos reservados</p>
-    </footer>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -309,38 +299,116 @@
             const probValue = document.getElementById('prob-value');
             const simulationsRange = document.getElementById('simulations-range');
             const rangeValue = document.getElementById('range-value');
-            
-            // Elementos de resultados
             const mediaSimulada = document.getElementById('media-simulada');
             const mediaTeorica = document.getElementById('media-teorica');
             const varianzaSimulada = document.getElementById('varianza-simulada');
             const varianzaTeorica = document.getElementById('varianza-teorica');
+            const diffMedia = document.getElementById('diff-media');
+            const diffVarianza = document.getElementById('diff-varianza');
             
             // Variables de estado
             let totalLanzamientos = 0;
             let totalCaras = 0;
             let totalCruces = 0;
-            let resultados = []; // Almacena los resultados de cada experimento (número de lanzamientos para alcanzar r caras)
+            let resultados = [];
             let experimentosRealizados = 0;
             
-            // Actualizar valores de los rangos
+            // Configuración inicial del gráfico
+            const binomialCtx = document.getElementById('binomial-chart').getContext('2d');
+            let binomialChart = new Chart(binomialCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Frecuencia observada',
+                            data: [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Distribución teórica',
+                            data: [],
+                            type: 'line',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Frecuencia'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Número de lanzamientos necesarios'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Actualizar valores de los controles deslizantes
             successRange.addEventListener('input', function() {
                 successValue.textContent = this.value;
+                updateTheoreticalValues();
             });
             
             probRange.addEventListener('input', function() {
                 const prob = parseInt(this.value) / 100;
                 probValue.textContent = prob.toFixed(2);
+                updateTheoreticalValues();
             });
             
             simulationsRange.addEventListener('input', function() {
                 rangeValue.textContent = this.value;
             });
             
-            // Función para lanzar una moneda (true = cara, false = cruz)
+            // Función para lanzar una moneda
             function flipCoin() {
                 const p = parseInt(probRange.value) / 100;
                 return Math.random() < p;
+            }
+            
+            // Función para calcular combinaciones (coeficiente binomial)
+            function combination(n, k) {
+                if (k < 0 || k > n) return 0;
+                if (k === 0 || k === n) return 1;
+                k = Math.min(k, n - k);
+                let res = 1;
+                for (let i = 1; i <= k; i++) {
+                    res = res * (n - k + i) / i;
+                }
+                return res;
+            }
+            
+            // Función para actualizar valores teóricos
+            function updateTheoreticalValues() {
+                const r = parseInt(successRange.value);
+                const p = parseInt(probRange.value) / 100;
+                
+                if (p > 0) {
+                    const mediaT = r / p;
+                    const varianzaT = r * (1 - p) / Math.pow(p, 2);
+                    
+                    mediaTeorica.textContent = mediaT.toFixed(4);
+                    varianzaTeorica.textContent = varianzaT.toFixed(4);
+                    
+                    // Actualizar diferencias si hay datos simulados
+                    if (resultados.length > 0) {
+                        calculateStatistics();
+                    }
+                }
             }
             
             // Función para realizar un experimento binomial negativo
@@ -364,11 +432,6 @@
                         coinResult.textContent = 'X';
                         coinResult.style.backgroundColor = 'silver';
                     }
-                    
-                    // Pequeña pausa para animación (solo en lanzamientos individuales)
-                    if (parseInt(simulationsRange.value) === 1) {
-                        // No hacemos nada aquí, pero podríamos agregar un setTimeout si quisiéramos animación
-                    }
                 }
                 
                 return lanzamientos;
@@ -381,112 +444,104 @@
                 crucesCounter.textContent = totalCruces;
             }
             
-            // Función para calcular media y varianza
+            // Función para calcular estadísticas
             function calculateStatistics() {
                 if (resultados.length === 0) return;
                 
-                // Media simulada
+                // Calcular media y varianza simuladas
                 const media = resultados.reduce((a, b) => a + b, 0) / resultados.length;
-                mediaSimulada.textContent = media.toFixed(2);
-                
-                // Varianza simulada
                 const varianza = resultados.reduce((a, b) => a + Math.pow(b - media, 2), 0) / resultados.length;
-                varianzaSimulada.textContent = varianza.toFixed(2);
                 
-                // Valores teóricos
-                const r = parseInt(successRange.value);
-                const p = parseInt(probRange.value) / 100;
-                const mediaT = r / p;
-                const varianzaT = r * (1 - p) / Math.pow(p, 2);
+                mediaSimulada.textContent = media.toFixed(4);
+                varianzaSimulada.textContent = varianza.toFixed(4);
                 
-                mediaTeorica.textContent = mediaT.toFixed(2);
-                varianzaTeorica.textContent = varianzaT.toFixed(2);
+                // Calcular diferencias con valores teóricos
+                const mediaT = parseFloat(mediaTeorica.textContent);
+                const varianzaT = parseFloat(varianzaTeorica.textContent);
+                
+                diffMedia.textContent = (media - mediaT).toFixed(4);
+                diffVarianza.textContent = (varianza - varianzaT).toFixed(4);
             }
             
-            // Configurar gráfico
-            const binomialCtx = document.getElementById('binomial-chart').getContext('2d');
-            let binomialChart = new Chart(binomialCtx, {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Frecuencia observada',
-                        data: [],
-                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Frecuencia'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Número de lanzamientos necesarios'
-                            }
-                        }
-                    }
+            // Función para calcular la distribución teórica
+            function calculateTheoreticalDistribution() {
+                const r = parseInt(successRange.value);
+                const p = parseInt(probRange.value) / 100;
+                const maxTrials = Math.max(...resultados) || r + 20;
+                const theoreticalData = {};
+                let sumProb = 0;
+                
+                // Calcular probabilidades exactas
+                for (let k = r; k <= maxTrials; k++) {
+                    const prob = combination(k-1, r-1) * Math.pow(p, r) * Math.pow(1-p, k-r);
+                    theoreticalData[k] = prob;
+                    sumProb += prob;
                 }
-            });
+                
+                // Normalizar y escalar al número de experimentos
+                for (let k in theoreticalData) {
+                    theoreticalData[k] = (theoreticalData[k] / sumProb) * resultados.length;
+                }
+                
+                return theoreticalData;
+            }
             
             // Función para actualizar el gráfico
             function updateChart() {
                 if (resultados.length === 0) return;
                 
-                // Crear histograma de los resultados
-                const min = Math.min(...resultados);
+                const r = parseInt(successRange.value);
+                const min = r;
                 const max = Math.max(...resultados);
+                const binSize = Math.max(1, Math.ceil((max - min) / 15));
                 const bins = {};
+                const labels = [];
                 
-                // Determinar el tamaño de los bins (usamos la regla de Sturges)
-                const numBins = Math.ceil(Math.log2(resultados.length)) + 1 || 10;
-                const binSize = Math.ceil((max - min) / numBins);
-                
-                // Crear bins
-                for (let i = 0; i <= numBins; i++) {
-                    const binStart = min + i * binSize;
-                    const binEnd = binStart + binSize;
-                    bins[`${binStart}-${binEnd}`] = 0;
+                // Crear bins equiespaciados
+                for (let i = min; i <= max + binSize; i += binSize) {
+                    const binLabel = binSize > 1 ? `${i}-${i+binSize-1}` : `${i}`;
+                    bins[binLabel] = { observed: 0, theoretical: 0 };
+                    labels.push(binLabel);
                 }
                 
-                // Llenar los bins con los datos
+                // Contar resultados observados
                 resultados.forEach(val => {
-                    for (let i = 0; i <= numBins; i++) {
-                        const binStart = min + i * binSize;
-                        const binEnd = binStart + binSize;
-                        
-                        if (val >= binStart && val < binEnd) {
-                            bins[`${binStart}-${binEnd}`]++;
-                            break;
-                        } else if (i === numBins && val >= binStart) {
-                            // Para el último valor
-                            bins[`${binStart}-${binEnd}`]++;
-                        }
-                    }
+                    const binIndex = Math.floor((val - min) / binSize);
+                    const binLabel = labels[binIndex];
+                    bins[binLabel].observed++;
                 });
                 
+                // Calcular y asignar distribución teórica a los mismos bins
+                const theoreticalData = calculateTheoreticalDistribution();
+                for (let k in theoreticalData) {
+                    const val = parseInt(k);
+                    const binIndex = Math.floor((val - min) / binSize);
+                    if (binIndex >= 0 && binIndex < labels.length) {
+                        bins[labels[binIndex]].theoretical += theoreticalData[k];
+                    }
+                }
+                
                 // Preparar datos para el gráfico
-                const labels = Object.keys(bins);
-                const data = Object.values(bins);
+                const observedData = labels.map(label => bins[label].observed);
+                const theoreticalDataForChart = labels.map(label => bins[label].theoretical);
                 
                 // Actualizar gráfico
                 binomialChart.data.labels = labels;
-                binomialChart.data.datasets[0].data = data;
+                binomialChart.data.datasets[0].data = observedData;
+                binomialChart.data.datasets[1].data = theoreticalDataForChart;
+                
+                // Ajustar escala Y automáticamente
+                const maxY = Math.max(
+                    Math.max(...observedData),
+                    Math.max(...theoreticalDataForChart)
+                ) * 1.1;
+                binomialChart.options.scales.y.max = maxY;
+                
                 binomialChart.update();
             }
             
-            // Event listeners
+            // Event listeners para los botones
             document.getElementById('simulate-coin').addEventListener('click', function() {
-                // Realizar un solo experimento (hasta obtener r caras)
                 const lanzamientos = runNegativeBinomialExperiment();
                 resultados.push(lanzamientos);
                 experimentosRealizados++;
@@ -497,39 +552,55 @@
             
             document.getElementById('simulate-multiple').addEventListener('click', function() {
                 const numExperimentos = parseInt(simulationsRange.value);
+                const batchSize = 100;
+                let completed = 0;
                 
-                for (let i = 0; i < numExperimentos; i++) {
-                    const lanzamientos = runNegativeBinomialExperiment();
-                    resultados.push(lanzamientos);
-                    experimentosRealizados++;
-                }
+                const simulateBatch = () => {
+                    const remaining = numExperimentos - completed;
+                    const currentBatch = Math.min(batchSize, remaining);
+                    
+                    for (let i = 0; i < currentBatch; i++) {
+                        const lanzamientos = runNegativeBinomialExperiment();
+                        resultados.push(lanzamientos);
+                        experimentosRealizados++;
+                    }
+                    
+                    completed += currentBatch;
+                    
+                    updateCounters();
+                    calculateStatistics();
+                    
+                    if (completed < numExperimentos) {
+                        setTimeout(simulateBatch, 0);
+                    } else {
+                        updateChart();
+                    }
+                };
                 
-                updateCounters();
-                calculateStatistics();
-                updateChart();
+                simulateBatch();
             });
             
             document.getElementById('reset-simulation').addEventListener('click', function() {
-                // Reiniciar todos los contadores y resultados
                 totalLanzamientos = 0;
                 totalCaras = 0;
                 totalCruces = 0;
                 resultados = [];
                 experimentosRealizados = 0;
                 
-                // Actualizar interfaz
                 updateCounters();
                 calculateStatistics();
                 
-                // Reiniciar gráfico
                 binomialChart.data.labels = [];
                 binomialChart.data.datasets[0].data = [];
+                binomialChart.data.datasets[1].data = [];
                 binomialChart.update();
                 
-                // Restablecer moneda
                 coinResult.textContent = 'C';
                 coinResult.style.backgroundColor = 'gold';
             });
+            
+            // Inicializar valores teóricos
+            updateTheoreticalValues();
         });
     </script>
 </body>

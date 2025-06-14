@@ -46,6 +46,25 @@
             color: #6a0f1a;
             text-align: center;
             margin-bottom: 1.5rem;
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .simulation-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, #e74c3c, #3498db, #2ecc71, #f39c12);
+            border-radius: 2px;
         }
 
         .urn-container {
@@ -141,6 +160,42 @@
             height: 400px;
             position: relative;
         }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stats-box {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            flex: 1;
+            min-width: 200px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stats-box h4 {
+            margin-top: 0;
+            color: #6a0f1a;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+        }
+        
+        .explanation {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .explanation h3 {
+            color: #6a0f1a;
+            margin-top: 0;
+        }
     </style>
 </head>
 <body>
@@ -150,6 +205,29 @@
     <div id="urna-page">
         <div class="simulation-container">
             <h2 class="simulation-title">Simulación de la Urna</h2>
+            
+            <div class="explanation">
+                <h3>Explicación Teórica</h3>
+                <p>Esta simulación modela el experimento de extraer 2 pelotas de una urna que contiene 4 pelotas numeradas del 1 al 4. Las variables importantes son:</p>
+                <ul>
+                    <li><strong>Espacio muestral:</strong> Todas las combinaciones posibles de 2 pelotas (6 en total).</li>
+                    <li><strong>Variable aleatoria Z:</strong> La suma de los números de las dos pelotas extraídas.</li>
+                    <li><strong>Distribución teórica:</strong> 
+                        <ul>
+                            <li>P(Z=3) = 1/6 (combinación 1+2)</li>
+                            <li>P(Z=4) = 1/6 (combinación 1+3)</li>
+                            <li>P(Z=5) = 2/6 (combinaciones 1+4 y 2+3)</li>
+                            <li>P(Z=6) = 1/6 (combinación 2+4)</li>
+                            <li>P(Z=7) = 1/6 (combinación 3+4)</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p><strong>Cálculo teórico:</strong></p>
+                <ul>
+                    <li><strong>Media (μ):</strong> (3×1 + 4×1 + 5×2 + 6×1 + 7×1)/6 = 5</li>
+                    <li><strong>Varianza (σ²):</strong> [(3-5)²×1 + (4-5)²×1 + (5-5)²×2 + (6-5)²×1 + (7-5)²×1]/6 = 1.666...</li>
+                </ul>
+            </div>
             
             <div class="urn-container">
                 <div class="urn">
@@ -172,10 +250,26 @@
             
             <div class="simulation-controls">
                 <button id="simulate-urna" class="btn">Ejecutar Simulación</button>
-                <button id="reset-urna" class="btn btn-secondary">Reiniciar</button>
+                <button id="reset-urna" class="btn btn-secondary">Reiniciar Todo</button>
                 <div>
-                    <label for="simulations-urna">Número de simulaciones:</label>
+                    <label for="simulations-urna">Número de simulaciones por ejecución:</label>
                     <input type="number" id="simulations-urna" min="1" max="10000" value="1000">
+                </div>
+                <div id="simulation-counter" style="margin-top: 10px; font-weight: bold;">
+                    Simulaciones acumuladas: 0
+                </div>
+            </div>
+            
+            <div class="stats-container">
+                <div class="stats-box">
+                    <h4>Resultados Teóricos</h4>
+                    <p><strong>Media (μ):</strong> <span id="theoretical-mean">5.0000</span></p>
+                    <p><strong>Varianza (σ²):</strong> <span id="theoretical-variance">1.6667</span></p>
+                </div>
+                <div class="stats-box">
+                    <h4>Resultados Simulados</h4>
+                    <p><strong>Media muestral:</strong> <span id="sample-mean">0.0000</span></p>
+                    <p><strong>Varianza muestral:</strong> <span id="sample-variance">0.0000</span></p>
                 </div>
             </div>
             
@@ -184,7 +278,16 @@
             </div>
             
             <div class="results">
-                <h3>Resultados Teóricos</h3>
+                <h3>Instrucciones de Uso</h3>
+                <ol>
+                    <li>Ingrese el número de simulaciones que desea realizar en cada ejecución (entre 1 y 10,000).</li>
+                    <li>Haga clic en "Ejecutar Simulación" para realizar más simulaciones y acumular resultados.</li>
+                    <li>Observe la animación de la primera extracción de cada ejecución y los resultados estadísticos acumulados.</li>
+                    <li>El gráfico mostrará las probabilidades acumuladas de todas las simulaciones realizadas.</li>
+                    <li>Use "Reiniciar Todo" para comenzar desde cero cuando lo desee.</li>
+                </ol>
+                
+                <h3>Resultados Teóricos Detallados</h3>
                 <p>Combinaciones posibles al sacar 2 pelotas de 4:</p>
                 <ul id="combinationsList"></ul>
                 <p>Distribución teórica de probabilidades:</p>
@@ -207,10 +310,19 @@
             ];
             
             const theoreticalSums = {3: 1, 4: 1, 5: 2, 6: 1, 7: 1};
+            const theoreticalMean = 5;
+            const theoreticalVariance = 5/3; // 1.666...
+            
+            // Variables para acumular resultados
+            let simulationCount = 0;
+            let totalCounts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+            let totalSum = 0;
+            let sumOfSquares = 0;
             
             const selectedBall1 = document.getElementById('selected-ball-1');
             const selectedBall2 = document.getElementById('selected-ball-2');
             const sumValue = document.getElementById('sum-value');
+            const simulationCounter = document.getElementById('simulation-counter');
             
             // Configurar gráfico de urna
             const urnaCtx = document.getElementById('urna-chart').getContext('2d');
@@ -292,44 +404,95 @@
                 }, 100);
             }
             
-            // Función para simular extracciones
-            function simulateUrna() {
-                const numSimulations = parseInt(document.getElementById('simulations-urna').value);
-                const counts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
-                
-                // Animación de la primera simulación
-                const randomIndexFirst = Math.floor(Math.random() * allCombinations.length);
-                const firstCombination = allCombinations[randomIndexFirst];
-                animateBallSelection(firstCombination[0], firstCombination[1]);
-                
-                // Realizar todas las simulaciones
-                for (let i = 0; i < numSimulations; i++) {
-                    const randomIndex = Math.floor(Math.random() * allCombinations.length);
-                    const selectedCombination = allCombinations[randomIndex];
-                    const sum = selectedCombination[0] + selectedCombination[1];
-                    counts[sum]++;
+            // Función para calcular la media y varianza muestral
+            function updateStatistics(counts, totalSimulations) {
+                // Calcular media muestral
+                let sampleSum = 0;
+                for (const sum in counts) {
+                    sampleSum += parseInt(sum) * counts[sum];
                 }
+                const sampleMean = sampleSum / totalSimulations;
                 
-                // Actualizar el gráfico
+                // Calcular varianza muestral
+                let sumSquaredDifferences = 0;
+                for (const sum in counts) {
+                    const diff = parseInt(sum) - sampleMean;
+                    sumSquaredDifferences += counts[sum] * diff * diff;
+                }
+                const sampleVariance = sumSquaredDifferences / totalSimulations;
+                
+                // Actualizar la interfaz
+                document.getElementById('sample-mean').textContent = sampleMean.toFixed(4);
+                document.getElementById('sample-variance').textContent = sampleVariance.toFixed(4);
+                
+                // Mostrar valores teóricos
+                document.getElementById('theoretical-mean').textContent = theoreticalMean.toFixed(4);
+                document.getElementById('theoretical-variance').textContent = theoreticalVariance.toFixed(4);
+                
+                // Actualizar el gráfico con probabilidades acumuladas
                 const simulatedData = [
-                    counts[3] / numSimulations,
-                    counts[4] / numSimulations,
-                    counts[5] / numSimulations,
-                    counts[6] / numSimulations,
-                    counts[7] / numSimulations
+                    counts[3] / totalSimulations,
+                    counts[4] / totalSimulations,
+                    counts[5] / totalSimulations,
+                    counts[6] / totalSimulations,
+                    counts[7] / totalSimulations
                 ];
                 
                 urnaChart.data.datasets[1].data = simulatedData;
                 urnaChart.update();
             }
             
+            // Función para simular extracciones
+            function simulateUrna() {
+                const numSimulations = parseInt(document.getElementById('simulations-urna').value);
+                const currentCounts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+                
+                // Animación de la primera simulación del lote actual
+                const randomIndexFirst = Math.floor(Math.random() * allCombinations.length);
+                const firstCombination = allCombinations[randomIndexFirst];
+                animateBallSelection(firstCombination[0], firstCombination[1]);
+                
+                // Realizar todas las simulaciones del lote actual
+                for (let i = 0; i < numSimulations; i++) {
+                    const randomIndex = Math.floor(Math.random() * allCombinations.length);
+                    const selectedCombination = allCombinations[randomIndex];
+                    const sum = selectedCombination[0] + selectedCombination[1];
+                    currentCounts[sum]++;
+                }
+                
+                // Acumular resultados
+                for (const sum in currentCounts) {
+                    totalCounts[sum] += currentCounts[sum];
+                }
+                simulationCount += numSimulations;
+                
+                // Actualizar contador
+                simulationCounter.textContent = `Simulaciones acumuladas: ${simulationCount}`;
+                
+                // Actualizar estadísticas con todos los datos acumulados
+                updateStatistics(totalCounts, simulationCount);
+            }
+            
             // Event listeners para urna
             document.getElementById('simulate-urna').addEventListener('click', simulateUrna);
             
             document.getElementById('reset-urna').addEventListener('click', function() {
+                // Reiniciar todos los contadores
+                simulationCount = 0;
+                totalCounts = {3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+                totalSum = 0;
+                sumOfSquares = 0;
+                
+                // Actualizar interfaz
+                simulationCounter.textContent = `Simulaciones acumuladas: 0`;
+                document.getElementById('sample-mean').textContent = '0.0000';
+                document.getElementById('sample-variance').textContent = '0.0000';
+                
+                // Reiniciar gráfico
                 urnaChart.data.datasets[1].data = [0, 0, 0, 0, 0];
                 urnaChart.update();
                 
+                // Ocultar pelotas seleccionadas
                 selectedBall1.classList.remove('show');
                 selectedBall2.classList.remove('show');
                 sumValue.textContent = '0';
