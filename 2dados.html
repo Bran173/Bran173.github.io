@@ -88,10 +88,38 @@
             height: 400px;
             position: relative;
         }
+
+        .simulation-counter {
+            display: inline-block;
+            background-color: white;
+            color: #6a0f1a;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            margin-left: 10px;
+        }
+
+        .results {
+            background-color: #fff8f0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            color: #333;
+        }
+
+        .theory, .step-by-step {
+            background-color: #fef3f3;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 4px solid #d35400;
+        }
     </style>
 </head>
 <body>
-    <!-- Botón de regreso -->
     <a href="probabilidad.html" class="back-btn">← Regresar</a>
     
     <div id="dos-dados-page">
@@ -106,136 +134,132 @@
             <div class="sum-display">
                 Suma: <span id="sum-dados-value">2</span>
             </div>
-            
+
             <div class="simulation-controls">
                 <button id="simulate-dos-dados" class="btn">Lanzar Dados</button>
                 <button id="simulate-multiple-dos-dados" class="btn">Lanzar 100 veces</button>
                 <button id="reset-dos-dados" class="btn btn-secondary">Reiniciar</button>
+                <span class="simulation-counter" id="sim-counter">0</span>
+                <br><br>
+                <label for="custom-rolls">Número de simulaciones personalizadas: </label>
+                <input type="number" id="custom-rolls" value="10" min="1">
+                <button id="simulate-custom-dos-dados" class="btn">Simular Personalizado</button>
             </div>
-            
+
             <div class="chart-container">
                 <canvas id="dos-dados-chart"></canvas>
             </div>
-            
+
             <div class="results">
                 <h3>Resultados Teóricos</h3>
                 <p>La suma de dos dados sigue una distribución diferente:</p>
                 <ul id="dados-probabilities"></ul>
+                <h3>Media y Varianza</h3>
+                <p><strong>Teórica:</strong> Media = 7, Varianza = 5.8333</p>
+                <p><strong>Práctica:</strong> Media = <span id="media-practica">0</span>, Varianza = <span id="varianza-practica">0</span></p>
+            </div>
+
+            <div class="theory">
+                <h4>Explicación Teórica</h4>
+                <p>La distribución de la suma de dos dados se calcula considerando las combinaciones posibles que dan cada suma entre 2 y 12. La media se calcula como E[X] = Σx·P(x) y la varianza como Var(X) = E[X²] - (E[X])².</p>
+            </div>
+            <div class="step-by-step">
+                <h4>Explicación Paso a Paso</h4>
+                <p>1. Al hacer clic en "Lanzar Dados", se genera un número aleatorio para cada dado entre 1 y 6.</p>
+                <p>2. Se suman los valores obtenidos y se actualiza la frecuencia de esa suma.</p>
+                <p>3. El gráfico de barras se actualiza mostrando la proporción simulada.</p>
+                <p>4. Se calcula la media y varianza práctica basadas en todas las simulaciones realizadas.</p>
+                <p>5. El contador de simulaciones incrementa en cada lanzamiento.</p>
             </div>
         </div>
     </div>
-    
+
     <footer>
         <p>Proyecto de Energía Solar - Simulación de Dos Dados</p>
         <p>&copy; 2023 - Todos los derechos reservados</p>
     </footer>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dice1Result = document.getElementById('dice1-result');
             const dice2Result = document.getElementById('dice2-result');
             const sumDadosValue = document.getElementById('sum-dados-value');
-            const dosDadosCounts = Array(11).fill(0); // Sumas de 2 a 12
-            
-            // Configurar gráfico de dos dados
+            const dosDadosCounts = Array(11).fill(0);
+            let totalRolls = 0;
+            const simCounter = document.getElementById('sim-counter');
+
             const dosDadosCtx = document.getElementById('dos-dados-chart').getContext('2d');
             let dosDadosChart = new Chart(dosDadosCtx, {
                 type: 'bar',
                 data: {
-                    labels: ['2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
-                    datasets: [{
-                        label: 'Probabilidad teórica',
-                        data: [1/36, 2/36, 3/36, 4/36, 5/36, 6/36, 5/36, 4/36, 3/36, 2/36, 1/36],
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }, {
-                        label: 'Probabilidad simulada',
-                        data: Array(11).fill(0),
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
+                    labels: ['2','3','4','5','6','7','8','9','10','11','12'],
+                    datasets: [
+                        { label: 'Teórica', data: [1/36,2/36,3/36,4/36,5/36,6/36,5/36,4/36,3/36,2/36,1/36], backgroundColor: 'rgba(54, 162, 235, 0.5)' },
+                        { label: 'Simulada', data: Array(11).fill(0), backgroundColor: 'rgba(255, 99, 132, 0.5)' }
+                    ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 0.2,
-                            title: {
-                                display: true,
-                                text: 'Probabilidad'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Suma de los dados'
-                            }
-                        }
-                    }
-                }
+                options: { scales: { y: { beginAtZero: true, max: 0.2 } } }
             });
-            
-            // Mostrar probabilidades teóricas para dos dados
+
             const dadosProbabilities = document.getElementById('dados-probabilities');
-            const theoreticalDados = {
-                2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 
-                7: 6, 8: 5, 9: 4, 10: 3, 11: 2, 12: 1
-            };
-            
+            const theoreticalDados = {2:1,3:2,4:3,5:4,6:5,7:6,8:5,9:4,10:3,11:2,12:1};
             for (const sum in theoreticalDados) {
                 const li = document.createElement('li');
                 const prob = theoreticalDados[sum] / 36;
                 li.textContent = `P(Suma=${sum}) = ${theoreticalDados[sum]}/36 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
                 dadosProbabilities.appendChild(li);
             }
-            
+
             function rollTwoDice() {
-                const result1 = Math.floor(Math.random() * 6) + 1;
-                const result2 = Math.floor(Math.random() * 6) + 1;
+                const result1 = Math.floor(Math.random()*6)+1;
+                const result2 = Math.floor(Math.random()*6)+1;
                 const sum = result1 + result2;
-                
                 dice1Result.textContent = result1;
                 dice2Result.textContent = result2;
                 sumDadosValue.textContent = sum;
-                
                 return sum;
             }
-            
-            function simulateDosDados(numRolls = 1) {
-                for (let i = 0; i < numRolls; i++) {
+
+            function calculateStats() {
+                let total = dosDadosCounts.reduce((a,b)=>a+b,0);
+                if(total===0) return;
+                let mean = dosDadosCounts.reduce((acc, count, idx) => acc + ((idx+2)*count),0) / total;
+                let variance = dosDadosCounts.reduce((acc,count,idx)=>acc+(((idx+2)**2)*count),0)/total - mean**2;
+                document.getElementById('media-practica').textContent = mean.toFixed(4);
+                document.getElementById('varianza-practica').textContent = variance.toFixed(4);
+            }
+
+            function simulateDosDados(numRolls=1) {
+                for(let i=0;i<numRolls;i++){
                     const sum = rollTwoDice();
                     dosDadosCounts[sum-2]++;
                 }
-                
-                const total = dosDadosCounts.reduce((a, b) => a + b, 0);
-                const simulatedData = dosDadosCounts.map(count => count / total);
-                
+                totalRolls += numRolls;
+                simCounter.textContent = totalRolls;
+                const total = dosDadosCounts.reduce((a,b)=>a+b,0);
+                const simulatedData = dosDadosCounts.map(count => count/total);
                 dosDadosChart.data.datasets[1].data = simulatedData;
                 dosDadosChart.update();
+                calculateStats();
             }
-            
-            // Event listeners para dos dados
-            document.getElementById('simulate-dos-dados').addEventListener('click', function() {
-                simulateDosDados(1);
+
+            document.getElementById('simulate-dos-dados').addEventListener('click', ()=>simulateDosDados(1));
+            document.getElementById('simulate-multiple-dos-dados').addEventListener('click', ()=>simulateDosDados(100));
+            document.getElementById('simulate-custom-dos-dados').addEventListener('click', ()=>{
+                const customRolls = parseInt(document.getElementById('custom-rolls').value);
+                if(customRolls>0) simulateDosDados(customRolls);
             });
-            
-            document.getElementById('simulate-multiple-dos-dados').addEventListener('click', function() {
-                simulateDosDados(100);
-            });
-            
-            document.getElementById('reset-dos-dados').addEventListener('click', function() {
-                for (let i = 0; i < dosDadosCounts.length; i++) {
-                    dosDadosCounts[i] = 0;
-                }
+            document.getElementById('reset-dos-dados').addEventListener('click', ()=>{
+                for(let i=0;i<dosDadosCounts.length;i++) dosDadosCounts[i]=0;
                 dosDadosChart.data.datasets[1].data = Array(11).fill(0);
                 dosDadosChart.update();
                 dice1Result.textContent = '1';
                 dice2Result.textContent = '1';
                 sumDadosValue.textContent = '2';
+                totalRolls=0;
+                simCounter.textContent=0;
+                document.getElementById('media-practica').textContent = '0';
+                document.getElementById('varianza-practica').textContent = '0';
             });
         });
     </script>

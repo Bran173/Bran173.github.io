@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Poisson (Eventos Raros)</title>
+    <title>Simulación de Poisson Completa</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #6a0f1a;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 20px;
             color: #333;
@@ -17,125 +17,233 @@
             max-width: 1000px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
         h1, h2, h3 {
             color: #2c3e50;
         }
         .simulation-area {
             background-color: #f9f9f9;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
         }
         .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
         }
         .control-group {
-            flex: 1;
-            min-width: 200px;
+            margin-bottom: 15px;
         }
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: bold;
+            color: #2c3e50;
         }
         input[type="range"] {
             width: 100%;
+            height: 8px;
+            border-radius: 4px;
         }
         .range-value {
             display: inline-block;
-            width: 50px;
+            width: 60px;
             text-align: right;
+            font-weight: bold;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
         }
         button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        #simulate-one {
             background-color: #3498db;
             color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+        }
+        #simulate-100 {
+            background-color: #2ecc71;
+            color: white;
+        }
+        #reset {
+            background-color: #e74c3c;
+            color: white;
         }
         button:hover {
-            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #simulate-one:hover { background-color: #2980b9; }
+        #simulate-100:hover { background-color: #27ae60; }
+        #reset:hover { background-color: #c0392b; }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
         }
         .results {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
-            margin-top: 20px;
+            margin-top: 30px;
         }
         .result-box {
-            flex: 1;
-            min-width: 200px;
             background-color: #e8f4fc;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
+            border-top: 4px solid #3498db;
+        }
+        .result-box h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .result-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #2c3e50;
         }
         .chart-container {
-            margin-top: 30px;
-            height: 400px;
+            height: 450px;
+            margin: 40px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        #timeline {
+            height: 80px;
+            border: 2px solid #dfe6e9;
+            position: relative;
+            margin: 30px 0;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #events-container {
+            min-height: 100px;
+            margin: 20px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .event {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             background-color: #e74c3c;
-            margin: 5px;
             border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
             animation: pulse 0.5s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            position: absolute;
         }
         @keyframes pulse {
             0% { transform: scale(0.8); opacity: 0.5; }
-            50% { transform: scale(1.2); }
+            50% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
-        }
-        #timeline {
-            height: 60px;
-            border: 1px solid #ddd;
-            position: relative;
-            margin: 20px 0;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-        }
-        #events-container {
-            margin: 20px 0;
-            min-height: 60px;
         }
         .time-marker {
             position: absolute;
             bottom: 0;
-            width: 1px;
-            height: 10px;
-            background-color: #95a5a6;
+            width: 2px;
+            height: 15px;
+            background-color: #7f8c8d;
         }
         .time-label {
             position: absolute;
-            bottom: -20px;
+            bottom: -25px;
             font-size: 12px;
+            font-weight: bold;
             transform: translateX(-50%);
+            color: #7f8c8d;
+        }
+        .progress-bar {
+            position: absolute;
+            height: 4px;
+            background-color: #3498db;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .theory-section {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #3498db;
+        }
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .step-card {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 8px;
+            border-top: 4px solid #3498db;
+        }
+        .math-formula {
+            font-family: "Courier New", monospace;
+            background-color: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .interpretation {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 5px solid #2ecc71;
+        }
+        .status-message {
+            padding: 10px;
+            background: #2ecc71;
+            color: white;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Simulación de Poisson: Eventos Raros</h1>
-        <p>¿Cuántos eventos ocurrirán en un intervalo de tiempo? (Ej: clientes llegando a una tienda)</p>
+        <h1>Simulación de Poisson Mejorada</h1>
+        <p>Visualización de eventos raros en un intervalo de tiempo</p>
         
         <div class="simulation-area">
             <h2>Configuración</h2>
             <div class="controls">
                 <div class="control-group">
-                    <label for="lambda">Tasa promedio (λ) de eventos por intervalo:</label>
-                    <input type="range" id="lambda" min="0.1" max="20" step="0.1" value="3">
-                    <span class="range-value" id="lambda-value">3.0</span>
+                    <label for="lambda">Tasa promedio (λ) de eventos:</label>
+                    <input type="range" id="lambda" min="0.1" max="20" step="0.1" value="5">
+                    <span class="range-value" id="lambda-value">5.0</span>
                 </div>
                 <div class="control-group">
                     <label for="time-interval">Duración del intervalo (minutos):</label>
@@ -144,14 +252,16 @@
                 </div>
             </div>
             
-            <div class="controls">
+            <div class="button-group">
                 <button id="simulate-one">Simular 1 intervalo</button>
                 <button id="simulate-100">Simular 100 intervalos</button>
                 <button id="reset">Reiniciar</button>
             </div>
             
+            <div id="status-message" class="status-message"></div>
+            
             <div id="timeline">
-                <!-- Marcadores de tiempo se generarán dinámicamente -->
+                <div class="progress-bar" id="progress-bar"></div>
             </div>
             
             <div id="events-container"></div>
@@ -159,19 +269,19 @@
             <div class="results">
                 <div class="result-box">
                     <h3>Estadísticas</h3>
-                    <p>Eventos en este intervalo: <span id="current-events">0</span></p>
-                    <p>Total de intervalos simulados: <span id="total-simulations">0</span></p>
-                    <p>Total de eventos registrados: <span id="total-events">0</span></p>
+                    <p>Eventos en este intervalo: <span class="result-value" id="current-events">0</span></p>
+                    <p>Total de intervalos simulados: <span class="result-value" id="total-simulations">0</span></p>
+                    <p>Total de eventos registrados: <span class="result-value" id="total-events">0</span></p>
                 </div>
                 <div class="result-box">
                     <h3>Resultados Teóricos</h3>
-                    <p>Media (λ): <span id="theoretical-mean">3.00</span></p>
-                    <p>Varianza: <span id="theoretical-variance">3.00</span></p>
+                    <p>Media (λ): <span class="result-value" id="theoretical-mean">5.00</span></p>
+                    <p>Varianza: <span class="result-value" id="theoretical-variance">5.00</span></p>
                 </div>
                 <div class="result-box">
                     <h3>Resultados Simulados</h3>
-                    <p>Media muestral: <span id="sample-mean">0.00</span></p>
-                    <p>Varianza muestral: <span id="sample-variance">0.00</span></p>
+                    <p>Media muestral: <span class="result-value" id="sample-mean">0.00</span></p>
+                    <p>Varianza muestral: <span class="result-value" id="sample-variance">0.00</span></p>
                 </div>
             </div>
         </div>
@@ -180,37 +290,96 @@
             <canvas id="distribution-chart"></canvas>
         </div>
         
-        <div class="theory">
-            <h2>Explicación Teórica</h2>
-            <p>La <strong>distribución de Poisson</strong> modela el número de eventos que ocurren en un intervalo fijo de tiempo o espacio, cuando estos eventos suceden con una tasa promedio conocida (λ) e independientemente del tiempo desde el último evento.</p>
+        <div class="theory-section">
+            <h2>Explicación Teórica Detallada</h2>
             
-            <h3>Parámetros</h3>
+            <h3>¿Qué es la distribución de Poisson?</h3>
+            <p>La distribución de Poisson modela la probabilidad de que ocurra un número determinado de eventos en un intervalo fijo de tiempo o espacio, cuando:</p>
             <ul>
-                <li><strong>λ (lambda)</strong>: Tasa promedio de eventos por intervalo (puede ser cualquier número positivo).</li>
+                <li>Los eventos ocurren con una tasa promedio conocida (λ)</li>
+                <li>Los eventos son independientes entre sí</li>
+                <li>La probabilidad de que ocurra más de un evento en un instante muy pequeño es despreciable</li>
             </ul>
-            
-            <h3>Fórmulas</h3>
+
+            <h3>Fórmulas Clave</h3>
+            <p><strong>Función de probabilidad:</strong></p>
+            <p class="math-formula">P(X = k) = (e⁻ᵡ · λᵏ) / k!</p>
+            <p>Donde:
+                <ul>
+                    <li><span class="math-formula">λ</span>: Tasa promedio de eventos por intervalo</li>
+                    <li><span class="math-formula">k</span>: Número de ocurrencias del evento</li>
+                    <li><span class="math-formula">e</span>: Constante de Euler (~2.71828)</li>
+                </ul>
+            </p>
+
+            <p><strong>Propiedades:</strong></p>
             <ul>
-                <li><strong>Función de probabilidad</strong>: P(X = k) = (e<sup>-λ</sup> · λ<sup>k</sup>) / k!</li>
-                <li><strong>Media</strong>: E[X] = λ</li>
-                <li><strong>Varianza</strong>: Var(X) = λ</li>
+                <li>Media: <span class="math-formula">E[X] = λ</span></li>
+                <li>Varianza: <span class="math-formula">Var(X) = λ</span></li>
+                <li>La forma de la distribución depende del valor de λ:
+                    <ul>
+                        <li>Para λ pequeño: Distribución asimétrica hacia la derecha</li>
+                        <li>Para λ grande (>10): Se aproxima a una distribución normal</li>
+                    </ul>
+                </li>
             </ul>
+        </div>
+
+        <div class="steps-container">
+            <div class="step-card">
+                <h3>Paso 1: Configurar Parámetros</h3>
+                <ol>
+                    <li><strong>Tasa promedio (λ):</strong> Desliza el control para establecer cuántos eventos esperas en promedio por intervalo</li>
+                    <li><strong>Duración del intervalo:</strong> Establece el período de tiempo a simular (en minutos)</li>
+                    <li>Los valores se actualizan automáticamente en los campos numéricos</li>
+                </ol>
+                <p><strong>Ejemplo:</strong> Si esperas 5 clientes por hora (λ=5) y quieres simular 30 minutos, ajusta λ=5 y duración=30.</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Paso 2: Ejecutar Simulación</h3>
+                <ol>
+                    <li><strong>Simular 1 intervalo:</strong> Muestra una simulación detallada con animación</li>
+                    <li><strong>Simular 100 intervalos:</strong> Calcula rápidamente múltiples simulaciones para estadísticas</li>
+                    <li>Observa cómo los eventos aparecen aleatoriamente en la línea de tiempo</li>
+                </ol>
+                <p><strong>Nota:</strong> La simulación individual ahora es más rápida pero conserva la visualización.</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Paso 3: Interpretar Resultados</h3>
+                <ol>
+                    <li>Compara los resultados simulados con los valores teóricos</li>
+                    <li>Observa el gráfico de distribución de probabilidades</li>
+                    <li>Analiza la diferencia entre media y varianza</li>
+                </ol>
+                <p><strong>Tip:</strong> Con más simulaciones, los resultados empíricos se acercan a los teóricos.</p>
+            </div>
+        </div>
+
+        <div class="interpretation">
+            <h2>¿Cómo Interpretar los Resultados?</h2>
             
-            <h3>Aplicaciones</h3>
-            <p>Esta distribución es útil para modelar:</p>
+            <h3>Para una sola simulación:</h3>
             <ul>
-                <li>Llegadas de clientes a una tienda o llamadas a un call center</li>
-                <li>Número de accidentes en un cruce por mes</li>
-                <li>Errores de impresión por página en un libro</li>
-                <li>Número de meteoritos que caen en un área determinada</li>
+                <li><strong>Eventos en este intervalo:</strong> Número de puntos rojos en la línea de tiempo</li>
+                <li><strong>Distribución temporal:</strong> Los eventos aparecen aleatoriamente pero con densidad proporcional a λ</li>
+                <li><strong>Ejemplo:</strong> Si λ=5 y ves 3 eventos, esto es normal (la probabilidad P(X=3) ≈ 14% para λ=5)</li>
             </ul>
-            
-            <h3>Condiciones para usar Poisson</h3>
-            <ol>
-                <li>Los eventos son independientes (la ocurrencia de uno no afecta la probabilidad de otro)</li>
-                <li>La tasa promedio (λ) es constante</li>
-                <li>Dos eventos no pueden ocurrir exactamente al mismo instante</li>
-            </ol>
+
+            <h3>Para múltiples simulaciones:</h3>
+            <ul>
+                <li><strong>Media muestral:</strong> Debería acercarse a λ (error < 5% con 100+ simulaciones)</li>
+                <li><strong>Varianza muestral:</strong> También debería aproximarse a λ</li>
+                <li><strong>Gráfico:</strong> Las barras azules (observado) deberían seguir la línea verde (teórico)</li>
+            </ul>
+
+            <h3>¿Qué indica una discrepancia?</h3>
+            <ul>
+                <li>Si media y varianza difieren mucho: posible error en los supuestos de Poisson</li>
+                <li>Si la forma del gráfico no coincide: la tasa λ podría no ser constante</li>
+                <li>Con pocas simulaciones: espera variaciones aleatorias</li>
+            </ul>
         </div>
     </div>
 
@@ -222,7 +391,9 @@
             const timeIntervalInput = document.getElementById('time-interval');
             const timeIntervalValue = document.getElementById('time-interval-value');
             const timeline = document.getElementById('timeline');
+            const progressBar = document.getElementById('progress-bar');
             const eventsContainer = document.getElementById('events-container');
+            const statusMessage = document.getElementById('status-message');
             const currentEventsSpan = document.getElementById('current-events');
             const totalSimulationsSpan = document.getElementById('total-simulations');
             const totalEventsSpan = document.getElementById('total-events');
@@ -230,6 +401,9 @@
             const theoreticalVarianceSpan = document.getElementById('theoretical-variance');
             const sampleMeanSpan = document.getElementById('sample-mean');
             const sampleVarianceSpan = document.getElementById('sample-variance');
+            const simulateOneBtn = document.getElementById('simulate-one');
+            const simulateHundredBtn = document.getElementById('simulate-100');
+            const resetBtn = document.getElementById('reset');
             
             // Variables de estado
             let currentEvents = 0;
@@ -237,6 +411,8 @@
             let totalEvents = 0;
             let results = [];
             let chart = null;
+            let isSimulating = false;
+            let simulationTimeout = null;
             
             // Inicializar gráfico
             const ctx = document.getElementById('distribution-chart').getContext('2d');
@@ -249,11 +425,12 @@
                         data: [],
                         backgroundColor: 'rgba(231, 76, 60, 0.7)',
                         borderColor: 'rgba(231, 76, 60, 1)',
-                        borderWidth: 1
+                        borderWidth: 1,
+                        barPercentage: 0.8
                     }, {
                         label: 'Probabilidad teórica',
                         data: [],
-                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        backgroundColor: 'rgba(52, 152, 219, 0.5)',
                         borderColor: 'rgba(52, 152, 219, 1)',
                         borderWidth: 1,
                         type: 'line',
@@ -268,20 +445,51 @@
                             beginAtZero: true,
                             title: {
                                 display: true,
-                                text: 'Frecuencia / Probabilidad'
+                                text: 'Frecuencia',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0,0,0,0.05)'
                             }
                         },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Número de eventos en el intervalo'
+                                text: 'Número de eventos',
+                                font: {
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            titleFont: {
+                                size: 16
+                            },
+                            bodyFont: {
+                                size: 14
                             }
                         }
                     }
                 }
             });
             
-            // Función para calcular factorial (necesaria para Poisson)
+            // Función para calcular factorial
             function factorial(n) {
                 if (n === 0 || n === 1) return 1;
                 let result = 1;
@@ -291,30 +499,30 @@
                 return result;
             }
             
-            // Función para calcular probabilidad teórica de Poisson
+            // Función para probabilidad de Poisson
             function poissonProbability(k, lambda) {
                 return (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
             }
             
             // Actualizar valores de los controles
-            lambdaInput.addEventListener('input', function() {
-                lambdaValue.textContent = parseFloat(this.value).toFixed(1);
+            function updateControlValues() {
+                const lambda = parseFloat(lambdaInput.value);
+                lambdaValue.textContent = lambda.toFixed(1);
+                
+                const interval = parseInt(timeIntervalInput.value);
+                timeIntervalValue.textContent = interval;
+                
                 updateTheoreticalValues();
                 updateTimelineMarkers();
-            });
+            }
             
-            timeIntervalInput.addEventListener('input', function() {
-                timeIntervalValue.textContent = this.value;
-                updateTimelineMarkers();
-            });
-            
-            // Función para actualizar marcadores de tiempo
+            // Actualizar marcadores de tiempo
             function updateTimelineMarkers() {
-                timeline.innerHTML = '';
+                timeline.innerHTML = '<div class="progress-bar" id="progress-bar"></div>';
                 const interval = parseInt(timeIntervalValue.textContent);
                 
-                // Agregar marcadores cada 5 minutos
-                for (let i = 0; i <= interval; i += 5) {
+                // Agregar marcadores cada 25% del intervalo
+                for (let i = 0; i <= interval; i += interval/4) {
                     const marker = document.createElement('div');
                     marker.className = 'time-marker';
                     marker.style.left = `${(i / interval) * 100}%`;
@@ -327,9 +535,11 @@
                     timeline.appendChild(marker);
                     timeline.appendChild(label);
                 }
+                
+                progressBar.style.width = '0%';
             }
             
-            // Función para actualizar valores teóricos
+            // Actualizar valores teóricos
             function updateTheoreticalValues() {
                 const lambda = parseFloat(lambdaValue.textContent);
                 
@@ -337,37 +547,7 @@
                 theoreticalVarianceSpan.textContent = lambda.toFixed(2);
             }
             
-            // Función para simular un intervalo de Poisson
-            function simulatePoissonInterval() {
-                const lambda = parseFloat(lambdaValue.textContent);
-                const interval = parseInt(timeIntervalValue.textContent);
-                
-                // Generar eventos de Poisson
-                const numEvents = poissonRandom(lambda);
-                currentEvents = numEvents;
-                totalEvents += numEvents;
-                totalSimulations++;
-                results.push(numEvents);
-                
-                // Actualizar UI
-                currentEventsSpan.textContent = numEvents;
-                totalSimulationsSpan.textContent = totalSimulations;
-                totalEventsSpan.textContent = totalEvents;
-                
-                // Mostrar eventos en la línea de tiempo
-                eventsContainer.innerHTML = '';
-                for (let i = 0; i < numEvents; i++) {
-                    const event = document.createElement('div');
-                    event.className = 'event';
-                    event.style.animationDelay = `${i * 0.1}s`;
-                    eventsContainer.appendChild(event);
-                }
-                
-                updateSampleStatistics();
-                updateChart();
-            }
-            
-            // Función para generar números aleatorios de Poisson
+            // Función para generar números de Poisson
             function poissonRandom(lambda) {
                 const L = Math.exp(-lambda);
                 let k = 0;
@@ -381,25 +561,99 @@
                 return k - 1;
             }
             
-            // Función para simular múltiples intervalos
-            function simulateMultipleIntervals(count) {
-                const lambda = parseFloat(lambdaValue.textContent);
+            // Simular un intervalo con animación rápida
+            function simulateSingleInterval() {
+                if (isSimulating) return;
                 
-                for (let i = 0; i < count; i++) {
-                    const numEvents = poissonRandom(lambda);
-                    totalEvents += numEvents;
-                    totalSimulations++;
-                    results.push(numEvents);
+                resetCurrentSimulation();
+                isSimulating = true;
+                simulateOneBtn.disabled = true;
+                simulateHundredBtn.disabled = true;
+                
+                const lambda = parseFloat(lambdaValue.textContent);
+                const intervalDuration = parseInt(timeIntervalValue.textContent);
+                
+                // Calcular eventos totales para este intervalo
+                const numEvents = poissonRandom(lambda);
+                currentEvents = numEvents;
+                
+                // Mostrar progreso completo inmediatamente
+                progressBar.style.width = '100%';
+                
+                // Mostrar todos los eventos con distribución temporal aleatoria
+                eventsContainer.innerHTML = '';
+                for (let i = 0; i < numEvents; i++) {
+                    const event = document.createElement('div');
+                    event.className = 'event';
+                    event.textContent = i + 1;
+                    event.style.left = `${Math.random() * 95}%`;
+                    eventsContainer.appendChild(event);
+                    
+                    // Pequeña animación para cada evento
+                    setTimeout(() => {
+                        event.style.animation = 'pulse 0.5s';
+                    }, i * 50);
                 }
                 
+                // Actualizar estadísticas
+                totalEvents += numEvents;
+                totalSimulations++;
+                results.push(numEvents);
+                
+                currentEventsSpan.textContent = numEvents;
                 totalSimulationsSpan.textContent = totalSimulations;
                 totalEventsSpan.textContent = totalEvents;
                 
                 updateSampleStatistics();
                 updateChart();
+                
+                isSimulating = false;
+                simulateOneBtn.disabled = false;
+                simulateHundredBtn.disabled = false;
+                
+                statusMessage.textContent = `Simulación completada: ${numEvents} eventos en ${intervalDuration} minutos`;
+                statusMessage.style.display = 'block';
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
             }
             
-            // Función para actualizar estadísticas muestrales
+            // Simular múltiples intervalos
+            function simulateMultipleIntervals(count) {
+                const lambda = parseFloat(lambdaValue.textContent);
+                
+                // Limpiar y preparar
+                resetCurrentSimulation();
+                eventsContainer.innerHTML = '<p>Simulación rápida en progreso...</p>';
+                
+                // Simular todos los intervalos
+                for (let i = 0; i < count; i++) {
+                    const numEvents = poissonRandom(lambda);
+                    totalEvents += numEvents;
+                    results.push(numEvents);
+                }
+                
+                totalSimulations += count;
+                
+                // Actualizar UI
+                currentEventsSpan.textContent = '-';
+                totalSimulationsSpan.textContent = totalSimulations;
+                totalEventsSpan.textContent = totalEvents;
+                
+                updateSampleStatistics();
+                updateChart();
+                
+                // Mostrar resumen
+                statusMessage.textContent = `Simulados ${count} intervalos con un total de ${totalEvents} eventos`;
+                statusMessage.style.display = 'block';
+                setTimeout(() => {
+                    statusMessage.style.display = 'none';
+                }, 3000);
+                
+                eventsContainer.innerHTML = '<p>Ver gráfico para resultados detallados</p>';
+            }
+            
+            // Actualizar estadísticas
             function updateSampleStatistics() {
                 if (results.length === 0) {
                     sampleMeanSpan.textContent = '0.00';
@@ -411,12 +665,24 @@
                 const mean = sum / results.length;
                 sampleMeanSpan.textContent = mean.toFixed(2);
                 
-                const squaredDiffs = results.map(x => Math.pow(x - mean, 2));
-                const variance = squaredDiffs.reduce((a, b) => a + b, 0) / results.length;
+                // Algoritmo de Welford para varianza
+                let variance = 0;
+                if (results.length > 1) {
+                    let M2 = 0;
+                    let delta;
+                    
+                    for (let i = 0; i < results.length; i++) {
+                        delta = results[i] - mean;
+                        M2 += delta * delta;
+                    }
+                    
+                    variance = M2 / results.length;
+                }
+                
                 sampleVarianceSpan.textContent = variance.toFixed(2);
             }
             
-            // Función para actualizar el gráfico
+            // Actualizar gráfico
             function updateChart() {
                 if (results.length === 0) {
                     chart.data.labels = [];
@@ -441,22 +707,31 @@
                     theoreticalProbs.push(results.length * poissonProbability(k, lambda));
                 }
                 
-                // Preparar etiquetas
-                const labels = Array.from({length: maxResult + 1}, (_, i) => i);
-                
                 // Actualizar gráfico
-                chart.data.labels = labels;
+                chart.data.labels = Array.from({length: maxResult + 1}, (_, i) => i);
                 chart.data.datasets[0].data = histogram;
                 chart.data.datasets[1].data = theoreticalProbs;
                 chart.update();
             }
             
-            // Función para reiniciar la simulación
-            function resetSimulation() {
+            // Reiniciar simulación actual
+            function resetCurrentSimulation() {
+                if (simulationTimeout) {
+                    cancelAnimationFrame(simulationTimeout);
+                }
+                progressBar.style.width = '0%';
+                currentEvents = 0;
+            }
+            
+            // Reiniciar todo
+            function resetAll() {
+                resetCurrentSimulation();
+                isSimulating = false;
+                
+                results = [];
                 currentEvents = 0;
                 totalSimulations = 0;
                 totalEvents = 0;
-                results = [];
                 
                 currentEventsSpan.textContent = '0';
                 totalSimulationsSpan.textContent = '0';
@@ -465,19 +740,23 @@
                 sampleVarianceSpan.textContent = '0.00';
                 
                 eventsContainer.innerHTML = '';
+                statusMessage.style.display = 'none';
                 updateChart();
+                
+                simulateOneBtn.disabled = false;
+                simulateHundredBtn.disabled = false;
             }
             
             // Event listeners
-            document.getElementById('simulate-one').addEventListener('click', simulatePoissonInterval);
-            document.getElementById('simulate-100').addEventListener('click', function() {
-                simulateMultipleIntervals(100);
-            });
-            document.getElementById('reset').addEventListener('click', resetSimulation);
+            lambdaInput.addEventListener('input', updateControlValues);
+            timeIntervalInput.addEventListener('input', updateControlValues);
             
-            // Inicializar valores
-            updateTheoreticalValues();
-            updateTimelineMarkers();
+            simulateOneBtn.addEventListener('click', simulateSingleInterval);
+            simulateHundredBtn.addEventListener('click', () => simulateMultipleIntervals(100));
+            resetBtn.addEventListener('click', resetAll);
+            
+            // Inicializar
+            updateControlValues();
         });
     </script>
 </body>

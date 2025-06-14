@@ -3,318 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación de Dado</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Simulación de Dado Mejorada</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        #dado-page {
-            min-height: 100vh;
-            padding-top: 80px;
-            position: relative;
+        body {
             background-color: #6a0f1a;
-            background-image: url('fondo-proba.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-
-        #dado-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(106, 15, 26, 0.8);
-            z-index: 0;
-        }
-
         .simulation-container {
-            position: relative;
-            z-index: 1;
-            background-color: rgba(255, 255, 255, 0.95);
+            background-color: #f8f8f8;
             width: 90%;
-            max-width: 1000px;
-            margin: 2rem auto;
+            max-width: 900px;
+            margin: 3rem auto;
             padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
         }
-
-        .simulation-title {
-            color: #6a0f1a;
+        h2, h3 {
             text-align: center;
-            margin-bottom: 1.5rem;
+            color: #6a0f1a;
         }
-
         .dice-container {
             text-align: center;
             margin: 20px 0;
         }
-
         .dice {
             width: 80px;
             height: 80px;
             background-color: white;
             border-radius: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+            display: inline-grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 5px;
+            padding: 8px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
             margin: 10px;
         }
-
-        .counter-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #2c3e50;
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: black;
+            border-radius: 50%;
+            margin: auto;
+        }
+        .counter-display, .stats-display {
             text-align: center;
+            font-size: 1.1rem;
             margin: 10px 0;
+            color: #333;
         }
-
-        .simulation-controls {
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .control-group {
-            margin-bottom: 15px;
-        }
-
-        .control-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .control-group input[type="range"] {
-            width: 100%;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-
-        .control-group .range-value {
-            display: inline-block;
-            width: 50px;
-            text-align: center;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
         .btn-group {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
+            text-align: center;
+            margin: 20px 0;
         }
-
         .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
             background-color: #16a085;
             color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: 0.3s ease;
         }
-
-        .btn-primary:hover {
+        .btn:hover {
             background-color: #1abc9c;
-            transform: translateY(-2px);
+            transform: translateY(-3px);
         }
-
-        .btn-secondary {
-            background-color: #e74c3c;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #c0392b;
-            transform: translateY(-2px);
-        }
-
         .chart-container {
+            height: 350px;
             margin: 30px 0;
-            height: 400px;
-            position: relative;
         }
-
-        @media (max-width: 768px) {
-            .btn-group {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 250px;
-            }
+        .explanation {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <!-- Botón de regreso -->
-    <a href="probabilidad.html" class="back-btn">← Regresar</a>
-    
-    <div id="dado-page">
-        <div class="simulation-container">
-            <h2 class="simulation-title">Simulación de un Dado (Distribución Uniforme)</h2>
-            
-            <div class="dice-container">
-                <div class="dice" id="dice-result">1</div>
-            </div>
-            
-            <div class="counter-display">
-                Lanzamientos realizados: <span id="lanzamientos-counter">0</span>
-            </div>
-            
-            <div class="simulation-controls">
-                <div class="control-group">
-                    <label for="simulations-range">Cantidad de lanzamientos:</label>
-                    <input type="range" id="simulations-range" min="1" max="1000" value="100" step="1">
-                    <span class="range-value" id="range-value">100</span>
-                </div>
-                
-                <div class="btn-group">
-                    <button id="simulate-dado" class="btn btn-primary">Lanzar Dado</button>
-                    <button id="simulate-multiple-dado" class="btn btn-primary">Lanzar</button>
-                    <button id="reset-dado" class="btn btn-secondary">Reiniciar</button>
-                </div>
-            </div>
-            
-            <div class="chart-container">
-                <canvas id="dado-chart"></canvas>
-            </div>
-            
-            <div class="results">
-                <h3>Resultados Teóricos</h3>
-                <p>En un dado justo de 6 caras, cada número tiene la misma probabilidad de salir:</p>
-                <p>P(X=1) = P(X=2) = ... = P(X=6) = 1/6 ≈ 16.67%</p>
-            </div>
+    <div class="simulation-container">
+        <h2>Simulación de Dado (Distribución Uniforme)</h2>
+
+        <div class="dice-container">
+            <p><strong>Resultado del dado:</strong></p>
+            <div class="dice" id="dice"></div>
+        </div>
+
+        <div class="counter-display">
+            Lanzamientos realizados: <span id="lanzamientos-counter">0</span>
+        </div>
+
+        <div class="stats-display">
+            <p>Media Teórica: 3.5 | Varianza Teórica: 2.92</p>
+            <p>Media Experimental: <span id="media-exp">0</span> | Varianza Experimental: <span id="varianza-exp">0</span></p>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="simular(1)">Lanzar Dado</button>
+            <button class="btn" onclick="simular(parseInt(document.getElementById('simulaciones').value))">Lanzar Múltiples</button>
+            <button class="btn" onclick="reiniciar()">Reiniciar</button><br>
+            <input type="range" id="simulaciones" min="1" max="1000" value="100" oninput="document.getElementById('rangeValue').textContent=this.value;">
+            <span id="rangeValue">100</span>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="explanation">
+            <h3>Explicación Teórica</h3>
+            <p>En un dado justo de 6 caras, cada cara tiene una probabilidad de 1/6 ≈ 16.67%. 
+            La media teórica es 3.5 y la varianza teórica es 2.92.</p>
+            <p>La simulación lanza el dado un número de veces seleccionado y compara la distribución observada (experimental) contra la distribución teórica.
+            La media experimental es el promedio de los resultados reales obtenidos, y la varianza experimental mide cómo se dispersan estos resultados.</p>
+            <p><strong>Paso a paso:</strong></p>
+            <ol>
+                <li>Selecciona el número de lanzamientos.</li>
+                <li>Presiona "Lanzar Múltiples".</li>
+                <li>Se actualiza el dado visual (representación real) y la gráfica.</li>
+                <li>Se calcula la media y varianza experimental.</li>
+                <li>Puedes reiniciar la simulación en cualquier momento.</li>
+            </ol>
         </div>
     </div>
-    
-    <footer>
-        <p>Proyecto de Energía Solar - Simulación de Dado</p>
-        <p>&copy; 2023 - Todos los derechos reservados</p>
-    </footer>
-    
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const diceResult = document.getElementById('dice-result');
-            const lanzamientosCounter = document.getElementById('lanzamientos-counter');
-            const simulationsRange = document.getElementById('simulations-range');
-            const rangeValue = document.getElementById('range-value');
-            const dadoCounts = [0, 0, 0, 0, 0, 0];
-            let totalLanzamientos = 0;
-            
-            // Actualizar el valor del rango
-            simulationsRange.addEventListener('input', function() {
-                rangeValue.textContent = this.value;
-            });
-            
-            // Configurar gráfico de dado
-            const dadoCtx = document.getElementById('dado-chart').getContext('2d');
-            let dadoChart = new Chart(dadoCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['1', '2', '3', '4', '5', '6'],
-                    datasets: [{
-                        label: 'Probabilidad teórica',
-                        data: [1/6, 1/6, 1/6, 1/6, 1/6, 1/6],
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }, {
-                        label: 'Probabilidad simulada',
-                        data: [0, 0, 0, 0, 0, 0],
-                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 1,
-                            title: {
-                                display: true,
-                                text: 'Probabilidad'
-                            }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Resultado del dado'
-                            }
-                        }
+        const diceElem = document.getElementById('dice');
+        const lanzamientosCounter = document.getElementById('lanzamientos-counter');
+        const mediaExpElem = document.getElementById('media-exp');
+        const varianzaExpElem = document.getElementById('varianza-exp');
+        let counts = [0,0,0,0,0,0];
+        let totalRolls = 0;
+        let resultados = [];
+
+        const ctx = document.getElementById('chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['1','2','3','4','5','6'],
+                datasets: [{
+                    label: 'Probabilidad Teórica',
+                    data: [1/6,1/6,1/6,1/6,1/6,1/6],
+                    backgroundColor: 'rgba(54,162,235,0.5)',
+                    borderColor: 'rgba(54,162,235,1)',
+                    borderWidth: 1
+                },{
+                    label: 'Probabilidad Experimental',
+                    data: [0,0,0,0,0,0],
+                    backgroundColor: 'rgba(255,99,132,0.5)',
+                    borderColor: 'rgba(255,99,132,1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 0.4
                     }
                 }
-            });
-            
-            function rollDice() {
-                const result = Math.floor(Math.random() * 6) + 1;
-                diceResult.textContent = result;
-                return result;
             }
-            
-            function simulateDado(numRolls = 1) {
-                for (let i = 0; i < numRolls; i++) {
-                    const result = rollDice();
-                    dadoCounts[result-1]++;
-                    totalLanzamientos++;
-                }
-                
-                // Actualizar contador
-                lanzamientosCounter.textContent = totalLanzamientos;
-                
-                // Calcular probabilidades
-                const simulatedData = dadoCounts.map(count => count / totalLanzamientos);
-                
-                // Actualizar gráfico
-                dadoChart.data.datasets[1].data = simulatedData;
-                dadoChart.update();
-            }
-            
-            // Event listeners para dado
-            document.getElementById('simulate-dado').addEventListener('click', function() {
-                simulateDado(1);
-            });
-            
-            document.getElementById('simulate-multiple-dado').addEventListener('click', function() {
-                const numSimulations = parseInt(simulationsRange.value);
-                simulateDado(numSimulations);
-            });
-            
-            document.getElementById('reset-dado').addEventListener('click', function() {
-                // Reiniciar contadores
-                for (let i = 0; i < dadoCounts.length; i++) {
-                    dadoCounts[i] = 0;
-                }
-                totalLanzamientos = 0;
-                
-                // Actualizar interfaz
-                lanzamientosCounter.textContent = '0';
-                dadoChart.data.datasets[1].data = [0, 0, 0, 0, 0, 0];
-                dadoChart.update();
-                diceResult.textContent = '1';
-            });
         });
+
+        function mostrarDado(numero) {
+            const posiciones = [
+                [4], [0,8], [0,4,8], [0,2,6,8], [0,2,4,6,8], [0,2,3,5,6,8]
+            ];
+            diceElem.innerHTML = '';
+            for (let i=0;i<9;i++) {
+                const dot = document.createElement('div');
+                if (posiciones[numero-1].includes(i)) {
+                    dot.classList.add('dot');
+                }
+                diceElem.appendChild(dot);
+            }
+        }
+
+        function simular(n) {
+            for (let i = 0; i < n; i++) {
+                const res = Math.floor(Math.random() * 6) + 1;
+                counts[res-1]++;
+                resultados.push(res);
+                totalRolls++;
+            }
+            const probsExp = counts.map(c => c/totalRolls);
+            chart.data.datasets[1].data = probsExp;
+            chart.update();
+
+            mostrarDado(resultados[resultados.length -1]);
+            lanzamientosCounter.textContent = totalRolls;
+
+            const media = resultados.reduce((a,b) => a+b, 0) / resultados.length;
+            const varianza = resultados.reduce((a,b) => a + Math.pow(b - media,2), 0) / resultados.length;
+            mediaExpElem.textContent = media.toFixed(2);
+            varianzaExpElem.textContent = varianza.toFixed(2);
+        }
+
+        function reiniciar() {
+            counts = [0,0,0,0,0,0];
+            totalRolls = 0;
+            resultados = [];
+            chart.data.datasets[1].data = [0,0,0,0,0,0];
+            chart.update();
+            lanzamientosCounter.textContent = '0';
+            mediaExpElem.textContent = '0';
+            varianzaExpElem.textContent = '0';
+            mostrarDado(1);
+        }
+
+        mostrarDado(1); // Dado inicial en 1
     </script>
 </body>
 </html>
