@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Distribución Uniforme</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #6a0f1a;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .simulation-container {
+            background-color: #f8f8f8;
+            width: 90%;
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #6a0f1a;
+        }
+        .data-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .sample-display {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px auto;
+            background-color: white;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .counter-display, .stats-display {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: #333;
+        }
+        .btn-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            background-color: #16a085;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #1abc9c;
+            transform: translateY(-3px);
+        }
+        .chart-container {
+            height: 350px;
+            margin: 30px 0;
+        }
+        .explanation {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
+        }
+        .input-group {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .params-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .param-box {
+            background-color: #e6e6e6;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            text-align: center;
+        }
+        .stats-box {
+            background-color: #e6f3ff;
+            border: 2px solid #a0c4ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-item {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .stat-item.theoretical {
+            border-left: 4px solid #4a90e2;
+        }
+        .stat-item.experimental {
+            border-left: 4px solid #e24a4a;
+        }
+        .stat-item h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <h2>Simulación de Distribución Uniforme</h2>
+        <p style="text-align: center; margin-bottom: 20px;">Tiempo de llegada de mensajes en un celular (minutos)</p>
+
+        <div class="explanation">
+            <h3>¿Qué estamos simulando?</h3>
+            <p>Esta simulación modela el tiempo de llegada de mensajes a un celular usando una distribución uniforme continua. En este modelo, todos los tiempos dentro del rango especificado tienen exactamente la misma probabilidad de ocurrencia.</p>
+            <p>Por ejemplo, si simulamos tiempos entre 0 y 10 minutos, cualquier valor en ese intervalo (como 3.2 minutos o 7.8 minutos) tiene la misma probabilidad de aparecer.</p>
+        </div>
+
+        <div class="params-container">
+            <div class="param-box">
+                <h4>Límite inferior (a)</h4>
+                <input type="number" id="min-input" value="0" min="0" max="100" step="0.1"> min
+            </div>
+            <div class="param-box">
+                <h4>Límite superior (b)</h4>
+                <input type="number" id="max-input" value="10" min="0.1" max="100" step="0.1"> min
+            </div>
+            <div class="param-box">
+                <h4>Tasa de mensajes</h4>
+                <input type="number" id="tasa-input" value="60" min="1" max="1000" step="1"> mensajes/min
+            </div>
+            <div class="param-box">
+                <h4>Simulaciones a realizar</h4>
+                <input type="number" id="simulaciones-input" value="1" min="1" max="100" step="1">
+            </div>
+        </div>
+
+        <div class="data-container">
+            <div class="counter-display">
+                Simulaciones realizadas: <span id="simulaciones-counter">0</span> | 
+                Mensajes simulados: <span id="total-muestras">0</span>
+            </div>
+            <p><strong>Últimos 10 tiempos generados:</strong></p>
+            <div class="sample-display" id="muestras-display">
+                <!-- Las muestras aparecerán aquí -->
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Estadísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-item theoretical">
+                    <h4>Teóricas</h4>
+                    <p><strong>Media:</strong> <span id="media-teo">5.00</span> min</p>
+                    <p><strong>Varianza:</strong> <span id="varianza-teo">8.33</span> min²</p>
+                    <p><strong>Desv. Estándar:</strong> <span id="desviacion-teo">2.89</span> min</p>
+                </div>
+                <div class="stat-item experimental">
+                    <h4>Experimentales</h4>
+                    <p><strong>Media:</strong> <span id="media-exp">0.00</span> min</p>
+                    <p><strong>Varianza:</strong> <span id="varianza-exp">0.00</span> min²</p>
+                    <p><strong>Desv. Estándar:</strong> <span id="desviacion-exp">0.00</span> min</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="simular()">Ejecutar simulaciones</button>
+            <button class="btn" onclick="reiniciar()">Reiniciar</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="explanation">
+            <h3>Explicación Teórica</h3>
+            <p>La distribución uniforme continua describe un experimento donde todos los resultados en un intervalo [a, b] son igualmente probables.</p>
+            
+            <p><strong>Características:</strong></p>
+            <ul>
+                <li>Función de densidad: f(x) = 1/(b-a) para a ≤ x ≤ b (0 en otro caso)</li>
+                <li>Media teórica: E[X] = (a + b)/2</li>
+                <li>Varianza teórica: Var(X) = (b - a)²/12</li>
+                <li>Forma plana (todos los valores tienen igual probabilidad)</li>
+            </ul>
+            
+            <p><strong>En nuestro ejemplo (a=0, b=10):</strong></p>
+            <ul>
+                <li>Media = (0 + 10)/2 = 5 minutos</li>
+                <li>Varianza = (10 - 0)²/12 = 100/12 ≈ 8.33 min²</li>
+                <li>Desviación estándar = √8.33 ≈ 2.89 minutos</li>
+            </ul>
+            
+            <h3>Paso a paso para usar la simulación:</h3>
+            <ol>
+                <li><strong>Ajustar parámetros:</strong> Establece los límites del intervalo [a, b], la tasa de mensajes por minuto y el número de simulaciones a realizar</li>
+                <li><strong>Generar datos:</strong> Haz clic en "Ejecutar simulaciones" para generar los tiempos de llegada</li>
+                <li><strong>Analizar resultados:</strong> Observa los últimos tiempos generados y compara las estadísticas teóricas con las experimentales</li>
+                <li><strong>Interpretar gráfico:</strong> El histograma debe ser aproximadamente plano, mostrando que todos los tiempos son igualmente probables</li>
+                <li><strong>Reiniciar:</strong> Usa el botón "Reiniciar" para comenzar una nueva simulación cuando lo desees</li>
+            </ol>
+            
+            <p><strong>Interpretación práctica:</strong> En este modelo, no hay tiempos "más probables" que otros dentro del intervalo. Un mensaje tiene la misma probabilidad de llegar a los 2 minutos que a los 8 minutos.</p>
+        </div>
+    </div>
+
+    <script>
+        const muestrasDisplay = document.getElementById('muestras-display');
+        const simulacionesCounter = document.getElementById('simulaciones-counter');
+        const totalMuestrasElem = document.getElementById('total-muestras');
+        const mediaExpElem = document.getElementById('media-exp');
+        const varianzaExpElem = document.getElementById('varianza-exp');
+        const desviacionExpElem = document.getElementById('desviacion-exp');
+        const mediaTeoElem = document.getElementById('media-teo');
+        const varianzaTeoElem = document.getElementById('varianza-teo');
+        const desviacionTeoElem = document.getElementById('desviacion-teo');
+        
+        let muestras = [];
+        let totalSimulaciones = 0;
+        let chart;
+
+        // Función de densidad uniforme teórica
+        function densidadUniforme(a, b) {
+            return 1 / (b - a);
+        }
+
+        // Inicializar el gráfico
+        function inicializarGrafico() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Frecuencia observada',
+                            data: [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Distribución teórica',
+                            data: [],
+                            type: 'line',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Número de mensajes'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tiempo (minutos)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Mensajes: ${context.raw}`;
+                                    } else {
+                                        return `Teórico: ${context.raw.toFixed(2)}`;
+                                    }
+                                },
+                                title: function(context) {
+                                    return `Tiempo: ${context[0].label}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Función para actualizar los parámetros teóricos
+        function actualizarParametrosTeoricos() {
+            const a = parseFloat(document.getElementById('min-input').value);
+            const b = parseFloat(document.getElementById('max-input').value);
+            
+            const media = (a + b) / 2;
+            const varianza = Math.pow(b - a, 2) / 12;
+            const desviacion = Math.sqrt(varianza);
+            
+            mediaTeoElem.textContent = media.toFixed(2);
+            varianzaTeoElem.textContent = varianza.toFixed(2);
+            desviacionTeoElem.textContent = desviacion.toFixed(2);
+            
+            // Si ya hay datos, actualizar el histograma
+            if (muestras.length > 0) {
+                actualizarHistograma(muestras, a, b);
+            }
+        }
+
+        // Función para actualizar el histograma
+        function actualizarHistograma(datos, a, b) {
+            const binCount = 20; // Número de bins fijo
+            const binSize = (b - a) / binCount;
+            
+            // Crear bins
+            const bins = Array(binCount).fill(0);
+            const labels = [];
+            const puntosTeoricos = [];
+            
+            // Calcular valor teórico esperado para cada bin
+            const densidadTeorica = densidadUniforme(a, b);
+            const valorTeorico = densidadTeorica * datos.length * binSize;
+            
+            for (let i = 0; i < binCount; i++) {
+                const binStart = a + i * binSize;
+                const binEnd = a + (i + 1) * binSize;
+                labels.push(`${binStart.toFixed(1)}-${binEnd.toFixed(1)}`);
+                puntosTeoricos.push(valorTeorico);
+            }
+            
+            // Contar datos en bins
+            datos.forEach(valor => {
+                const binIndex = Math.min(Math.floor((valor - a) / binSize), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            // Actualizar gráfico
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = bins;
+            chart.data.datasets[1].data = puntosTeoricos;
+            chart.update();
+        }
+
+        // Función para mostrar las últimas muestras
+        function mostrarMuestras(ultimasMuestras) {
+            muestrasDisplay.innerHTML = ultimasMuestras.map(val => val.toFixed(2) + ' min').join(', ');
+        }
+
+        // Función principal de simulación
+        function simular() {
+            const a = parseFloat(document.getElementById('min-input').value);
+            const b = parseFloat(document.getElementById('max-input').value);
+            const tasa = parseFloat(document.getElementById('tasa-input').value);
+            const numSimulaciones = parseInt(document.getElementById('simulaciones-input').value);
+            
+            // Generar muestras para cada simulación
+            const nuevasMuestras = [];
+            for (let s = 0; s < numSimulaciones; s++) {
+                // Cada simulación genera un minuto de mensajes según la tasa
+                const numMensajes = Math.round(tasa * 1); // 1 minuto por simulación
+                for (let i = 0; i < numMensajes; i++) {
+                    nuevasMuestras.push(a + Math.random() * (b - a));
+                }
+            }
+            
+            // Actualizar datos (acumular sin reiniciar)
+            muestras = muestras.concat(nuevasMuestras);
+            totalSimulaciones += numSimulaciones;
+            
+            // Calcular estadísticas acumuladas
+            const mediaExp = muestras.reduce((a, b) => a + b, 0) / muestras.length;
+            const varianzaExp = muestras.reduce((a, b) => a + Math.pow(b - mediaExp, 2), 0) / muestras.length;
+            const desviacionExp = Math.sqrt(varianzaExp);
+            
+            mediaExpElem.textContent = mediaExp.toFixed(2);
+            varianzaExpElem.textContent = varianzaExp.toFixed(2);
+            desviacionExpElem.textContent = desviacionExp.toFixed(2);
+            
+            // Actualizar visualizaciones
+            simulacionesCounter.textContent = totalSimulaciones;
+            totalMuestrasElem.textContent = muestras.length;
+            mostrarMuestras(nuevasMuestras.slice(-10));
+            actualizarHistograma(muestras, a, b);
+        }
+
+        // Función para reiniciar la simulación
+        function reiniciar() {
+            muestras = [];
+            totalSimulaciones = 0;
+            simulacionesCounter.textContent = '0';
+            totalMuestrasElem.textContent = '0';
+            mediaExpElem.textContent = '0.00';
+            varianzaExpElem.textContent = '0.00';
+            desviacionExpElem.textContent = '0.00';
+            muestrasDisplay.innerHTML = '';
+            
+            // Reiniciar gráfico
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.data.datasets[1].data = [];
+            chart.update();
+            
+            // Actualizar parámetros teóricos
+            actualizarParametrosTeoricos();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarGrafico();
+            actualizarParametrosTeoricos();
+            
+            // Actualizar parámetros teóricos cuando cambian los inputs
+            document.getElementById('min-input').addEventListener('change', actualizarParametrosTeoricos);
+            document.getElementById('max-input').addEventListener('change', actualizarParametrosTeoricos);
+        });
+    </script>
+</body>
+</html>

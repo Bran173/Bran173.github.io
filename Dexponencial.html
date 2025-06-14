@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación de Distribución Exponencial</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #6a0f1a;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .simulation-container {
+            background-color: #f8f8f8;
+            width: 90%;
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #6a0f1a;
+        }
+        .data-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .sample-display {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px auto;
+            background-color: white;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .counter-display, .stats-display {
+            text-align: center;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            color: #333;
+        }
+        .btn-group {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .btn {
+            background-color: #16a085;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #1abc9c;
+            transform: translateY(-3px);
+        }
+        .chart-container {
+            height: 350px;
+            margin: 30px 0;
+        }
+        .explanation {
+            background-color: #eee;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #333;
+        }
+        .input-group {
+            margin: 15px 0;
+            text-align: center;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .params-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .param-box {
+            background-color: #e6e6e6;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 5px;
+            text-align: center;
+        }
+        .stats-box {
+            background-color: #e6f3ff;
+            border: 2px solid #a0c4ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-item {
+            padding: 10px;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .stat-item.theoretical {
+            border-left: 4px solid #4a90e2;
+        }
+        .stat-item.experimental {
+            border-left: 4px solid #e24a4a;
+        }
+        .stat-item h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 80px;
+            text-align: center;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <h2>Simulación de Distribución Exponencial</h2>
+        <p style="text-align: center; margin-bottom: 20px;">Duración de bombillas hasta quemarse</p>
+
+        <div class="explanation">
+            <h3>¿Qué estamos simulando?</h3>
+            <p>Esta simulación modela el tiempo de vida de bombillas eléctricas usando una distribución exponencial. La distribución exponencial es ideal para modelar tiempos entre eventos en un proceso de Poisson, como la duración hasta que falla un componente electrónico.</p>
+            <p>En este caso, simulamos cuántas horas funcionan las bombillas antes de quemarse, donde el parámetro λ (lambda) representa la tasa de fallos (1/vida media).</p>
+        </div>
+
+        <div class="params-container">
+            <div class="param-box">
+                <h4>Vida media (1/λ)</h4>
+                <input type="number" id="media-input" value="800" min="100" max="5000" step="10"> horas
+            </div>
+            <div class="param-box">
+                <h4>Número de bombillas</h4>
+                <input type="number" id="muestras-input" value="1000" min="10" max="10000" step="10">
+            </div>
+        </div>
+
+        <div class="data-container">
+            <div class="counter-display">
+                Simulaciones realizadas: <span id="simulaciones-counter">0</span> | 
+                Bombillas simuladas: <span id="total-muestras">0</span>
+            </div>
+            <p><strong>Últimas 10 duraciones generadas:</strong></p>
+            <div class="sample-display" id="muestras-display">
+                <!-- Las muestras aparecerán aquí -->
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Estadísticas</h3>
+            <div class="stats-grid">
+                <div class="stat-item theoretical">
+                    <h4>Teóricas</h4>
+                    <p><strong>Media:</strong> <span id="media-teo">800.00</span> horas</p>
+                    <p><strong>Varianza:</strong> <span id="varianza-teo">640000.00</span> horas²</p>
+                    <p><strong>Desv. Estándar:</strong> <span id="desviacion-teo">800.00</span> horas</p>
+                </div>
+                <div class="stat-item experimental">
+                    <h4>Experimentales</h4>
+                    <p><strong>Media:</strong> <span id="media-exp">0.00</span> horas</p>
+                    <p><strong>Varianza:</strong> <span id="varianza-exp">0.00</span> horas²</p>
+                    <p><strong>Desv. Estándar:</strong> <span id="desviacion-exp">0.00</span> horas</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="simular(1)">Simular 1 bombilla</button>
+            <button class="btn" onclick="simular(parseInt(document.getElementById('muestras-input').value))">Simular todas</button>
+            <button class="btn" onclick="reiniciar()">Reiniciar</button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="chart"></canvas>
+        </div>
+
+        <div class="explanation">
+            <h3>Explicación Teórica</h3>
+            <p>La distribución exponencial describe el tiempo entre eventos en un proceso de Poisson, donde los eventos ocurren de forma continua e independiente a una tasa constante λ.</p>
+            
+            <p><strong>Características:</strong></p>
+            <ul>
+                <li>Función de densidad: f(x) = λe^(-λx) para x ≥ 0</li>
+                <li>Media teórica: E[X] = 1/λ</li>
+                <li>Varianza teórica: Var(X) = 1/λ²</li>
+                <li>Propiedad sin memoria: P(X > s + t | X > s) = P(X > t)</li>
+                <li>Forma decreciente característica</li>
+            </ul>
+            
+            <p><strong>En nuestro ejemplo:</strong></p>
+            <ul>
+                <li>λ = 1/800 (una falla cada 800 horas en promedio)</li>
+                <li>Media = 800 horas</li>
+                <li>Varianza = 800² = 640,000 horas²</li>
+            </ul>
+            
+            <h3>Paso a paso para usar la simulación:</h3>
+            <ol>
+                <li><strong>Ajustar parámetros:</strong> Establece la vida media esperada (1/λ) y el número de bombillas a simular</li>
+                <li><strong>Generar datos:</strong> Haz clic en "Simular 1 bombilla" para una muestra o "Simular todas" para el conjunto completo</li>
+                <li><strong>Analizar resultados:</strong> Observa las últimas duraciones generadas y compara las estadísticas teóricas con las experimentales</li>
+                <li><strong>Interpretar gráfico:</strong> El histograma muestra la distribución de las duraciones, que debería seguir una curva exponencial decreciente</li>
+                <li><strong>Reiniciar:</strong> Usa el botón "Reiniciar" para comenzar una nueva simulación cuando lo desees</li>
+            </ol>
+            
+            <p><strong>Interpretación práctica:</strong> Si una bombilla tiene una vida media de 800 horas, aproximadamente el 63.2% de las bombillas fallarán antes de las 800 horas, y el 36.8% durarán más que el promedio.</p>
+        </div>
+    </div>
+
+    <script>
+        const muestrasDisplay = document.getElementById('muestras-display');
+        const simulacionesCounter = document.getElementById('simulaciones-counter');
+        const totalMuestrasElem = document.getElementById('total-muestras');
+        const mediaExpElem = document.getElementById('media-exp');
+        const varianzaExpElem = document.getElementById('varianza-exp');
+        const desviacionExpElem = document.getElementById('desviacion-exp');
+        const mediaTeoElem = document.getElementById('media-teo');
+        const varianzaTeoElem = document.getElementById('varianza-teo');
+        const desviacionTeoElem = document.getElementById('desviacion-teo');
+        
+        let muestras = [];
+        let totalSimulaciones = 0;
+        let chart;
+
+        // Función para generar números con distribución exponencial
+        function generarExponencial(lambda) {
+            const u = Math.random();
+            return -Math.log(1 - u) / lambda;
+        }
+
+        // Función de densidad exponencial teórica
+        function densidadExponencial(x, lambda) {
+            return lambda * Math.exp(-lambda * x);
+        }
+
+        // Inicializar el gráfico
+        function inicializarGrafico() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Frecuencia observada',
+                            data: [],
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Distribución teórica',
+                            data: [],
+                            type: 'line',
+                            borderColor: 'rgba(46, 204, 113, 1)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Frecuencia'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Horas de duración'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Bombillas: ${context.raw}`;
+                                    } else {
+                                        return `Teórico: ${context.raw.toFixed(2)}`;
+                                    }
+                                },
+                                title: function(context) {
+                                    return `Duración: ${context[0].label}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Función para actualizar los parámetros teóricos
+        function actualizarParametrosTeoricos() {
+            const media = parseFloat(document.getElementById('media-input').value);
+            const lambda = 1 / media;
+            
+            mediaTeoElem.textContent = media.toFixed(2);
+            varianzaTeoElem.textContent = (media * media).toFixed(2);
+            desviacionTeoElem.textContent = media.toFixed(2);
+            
+            // Si ya hay datos, actualizar el histograma
+            if (muestras.length > 0) {
+                actualizarHistograma(muestras, lambda);
+            }
+        }
+
+        // Función para actualizar el histograma
+        function actualizarHistograma(datos, lambda) {
+            const media = 1/lambda;
+            // Crear bins con más detalle al inicio
+            const maxDatos = Math.max(...datos);
+            const binCount = 20;
+            const binSize = maxDatos / binCount;
+            
+            // Crear bins
+            const bins = Array(binCount).fill(0);
+            const labels = [];
+            const puntosTeoricos = [];
+            
+            for (let i = 0; i < binCount; i++) {
+                const binStart = i * binSize;
+                const binEnd = (i + 1) * binSize;
+                const binCenter = (binStart + binEnd) / 2;
+                labels.push(`${binStart.toFixed(0)}-${binEnd.toFixed(0)}`);
+                
+                // Calcular valor teórico para el bin
+                const prob = densidadExponencial(binCenter, lambda);
+                puntosTeoricos.push(prob * datos.length * binSize);
+            }
+            
+            // Contar datos en bins
+            datos.forEach(valor => {
+                const binIndex = Math.min(Math.floor(valor / binSize), binCount - 1);
+                bins[binIndex]++;
+            });
+            
+            // Actualizar gráfico
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = bins;
+            chart.data.datasets[1].data = puntosTeoricos;
+            chart.update();
+        }
+
+        // Función para mostrar las últimas muestras
+        function mostrarMuestras(ultimasMuestras) {
+            muestrasDisplay.innerHTML = ultimasMuestras.map(val => val.toFixed(2) + ' horas').join(', ');
+        }
+
+        // Función principal de simulación
+        function simular(n) {
+            const media = parseFloat(document.getElementById('media-input').value);
+            const lambda = 1 / media;
+            const numMuestras = parseInt(document.getElementById('muestras-input').value);
+            
+            // Generar muestras
+            const nuevasMuestras = [];
+            for (let i = 0; i < n; i++) {
+                nuevasMuestras.push(generarExponencial(lambda));
+            }
+            
+            // Actualizar datos
+            muestras = muestras.concat(nuevasMuestras);
+            totalSimulaciones += 1;
+            
+            // Mostrar estadísticas
+            const mediaExp = muestras.reduce((a, b) => a + b, 0) / muestras.length;
+            const varianzaExp = muestras.reduce((a, b) => a + Math.pow(b - mediaExp, 2), 0) / muestras.length;
+            const desviacionExp = Math.sqrt(varianzaExp);
+            
+            mediaExpElem.textContent = mediaExp.toFixed(2);
+            varianzaExpElem.textContent = varianzaExp.toFixed(2);
+            desviacionExpElem.textContent = desviacionExp.toFixed(2);
+            
+            // Actualizar visualizaciones
+            simulacionesCounter.textContent = totalSimulaciones;
+            totalMuestrasElem.textContent = muestras.length;
+            mostrarMuestras(nuevasMuestras.slice(-10));
+            actualizarHistograma(muestras, lambda);
+            
+            // Asegurarse de no exceder el número máximo de muestras
+            if (muestras.length > numMuestras) {
+                muestras = muestras.slice(-numMuestras);
+            }
+        }
+
+        // Función para reiniciar la simulación
+        function reiniciar() {
+            muestras = [];
+            totalSimulaciones = 0;
+            simulacionesCounter.textContent = '0';
+            totalMuestrasElem.textContent = '0';
+            mediaExpElem.textContent = '0.00';
+            varianzaExpElem.textContent = '0.00';
+            desviacionExpElem.textContent = '0.00';
+            muestrasDisplay.innerHTML = '';
+            
+            // Reiniciar gráfico
+            chart.data.labels = [];
+            chart.data.datasets[0].data = [];
+            chart.data.datasets[1].data = [];
+            chart.update();
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarGrafico();
+            actualizarParametrosTeoricos();
+            
+            // Actualizar parámetros teóricos cuando cambian los inputs
+            document.getElementById('media-input').addEventListener('change', actualizarParametrosTeoricos);
+        });
+    </script>
+</body>
+</html>

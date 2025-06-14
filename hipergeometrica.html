@@ -160,6 +160,15 @@
         .probabilities-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
+        .count-badge {
+            display: inline-block;
+            background-color: #6a0f1a;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -208,7 +217,7 @@
         </div>
 
         <div class="stats-box">
-            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Probabilidades de cada caso</h3>
+            <h3 style="text-align: center; margin-top: 0; color: #6a0f1a;">Resultados de las simulaciones</h3>
             <table class="probabilities-table">
                 <thead>
                     <tr>
@@ -216,6 +225,7 @@
                         <th>Prob. Teórica</th>
                         <th>Prob. Experimental</th>
                         <th>Diferencia</th>
+                        <th>Conteo</th>
                     </tr>
                 </thead>
                 <tbody id="probabilities-body">
@@ -354,6 +364,7 @@
                     <td>${(probTeo * 100).toFixed(2)}%</td>
                     <td>${(probExp * 100).toFixed(2)}%</td>
                     <td>${(diferencia * 100).toFixed(2)}%</td>
+                    <td>${counts[k]} <span class="count-badge">${((counts[k]/totalSimulaciones)*100).toFixed(1)}%</span></td>
                 `;
                 probabilitiesBody.appendChild(row);
             }
