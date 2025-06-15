@@ -1,10 +1,838 @@
-7. Distribución Gamma
-Ejemplo: Tiempo hasta que fallan 3 componentes electrónicos.
-
-Variable aleatoria (X): Tiempo acumulado hasta *k* eventos.
-
-Parámetros:
-
-*k = 3* (eventos deseados).
-
-λ = tasa de fallos por hora (ej. *λ = 0.5 fallos/hora*).
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación Gamma - Fallos Electrónicos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #6a0f1a;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        
+        .explanation-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .explanation-section {
+            margin-bottom: 20px;
+        }
+        
+        .explanation-section h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        
+        .simulation-panel {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-panel {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .component-visualization {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 5px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+        }
+        
+        .input-value {
+            display: inline-block;
+            width: 50px;
+            text-align: right;
+            margin-left: 10px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .component {
+            width: 60px;
+            height: 60px;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: white;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .component.working {
+            background-color: #2ecc71; /* Verde para componentes funcionando */
+        }
+        
+        .component.failed {
+            background-color: #e74c3c; /* Rojo para componentes fallados */
+        }
+        
+        .component::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.4);
+            transition: left 0.5s;
+        }
+        
+        .component.failed::after {
+            left: 100%;
+        }
+        
+        .components-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .time-display {
+            font-size: 1.2em;
+            margin: 15px 0;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .formula {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+        
+        .simulation-counter {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .speed-control {
+            margin-top: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulación Gamma para Fallos Electrónicos</h1>
+            <p>Modelado del tiempo total hasta que fallen k componentes</p>
+        </header>
+        
+        <!-- Panel de Explicación -->
+        <div class="explanation-panel">
+            <div class="explanation-section">
+                <h3>¿Qué simula este modelo?</h3>
+                <p>Esta simulación modela el tiempo total hasta que fallen <strong>k componentes electrónicos</strong> independientes, cada uno con un tiempo de vida promedio de <strong>θ horas</strong>. La distribución Gamma es ideal para representar el tiempo de espera hasta que ocurran múltiples eventos (fallos) en un proceso continuo.</p>
+                <p>En un sistema electrónico con varios componentes (resistencias, capacitores, etc.), cada componente falla aleatoriamente siguiendo una distribución exponencial. La suma de estos tiempos de fallo sigue una distribución Gamma.</p>
+            </div>
+            
+            <div class="explanation-section">
+                <h3>Fundamento Teórico</h3>
+                <p>La distribución Gamma tiene dos parámetros:</p>
+                <ol>
+                    <li><strong>k (parámetro de forma):</strong> Número de fallos requeridos (componentes que deben fallar)</li>
+                    <li><strong>θ (parámetro de escala):</strong> Tiempo promedio entre fallos de componentes individuales</li>
+                </ol>
+                <div class="formula">
+                    <p><strong>Función de densidad de probabilidad (PDF):</strong></p>
+                    <p>f(x; k, θ) = x<sup>k-1</sup> e<sup>-x/θ</sup> / (θ<sup>k</sup> Γ(k))</p>
+                    <p>Donde Γ(k) es la función Gamma, que generaliza el factorial (Γ(k) = (k-1)! para k entero)</p>
+                </div>
+                <p><strong>Media teórica:</strong> μ = k × θ</p>
+                <p><strong>Varianza teórica:</strong> σ² = k × θ²</p>
+            </div>
+            
+            <div class="explanation-section">
+                <h3>Instrucciones de Uso</h3>
+                <h4>Configuración de parámetros:</h4>
+                <ol>
+                    <li><strong>Parámetro de forma (k):</strong> Número de componentes que deben fallar (1-10)</li>
+                    <li><strong>Parámetro de escala (θ):</strong> Tiempo promedio entre fallos (50-500 horas)</li>
+                    <li><strong>Número de simulaciones:</strong> Cantidad de experimentos a realizar (100-10,000)</li>
+                    <li><strong>Velocidad:</strong> Controla qué tan rápido se ejecutan las simulaciones</li>
+                </ol>
+                
+                <h4>Interpretación de resultados:</h4>
+                <ul>
+                    <li>Los <strong>componentes verdes</strong> representan elementos funcionando</li>
+                    <li>Los <strong>componentes rojos</strong> muestran elementos que han fallado</li>
+                    <li>El <strong>histograma azul</strong> muestra los resultados observados</li>
+                    <li>La <strong>línea roja</strong> representa la distribución teórica esperada</li>
+                    <li>Los <strong>errores relativos</strong> indican cuánto difieren los resultados observados de los teóricos</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="simulation-panel">
+            <div class="control-panel">
+                <h2>Parámetros de Simulación</h2>
+                
+                <div class="form-group">
+                    <label for="shapeParam">Parámetro de forma (k): <span id="kValue" class="input-value">4</span></label>
+                    <input type="range" id="shapeParam" min="1" max="10" step="1" value="4">
+                </div>
+                
+                <div class="form-group">
+                    <label for="scaleParam">Parámetro de escala (θ): <span id="thetaValue" class="input-value">200</span></label>
+                    <input type="range" id="scaleParam" min="50" max="500" step="50" value="200">
+                </div>
+                
+                <div class="form-group">
+                    <label for="simulations">Número de simulaciones: <span id="simValue" class="input-value">1000</span></label>
+                    <input type="range" id="simulations" min="100" max="10000" step="100" value="1000">
+                </div>
+                
+                <div class="form-group speed-control">
+                    <label for="simSpeed">Velocidad de simulación:</label>
+                    <select id="simSpeed" class="btn">
+                        <option value="10">Lenta</option>
+                        <option value="50" selected>Normal</option>
+                        <option value="200">Rápida</option>
+                        <option value="1000">Muy rápida</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button id="startSim">Iniciar Simulación</button>
+                    <button id="resetSim">Reiniciar</button>
+                    <button id="stepSim" disabled>Paso a Paso</button>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="simulation-counter">
+                    Simulaciones completadas: <span id="simCounter">0</span>/<span id="totalSims">1000</span>
+                </div>
+                
+                <div class="time-display" id="currentTime">Tiempo actual: 0 horas</div>
+                
+                <div class="formula">
+                    <p>Función de densidad Gamma:</p>
+                    <p>f(x) = x<sup>k-1</sup> e<sup>-x/θ</sup> / (θ<sup>k</sup> Γ(k))</p>
+                    <p>Γ(k) = Función Gamma</p>
+                </div>
+            </div>
+            
+            <div class="component-visualization">
+                <h2>Visualización de Componentes</h2>
+                <p id="componentStatus">Estado: Todos funcionando</p>
+                
+                <div class="components-grid" id="componentsGrid">
+                    <!-- Componentes se generarán aquí dinámicamente -->
+                </div>
+                
+                <div class="time-display" id="failureTime">Tiempo hasta fallo: -</div>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <div class="stat-card">
+                <div class="stat-label">Media teórica (kθ)</div>
+                <div class="stat-value" id="theoreticalMean">800.00</div>
+                <div class="stat-label">horas</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Media observada</div>
+                <div class="stat-value" id="observedMean">-</div>
+                <div class="stat-label">horas</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Error relativo</div>
+                <div class="stat-value" id="meanError">-</div>
+                <div class="stat-label">%</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Varianza teórica (kθ²)</div>
+                <div class="stat-value" id="theoreticalVar">160000.00</div>
+                <div class="stat-label">horas²</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Varianza observada</div>
+                <div class="stat-value" id="observedVar">-</div>
+                <div class="stat-label">horas²</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Error relativo</div>
+                <div class="stat-value" id="varError">-</div>
+                <div class="stat-label">%</div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="gammaChart"></canvas>
+        </div>
+        
+        <footer>
+            <p>Simulación de distribución Gamma para modelar fallos en componentes electrónicos</p>
+            <p>&copy; 2023 - Proyecto de Simulación Estadística</p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos del DOM
+            const shapeParam = document.getElementById('shapeParam');
+            const scaleParam = document.getElementById('scaleParam');
+            const simulations = document.getElementById('simulations');
+            const kValue = document.getElementById('kValue');
+            const thetaValue = document.getElementById('thetaValue');
+            const simValue = document.getElementById('simValue');
+            const startSim = document.getElementById('startSim');
+            const resetSim = document.getElementById('resetSim');
+            const stepSim = document.getElementById('stepSim');
+            const progressBar = document.getElementById('progressBar');
+            const currentTime = document.getElementById('currentTime');
+            const componentStatus = document.getElementById('componentStatus');
+            const componentsGrid = document.getElementById('componentsGrid');
+            const failureTime = document.getElementById('failureTime');
+            const theoreticalMean = document.getElementById('theoreticalMean');
+            const observedMean = document.getElementById('observedMean');
+            const meanError = document.getElementById('meanError');
+            const theoreticalVar = document.getElementById('theoreticalVar');
+            const observedVar = document.getElementById('observedVar');
+            const varError = document.getElementById('varError');
+            const simCounter = document.getElementById('simCounter');
+            const totalSims = document.getElementById('totalSims');
+            const simSpeed = document.getElementById('simSpeed');
+            
+            // Variables de estado
+            let k = 4;
+            let theta = 200;
+            let numSimulations = 1000;
+            let simulationRunning = false;
+            let currentSimulation = 0;
+            let samples = [];
+            let currentTimeValue = 0;
+            let components = [];
+            let componentTypes = ['resistor', 'capacitor', 'inductor', 'diode', 'transistor'];
+            let simulationSpeed = 50;
+            let animationFrameId = null;
+            
+            // Configuración del gráfico
+            const ctx = document.getElementById('gammaChart').getContext('2d');
+            let gammaChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Frecuencia observada',
+                            data: [],
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            borderColor: 'rgba(52, 152, 219, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Distribución teórica',
+                            data: [],
+                            type: 'line',
+                            backgroundColor: 'rgba(231, 76, 60, 0.7)',
+                            borderColor: 'rgba(231, 76, 60, 1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Frecuencia'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Tiempo hasta fallo (horas)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(2);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Inicializar componentes
+            function initializeComponents() {
+                componentsGrid.innerHTML = '';
+                components = [];
+                
+                for (let i = 0; i < k; i++) {
+                    const type = componentTypes[i % componentTypes.length];
+                    const component = document.createElement('div');
+                    component.className = `component working ${type}`;
+                    component.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+                    component.id = `component-${i}`;
+                    componentsGrid.appendChild(component);
+                    components.push({
+                        element: component,
+                        failed: false,
+                        failureTime: null
+                    });
+                }
+            }
+            
+            // Actualizar parámetros teóricos
+            function updateTheoreticalValues() {
+                const mean = k * theta;
+                const variance = k * theta * theta;
+                
+                theoreticalMean.textContent = mean.toFixed(2);
+                theoreticalVar.textContent = variance.toFixed(2);
+                totalSims.textContent = numSimulations;
+            }
+            
+            // Actualizar controles
+            function updateControls() {
+                k = parseInt(shapeParam.value);
+                theta = parseInt(scaleParam.value);
+                numSimulations = parseInt(simulations.value);
+                simulationSpeed = parseInt(simSpeed.value);
+                
+                kValue.textContent = k;
+                thetaValue.textContent = theta;
+                simValue.textContent = numSimulations;
+                
+                updateTheoreticalValues();
+                initializeComponents();
+            }
+            
+            // Generar muestra Gamma más precisa
+            function generateGammaSample() {
+                // Usamos el método de suma de exponenciales para k entero
+                let sum = 0;
+                for (let i = 0; i < k; i++) {
+                    sum += -Math.log(1 - Math.random()) * theta;
+                }
+                return sum;
+            }
+            
+            // Actualizar histograma con bins adaptativos
+            function updateHistogram() {
+                if (samples.length === 0) return;
+                
+                // Calcular bins adaptativos basados en los datos
+                const minVal = Math.min(...samples);
+                const maxVal = Math.max(...samples);
+                const range = maxVal - minVal;
+                const binCount = Math.min(20, Math.ceil(Math.sqrt(samples.length)));
+                const binSize = range / binCount;
+                
+                const bins = Array(binCount).fill(0);
+                const binEdges = Array(binCount + 1).fill(0).map((_, i) => minVal + i * binSize);
+                
+                samples.forEach(sample => {
+                    let binIndex = Math.floor((sample - minVal) / binSize);
+                    binIndex = Math.min(binIndex, binCount - 1);
+                    bins[binIndex]++;
+                });
+                
+                // Crear etiquetas para los bins
+                const labels = binEdges.map((edge, i) => {
+                    if (i === binEdges.length - 1) return '';
+                    return `${edge.toFixed(0)}-${binEdges[i+1].toFixed(0)}`;
+                }).slice(0, -1);
+                
+                // Calcular valores teóricos usando la PDF Gamma
+                const theoretical = bins.map((_, i) => {
+                    const x = (binEdges[i] + binEdges[i+1]) / 2; // Punto medio del bin
+                    if (x <= 0) return 0;
+                    
+                    // PDF Gamma: (x^(k-1) * e^(-x/θ)) / (θ^k * Γ(k))
+                    const gammaK = jStat.gammafn(k);
+                    const pdf = (Math.pow(x, k - 1) * Math.exp(-x / theta)) / (Math.pow(theta, k) * gammaK);
+                    return pdf * samples.length * binSize;
+                });
+                
+                // Actualizar gráfico
+                gammaChart.data.labels = labels;
+                gammaChart.data.datasets[0].data = bins;
+                gammaChart.data.datasets[1].data = theoretical;
+                gammaChart.update();
+            }
+            
+            // Actualizar estadísticas con cálculos más precisos
+            function updateStatistics() {
+                if (samples.length < 2) return;
+                
+                // Calcular media y varianza observadas con algoritmo numéricamente estable
+                let mean = samples[0];
+                let M2 = 0;
+                
+                for (let i = 1; i < samples.length; i++) {
+                    const delta = samples[i] - mean;
+                    mean += delta / (i + 1);
+                    M2 += delta * (samples[i] - mean);
+                }
+                
+                const variance = M2 / samples.length;
+                
+                // Calcular errores relativos
+                const theoreticalMeanVal = k * theta;
+                const theoreticalVarVal = k * theta * theta;
+                
+                const meanErr = Math.abs((mean - theoreticalMeanVal) / theoreticalMeanVal) * 100;
+                const varErr = Math.abs((variance - theoreticalVarVal) / theoreticalVarVal) * 100;
+                
+                // Actualizar UI
+                observedMean.textContent = mean.toFixed(2);
+                meanError.textContent = meanErr.toFixed(2);
+                
+                observedVar.textContent = variance.toFixed(2);
+                varError.textContent = varErr.toFixed(2);
+            }
+            
+            // Simular fallo de componentes con mayor eficiencia
+            function simulateFailure() {
+                if (simulationRunning) return;
+                
+                simulationRunning = true;
+                currentSimulation = 0;
+                samples = [];
+                simCounter.textContent = "0";
+                
+                // Reiniciar componentes
+                initializeComponents();
+                componentStatus.textContent = "Estado: Todos funcionando";
+                failureTime.textContent = "Tiempo hasta fallo: -";
+                
+                // Ejecutar simulaciones por lotes para mayor velocidad
+                function runSimulationBatch() {
+                    if (currentSimulation >= numSimulations) {
+                        simulationRunning = false;
+                        startSim.disabled = false;
+                        stepSim.disabled = false;
+                        return;
+                    }
+                    
+                    // Calcular tamaño del lote basado en la velocidad seleccionada
+                    const batchSize = Math.min(simulationSpeed, numSimulations - currentSimulation);
+                    
+                    // Ejecutar un lote de simulaciones
+                    for (let i = 0; i < batchSize; i++) {
+                        const sample = generateGammaSample();
+                        samples.push(sample);
+                        currentSimulation++;
+                    }
+                    
+                    // Actualizar UI
+                    progressBar.style.width = `${(currentSimulation / numSimulations) * 100}%`;
+                    simCounter.textContent = currentSimulation;
+                    
+                    // Actualizar estadísticas periódicamente
+                    if (currentSimulation % 100 === 0 || currentSimulation === numSimulations) {
+                        updateStatistics();
+                        updateHistogram();
+                    }
+                    
+                    // Mostrar animación solo para la última muestra del lote
+                    if (currentSimulation === numSimulations) {
+                        animateComponentFailure(samples[samples.length - 1]);
+                    }
+                    
+                    // Usar requestAnimationFrame para animación suave
+                    if (currentSimulation < numSimulations) {
+                        animationFrameId = requestAnimationFrame(runSimulationBatch);
+                    } else {
+                        updateStatistics();
+                        updateHistogram();
+                    }
+                }
+                
+                runSimulationBatch();
+            }
+            
+            // Animación optimizada de fallo de componentes
+            function animateComponentFailure(totalTime) {
+                // Cancelar animación previa si existe
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                
+                const failureTimes = [];
+                for (let i = 0; i < k; i++) {
+                    failureTimes.push(-Math.log(1 - Math.random()) * theta);
+                }
+                
+                failureTimes.sort((a, b) => a - b);
+                
+                let currentComponent = 0;
+                currentTimeValue = 0;
+                const startTime = performance.now();
+                const totalDuration = 2000; // 2 segundos para toda la animación
+                
+                function updateAnimation(timestamp) {
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / totalDuration, 1);
+                    
+                    // Calcular tiempo simulado basado en el progreso
+                    currentTimeValue = progress * totalTime;
+                    currentTime.textContent = `Tiempo actual: ${currentTimeValue.toFixed(2)} horas`;
+                    
+                    // Actualizar componentes fallados
+                    while (currentComponent < k && currentTimeValue >= failureTimes[currentComponent]) {
+                        components[currentComponent].failed = true;
+                        components[currentComponent].failureTime = failureTimes[currentComponent];
+                        components[currentComponent].element.classList.remove('working');
+                        components[currentComponent].element.classList.add('failed');
+                        componentStatus.textContent = `Estado: ${currentComponent + 1} de ${k} componentes fallados`;
+                        currentComponent++;
+                    }
+                    
+                    if (progress < 1) {
+                        animationFrameId = requestAnimationFrame(updateAnimation);
+                    } else {
+                        failureTime.textContent = `Tiempo hasta fallo: ${totalTime.toFixed(2)} horas`;
+                        animationFrameId = null;
+                    }
+                }
+                
+                animationFrameId = requestAnimationFrame(updateAnimation);
+            }
+            
+            // Simulación paso a paso optimizada
+            function stepSimulation() {
+                if (simulationRunning) return;
+                
+                if (currentSimulation >= numSimulations) {
+                    alert('Simulación completada. Reinicie para comenzar de nuevo.');
+                    return;
+                }
+                
+                // Generar muestra
+                const sample = generateGammaSample();
+                samples.push(sample);
+                currentSimulation++;
+                
+                // Actualizar UI
+                progressBar.style.width = `${(currentSimulation / numSimulations) * 100}%`;
+                simCounter.textContent = currentSimulation;
+                updateStatistics();
+                updateHistogram();
+                
+                // Animación de fallo de componentes
+                animateComponentFailure(sample);
+            }
+            
+            // Reiniciar simulación completamente
+            function resetSimulation() {
+                // Cancelar cualquier animación en curso
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                
+                simulationRunning = false;
+                currentSimulation = 0;
+                samples = [];
+                
+                progressBar.style.width = '0%';
+                currentTime.textContent = 'Tiempo actual: 0 horas';
+                componentStatus.textContent = 'Estado: Todos funcionando';
+                failureTime.textContent = 'Tiempo hasta fallo: -';
+                simCounter.textContent = '0';
+                
+                observedMean.textContent = '-';
+                meanError.textContent = '-';
+                observedVar.textContent = '-';
+                varError.textContent = '-';
+                
+                initializeComponents();
+                
+                // Reiniciar gráfico
+                gammaChart.data.labels = [];
+                gammaChart.data.datasets[0].data = [];
+                gammaChart.data.datasets[1].data = [];
+                gammaChart.update();
+                
+                startSim.disabled = false;
+            }
+            
+            // Event listeners
+            shapeParam.addEventListener('input', updateControls);
+            scaleParam.addEventListener('input', updateControls);
+            simulations.addEventListener('input', updateControls);
+            simSpeed.addEventListener('change', updateControls);
+            
+            startSim.addEventListener('click', function() {
+                startSim.disabled = true;
+                stepSim.disabled = true;
+                simulateFailure();
+            });
+            
+            stepSim.addEventListener('click', stepSimulation);
+            
+            resetSim.addEventListener('click', resetSimulation);
+            
+            // Inicialización
+            updateControls();
+        });
+    </script>
+</body>
+</html>
