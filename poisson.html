@@ -127,64 +127,119 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
-        #timeline {
-            height: 80px;
-            border: 2px solid #dfe6e9;
-            position: relative;
+        .visualization-container {
+            min-height: 150px;
             margin: 30px 0;
+            padding: 20px;
             background-color: #f8f9fa;
             border-radius: 8px;
-            overflow: hidden;
+            border: 2px dashed #dfe6e9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        #events-container {
-            min-height: 100px;
-            margin: 20px 0;
+        .store-visualization {
+            width: 100%;
+            height: 100px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .store-door {
+            width: 60px;
+            height: 100px;
+            background-color: #8b4513;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            border: 3px solid #5d2d0c;
+        }
+        .customer {
+            width: 30px;
+            height: 50px;
+            background-color: #e74c3c;
+            border-radius: 50% 50% 0 0;
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            animation: enter 0.5s forwards;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .customer-queue {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+            width: 100%;
         }
-        .event {
-            width: 35px;
-            height: 35px;
+        .customer-badge {
+            width: 30px;
+            height: 30px;
             background-color: #e74c3c;
             border-radius: 50%;
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             color: white;
             font-weight: bold;
             animation: pulse 0.5s;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+        .timeline-container {
+            width: 100%;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .timeline {
+            display: flex;
+            height: 60px;
+            align-items: center;
+            padding: 0 10px;
+            position: relative;
+        }
+        .timeline-marker {
             position: absolute;
+            height: 100%;
+            width: 2px;
+            background-color: #3498db;
+            left: 0;
+            top: 0;
+        }
+        .timeline-event {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        .timeline-label {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        @keyframes enter {
+            0% { transform: translateX(-50px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
         }
         @keyframes pulse {
             0% { transform: scale(0.8); opacity: 0.5; }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); opacity: 1; }
-        }
-        .time-marker {
-            position: absolute;
-            bottom: 0;
-            width: 2px;
-            height: 15px;
-            background-color: #7f8c8d;
-        }
-        .time-label {
-            position: absolute;
-            bottom: -25px;
-            font-size: 12px;
-            font-weight: bold;
-            transform: translateX(-50%);
-            color: #7f8c8d;
-        }
-        .progress-bar {
-            position: absolute;
-            height: 4px;
-            background-color: #3498db;
-            bottom: 0;
-            left: 0;
-            width: 0%;
-            transition: width 0.1s linear;
         }
         .theory-section {
             background-color: #f8f9fa;
@@ -237,7 +292,7 @@
             margin-bottom: 30px;
             border-left: 5px solid #3498db;
         }
-        .timeline-explanation {
+        .visualization-explanation {
             margin-top: 10px;
             font-size: 14px;
             color: #555;
@@ -288,15 +343,19 @@
             
             <div id="status-message" class="status-message"></div>
             
-            <h3>Línea de tiempo de llegadas</h3>
-            <div id="timeline">
-                <div class="progress-bar" id="progress-bar"></div>
+            <div class="visualization-container">
+                <h3>Visualización de Llegada de Clientes</h3>
+                <div class="store-visualization">
+                    <div class="store-door">TIENDA</div>
+                </div>
+                <div class="customer-queue" id="customer-queue"></div>
+                <div class="timeline-container">
+                    <div class="timeline" id="timeline"></div>
+                </div>
+                <div class="visualization-explanation">
+                    <p>Esta representación muestra los clientes llegando a la tienda durante el período simulado.</p>
+                </div>
             </div>
-            <div class="timeline-explanation">
-                <p>Esta línea muestra el tiempo transcurrido. Cada punto rojo representa un cliente que llega a la tienda.</p>
-            </div>
-            
-            <div id="events-container"></div>
             
             <div class="results">
                 <div class="result-box">
@@ -365,9 +424,9 @@
             <div class="step-card">
                 <h3>Paso 2: Simulación</h3>
                 <ol>
-                    <li><strong>Simular 1 hora:</strong> Muestra una simulación detallada con línea de tiempo</li>
+                    <li><strong>Simular 1 hora:</strong> Muestra una simulación detallada con visualización</li>
                     <li><strong>Simular 100 horas:</strong> Calcula estadísticas rápidamente</li>
-                    <li>Observa cómo los clientes llegan aleatoriamente en la línea de tiempo</li>
+                    <li>Observa cómo los clientes llegan aleatoriamente en la visualización</li>
                 </ol>
             </div>
 
@@ -387,7 +446,7 @@
             
             <h3>Para una sola simulación:</h3>
             <ul>
-                <li><strong>Clientes en esta simulación:</strong> Número de puntos rojos en la línea de tiempo</li>
+                <li><strong>Clientes en esta simulación:</strong> Número de clientes que llegaron</li>
                 <li><strong>Distribución temporal:</strong> Los clientes llegan aleatoriamente</li>
                 <li><strong>Ejemplo:</strong> Si λ=5 y ves 3 clientes, esto es normal (probabilidad ≈ 14%)</li>
             </ul>
@@ -415,9 +474,6 @@
             const lambdaValue = document.getElementById('lambda-value');
             const timeIntervalInput = document.getElementById('time-interval');
             const timeIntervalValue = document.getElementById('time-interval-value');
-            const timeline = document.getElementById('timeline');
-            const progressBar = document.getElementById('progress-bar');
-            const eventsContainer = document.getElementById('events-container');
             const statusMessage = document.getElementById('status-message');
             const currentEventsSpan = document.getElementById('current-events');
             const totalSimulationsSpan = document.getElementById('total-simulations');
@@ -429,6 +485,9 @@
             const simulateOneBtn = document.getElementById('simulate-one');
             const simulateHundredBtn = document.getElementById('simulate-100');
             const resetBtn = document.getElementById('reset');
+            const storeVisualization = document.querySelector('.store-visualization');
+            const customerQueue = document.getElementById('customer-queue');
+            const timeline = document.getElementById('timeline');
             
             // Variables de estado
             let currentEvents = 0;
@@ -437,7 +496,7 @@
             let results = [];
             let chart = null;
             let isSimulating = false;
-            let simulationTimeout = null;
+            let arrivalTimes = [];
             
             // Inicializar gráfico
             const ctx = document.getElementById('distribution-chart').getContext('2d');
@@ -538,30 +597,6 @@
                 timeIntervalValue.textContent = interval;
                 
                 updateTheoreticalValues();
-                updateTimelineMarkers();
-            }
-            
-            // Actualizar marcadores de tiempo
-            function updateTimelineMarkers() {
-                timeline.innerHTML = '<div class="progress-bar" id="progress-bar"></div>';
-                const interval = parseInt(timeIntervalValue.textContent);
-                
-                // Agregar marcadores cada 25% del intervalo
-                for (let i = 0; i <= interval; i += interval/4) {
-                    const marker = document.createElement('div');
-                    marker.className = 'time-marker';
-                    marker.style.left = `${(i / interval) * 100}%`;
-                    
-                    const label = document.createElement('div');
-                    label.className = 'time-label';
-                    label.textContent = `${i} min`;
-                    label.style.left = `${(i / interval) * 100}%`;
-                    
-                    timeline.appendChild(marker);
-                    timeline.appendChild(label);
-                }
-                
-                progressBar.style.width = '0%';
             }
             
             // Actualizar valores teóricos
@@ -590,6 +625,71 @@
                 return k - 1;
             }
             
+            // Generar tiempos de llegada para los clientes
+            function generateArrivalTimes(numCustomers, durationMinutes) {
+                const arrivalTimes = [];
+                for (let i = 0; i < numCustomers; i++) {
+                    arrivalTimes.push(Math.random() * durationMinutes);
+                }
+                arrivalTimes.sort((a, b) => a - b);
+                return arrivalTimes;
+            }
+            
+            // Mostrar línea de tiempo de llegadas
+            function showTimeline(arrivalTimes, durationMinutes) {
+                timeline.innerHTML = '';
+                
+                // Agregar marcador de tiempo inicial
+                const marker = document.createElement('div');
+                marker.className = 'timeline-marker';
+                timeline.appendChild(marker);
+                
+                // Mostrar cada evento en la línea de tiempo
+                arrivalTimes.forEach((time, index) => {
+                    const event = document.createElement('div');
+                    event.className = 'timeline-event';
+                    event.style.left = `${(time / durationMinutes) * 100}%`;
+                    
+                    const dot = document.createElement('div');
+                    dot.className = 'timeline-dot';
+                    dot.title = `Cliente ${index + 1} llegó en el minuto ${time.toFixed(1)}`;
+                    
+                    const label = document.createElement('div');
+                    label.className = 'timeline-label';
+                    label.textContent = `${time.toFixed(1)}'`;
+                    
+                    event.appendChild(dot);
+                    event.appendChild(label);
+                    timeline.appendChild(event);
+                });
+            }
+            
+            // Mostrar animación de clientes entrando
+            function showCustomerAnimation(numCustomers, durationMinutes) {
+                // Limpiar visualización
+                storeVisualization.innerHTML = '<div class="store-door">TIENDA</div>';
+                customerQueue.innerHTML = '';
+                
+                // Generar tiempos de llegada
+                arrivalTimes = generateArrivalTimes(numCustomers, durationMinutes);
+                
+                // Mostrar línea de tiempo
+                showTimeline(arrivalTimes, durationMinutes);
+                
+                // Mostrar clientes en la cola
+                for (let i = 0; i < numCustomers; i++) {
+                    const badge = document.createElement('div');
+                    badge.className = 'customer-badge';
+                    badge.textContent = i + 1;
+                    customerQueue.appendChild(badge);
+                    
+                    // Pequeño retraso para animación
+                    setTimeout(() => {
+                        badge.style.animation = 'pulse 0.5s';
+                    }, i * 100);
+                }
+            }
+            
             // Simular un intervalo con animación
             function simulateSingleInterval() {
                 if (isSimulating) return;
@@ -609,31 +709,8 @@
                 const numEvents = poissonRandom(lambda);
                 currentEvents = numEvents;
                 
-                // Mostrar progreso completo inmediatamente
-                progressBar.style.width = '100%';
-                
-                // Mostrar todos los eventos con distribución temporal aleatoria
-                eventsContainer.innerHTML = '';
-                for (let i = 0; i < numEvents; i++) {
-                    const event = document.createElement('div');
-                    event.className = 'event';
-                    event.textContent = i + 1;
-                    event.style.left = `${Math.random() * 95}%`;
-                    
-                    // Posicionar el evento en un tiempo aleatorio dentro del intervalo
-                    const eventTime = Math.random() * intervalMinutes;
-                    event.style.left = `${(eventTime / intervalMinutes) * 95}%`;
-                    
-                    // Mostrar tooltip con el tiempo exacto
-                    event.title = `Cliente llegó a los ${eventTime.toFixed(1)} minutos`;
-                    
-                    eventsContainer.appendChild(event);
-                    
-                    // Pequeña animación para cada evento
-                    setTimeout(() => {
-                        event.style.animation = 'pulse 0.5s';
-                    }, i * 50);
-                }
+                // Mostrar animación de clientes
+                showCustomerAnimation(numEvents, intervalMinutes);
                 
                 // Actualizar estadísticas
                 totalEvents += numEvents;
@@ -668,7 +745,9 @@
                 
                 // Limpiar y preparar
                 resetCurrentSimulation();
-                eventsContainer.innerHTML = '<p>Simulación rápida en progreso...</p>';
+                storeVisualization.innerHTML = '<div class="store-door">TIENDA</div>';
+                customerQueue.innerHTML = '<p>Simulación rápida en progreso...</p>';
+                timeline.innerHTML = '';
                 
                 // Simular todos los intervalos
                 for (let i = 0; i < count; i++) {
@@ -694,7 +773,7 @@
                     statusMessage.style.display = 'none';
                 }, 3000);
                 
-                eventsContainer.innerHTML = '<p>Ver gráfico para resultados detallados</p>';
+                customerQueue.innerHTML = '<p>Ver gráfico para resultados detallados</p>';
             }
             
             // Actualizar estadísticas
@@ -763,11 +842,11 @@
             
             // Reiniciar simulación actual
             function resetCurrentSimulation() {
-                if (simulationTimeout) {
-                    cancelAnimationFrame(simulationTimeout);
-                }
-                progressBar.style.width = '0%';
+                storeVisualization.innerHTML = '<div class="store-door">TIENDA</div>';
+                customerQueue.innerHTML = '';
+                timeline.innerHTML = '';
                 currentEvents = 0;
+                arrivalTimes = [];
             }
             
             // Reiniciar todo
@@ -786,7 +865,6 @@
                 sampleMeanSpan.textContent = '0.00';
                 sampleVarianceSpan.textContent = '0.00';
                 
-                eventsContainer.innerHTML = '';
                 statusMessage.style.display = 'none';
                 updateChart();
                 
